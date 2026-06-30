@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="proof-head">
+  <div>
+    <p class="meta-label">Press check result</p>
+    <h1>{{ filename }}</h1>
+    <p class="pagecount">
+      {% if report.subtitle %}
+        {{ report.subtitle }}
+      {% elif report.page_count_is_estimate %}
+        ~{{ report.page_count }} page{{ 's' if report.page_count != 1 else '' }} (estimated from word count — Word has no fixed page count)
+      {% else %}
+        {{ report.page_count }} page{{ 's' if report.page_count != 1 else '' }} analyzed
+      {% endif %}
+    </p>
+  </div>
+  {% if report.overall_ok %}
+    <div class="stamp pass" role="img" aria-label="Overall result: pass">PASS</div>
+  {% else %}
+    <div class="stamp fail" role="img" aria-label="Overall result: needs fixes">NEEDS FIXES</div>
+  {% endif %}
+</div>
+
+<p class="lede">
+  {% if report.overall_ok %}
+    Nothing here should stop KDP from accepting this file. Always confirm in KDP's own previewer before publishing.
+  {% else %}
+    {{ report.issue_count }} thing{{ 's' if report.issue_count != 1 else '' }} below need fixing before this is ready to upload — each one says exactly what to change.
+  {% endif %}
+</p>
+
+<div class="spec-table">
+  {% for r in report.results %}
+    {% if r.warning_only %}
+      {% set state = 'warn' %}{% set label = 'NOTE' %}
+    {% elif r.ok %}
+      {% set state = 'ok' %}{% set label = 'OK' %}
+    {% else %}
+      {% set state = 'fail' %}{% set label = 'FAIL' %}
+    {% endif %}
+    <div class="spec-row">
+      <span class="status-icon {{ state }}" aria-hidden="true">
+        {% if state == 'ok' %}
+          <svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        {% elif state == 'fail' %}
+          <svg viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        {% else %}
+          <svg viewBox="0 0 16 16" fill="none"><path d="M8 5.5v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="8" cy="11.5" r="0.9" fill="currentColor"/></svg>
+        {% endif %}
+      </span>
+      <div class="body">
+        <div class="row-head">
+          <h3>{{ r.title }}</h3>
+          <span class="chip {{ state }}">{{ label }}</span>
+        </div>
+        <p class="summary">{{ r.summary }}</p>
+        {% if r.fix %}
+          <div class="fix-box {{ state }}">
+            <span class="fix-label">{{ 'Worth doing' if state == 'warn' else 'How to fix it' }}</span>
+            <p>{{ r.fix }}</p>
+          </div>
+        {% endif %}
+        {% if r.detail %}
+          <details class="tech-detail">
+            <summary>Show technical detail</summary>
+            <pre>{{ r.detail }}</pre>
+          </details>
+        {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<div class="results-actions">
+  <a class="button" href="{{ url_for('cover_index') if active_mode == 'cover' else url_for('index') }}">Check another file</a>
+</div>
+
+<p class="disclaimer">This checks the rules we currently model — always confirm in KDP's own previewer before publishing.</p>
+{% endblock %}

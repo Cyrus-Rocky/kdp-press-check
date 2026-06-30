@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <h1>Check your cover before the barcode lands on your title.</h1>
+  <p>Upload your full wraparound cover PDF — back cover, spine, and front cover in one file.
+    Tell us the book's trim size, page count, and paper so we can calculate the exact spine
+    width and check your file matches it, along with fonts, image resolution, and KDP's
+    barcode placement zone.</p>
+</section>
+
+<form id="upload-form" action="{{ url_for('check_cover') }}" method="post" enctype="multipart/form-data" novalidate>
+  <div class="field-grid">
+    <div class="field">
+      <label for="trim-select">Trim size</label>
+      <select name="trim_select" id="trim-select" required>
+        <option value="" disabled selected>Choose your book's trim size</option>
+        {% for w, h in trim_sizes %}
+          <option value="{{ w }}|{{ h }}">{{ w }}" x {{ h }}"</option>
+        {% endfor %}
+      </select>
+      <input type="hidden" name="trim_w" id="trim-w">
+      <input type="hidden" name="trim_h" id="trim-h">
+    </div>
+
+    <div class="field">
+      <label for="page-count">Interior page count</label>
+      <input type="number" name="page_count" id="page-count" min="1" step="1"
+             placeholder="e.g. 240" required>
+      <p class="hint">The final printed page count of your interior file.</p>
+    </div>
+
+    <div class="field field-full">
+      <label for="paper-type">Paper type</label>
+      <select name="paper_type" id="paper-type" required>
+        <option value="" disabled selected>Choose paper type</option>
+        <option value="white">White paper</option>
+        <option value="cream">Cream paper</option>
+        <option value="color">Premium color paper</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="dropzone" id="dropzone">
+    <span class="bracket-r" aria-hidden="true"></span>
+    <span class="scanline" aria-hidden="true"></span>
+
+    <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 3v12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M7 8l5-5 5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M5 16v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+
+    <label for="file-input" class="instructions">
+      Drop your cover PDF here, or
+      <button type="button" class="browse" id="browse-btn">choose a file</button>
+    </label>
+    <p class="filehint">PDF only &middot; up to 200 MB</p>
+
+    <input type="file" name="cover" id="file-input" accept="application/pdf,.pdf">
+
+    <div class="filename-display" id="file-display">
+      <span id="file-name"></span>
+      <button type="button" class="remove" id="file-remove">Remove</button>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button type="submit" class="primary" id="submit-btn" disabled>
+      <span class="label">Run press check</span>
+      <span class="spinner"><span class="spinner-dash" aria-hidden="true"></span> Checking cover&hellip;</span>
+    </button>
+    <p class="footnote">Usually takes a few seconds.</p>
+  </div>
+
+  <p id="form-status" role="status" aria-live="polite" style="position:absolute; left:-9999px;"></p>
+</form>
+
+<script>
+  document.getElementById("trim-select").addEventListener("change", function (e) {
+    var parts = e.target.value.split("|");
+    document.getElementById("trim-w").value = parts[0] || "";
+    document.getElementById("trim-h").value = parts[1] || "";
+  });
+</script>
+
+<p class="footnote" style="margin-top:48px;">Spine width is calculated from KDP's published formula and is approximate — always confirm against KDP's own cover calculator before your final upload.</p>
+{% endblock %}
