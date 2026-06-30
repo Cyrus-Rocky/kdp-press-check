@@ -766,6 +766,40 @@ button:focus-visible,
   text-transform: uppercase;
 }
 
+/* LED indicator on scanner lid */
+.scanner-led {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  flex-shrink: 0;
+  transition: background 300ms, box-shadow 300ms;
+}
+.scanner-led.ready {
+  background: #4ade80;
+  box-shadow: 0 0 8px rgba(74,222,128,0.7);
+}
+.scanner-led.scanning {
+  background: #fbbf24;
+  box-shadow: 0 0 8px rgba(251,191,36,0.7);
+  animation: led-pulse 0.8s ease-in-out infinite alternate;
+}
+@keyframes led-pulse {
+  from { opacity: 1; }
+  to   { opacity: 0.4; }
+}
+
+/* Scanner light states */
+.scanner-light.ready {
+  opacity: 0.25;
+  top: 50%;
+  background: linear-gradient(90deg, transparent, #4ade80, transparent);
+}
+.scanner-light.scanning {
+  opacity: 1;
+  animation: scan-beam 1.4s ease-in-out infinite;
+}
+
 /* Platen — the glass scan bed */
 .scanner-platen {
   padding: 24px;
@@ -1259,10 +1293,310 @@ button:focus-visible,
 
 @media (max-width: 640px) {
   .bv-spread { min-height: 280px; }
-  .bv-page-inner img { max-height: 340px; }
-  .bv-cover-img { max-width: 200px; max-height: 300px; }
   .bv-page-indicator { min-width: 120px; font-size: 0.75rem; }
+  .bv-cover-img { max-width: 200px; max-height: 300px; }
 }
+
+/* ── Guide-line toggle button ── */
+.bv-btn-guide {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+.bv-btn-guide:hover { background: rgba(59,130,246,0.08); border-color: #2563eb; color: #2563eb; }
+
+/* ── Guide legend strip ── */
+.guide-legend {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  margin-bottom: 10px;
+  padding: 6px 12px;
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+.guide-legend-item { display: flex; align-items: center; gap: 6px; }
+.guide-swatch {
+  width: 24px; height: 0;
+  border-top: 2px dashed;
+  flex-shrink: 0;
+}
+.guide-swatch-safety { border-color: rgba(59,130,246,0.8); }
+.guide-legend-sep { color: var(--line-strong); }
+
+/* ── Page image wrapper & guides ── */
+.bv-img-wrapper {
+  position: relative;
+  width: 100%;
+  max-height: 560px;
+  display: flex;
+  align-items: stretch;
+}
+
+.bv-page-img {
+  width: 100%;
+  height: 100%;
+  object-fit: fill; /* aspect-ratio set on wrapper → no letterbox */
+  display: block;
+  border-radius: 1px;
+}
+
+/* Safety-margin guide overlay */
+.page-guide-safety {
+  position: absolute;
+  border: 1.5px dashed rgba(59,130,246,0.75);
+  pointer-events: none;
+  z-index: 2;
+  border-radius: 0;
+}
+
+/* Page flag badge for margin violations */
+.page-flag-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: var(--fail-bg);
+  border: 1px solid var(--fail);
+  color: var(--fail);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  pointer-events: none;
+  z-index: 3;
+  letter-spacing: 0.02em;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Scan Report panel
+═══════════════════════════════════════════════════════════ */
+.scan-report {
+  margin-top: 40px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+}
+[data-theme="dark"] .scan-report { box-shadow: var(--shadow-soft-dark); }
+
+.scan-report-header {
+  padding: 20px 24px;
+  background: var(--paper-raised);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.scan-report-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scan-verdict {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+.scan-verdict-pass {
+  background: var(--pass-bg);
+  border: 1px solid var(--pass);
+  color: var(--pass);
+}
+.scan-verdict-fail {
+  background: var(--fail-bg);
+  border: 1px solid var(--fail);
+  color: var(--fail);
+}
+.scan-verdict-emoji { font-size: 1.5rem; }
+.scan-verdict strong { display: block; font-size: 0.95rem; }
+.scan-verdict span { color: var(--ink-muted); }
+
+.scan-section {
+  border-top: 1px solid var(--line);
+}
+.scan-section-title {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  padding: 10px 24px;
+  margin: 0;
+  background: var(--paper);
+}
+
+.scan-issue {
+  display: flex;
+  gap: 14px;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--line);
+}
+.scan-issue:last-child { border-bottom: none; }
+
+.scan-issue-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.scan-issue-fail .scan-issue-icon { background: var(--fail-bg); color: var(--fail); }
+.scan-issue-warn .scan-issue-icon { background: var(--warn-bg); color: var(--warn); }
+.scan-issue-pass .scan-issue-icon { background: var(--pass-bg); color: var(--pass); }
+
+.scan-issue-body { flex: 1; min-width: 0; }
+
+.scan-issue-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.97rem;
+  margin: 0 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.scan-issue-desc {
+  font-size: 0.88rem;
+  color: var(--ink-muted);
+  margin: 0 0 10px;
+  line-height: 1.55;
+}
+.scan-fix-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--fail);
+  margin: 10px 0 3px;
+}
+.scan-fix-text {
+  font-size: 0.85rem;
+  color: var(--ink);
+  margin: 0 0 12px;
+  line-height: 1.55;
+}
+.scan-note-chip {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: var(--warn-bg);
+  color: var(--warn);
+  border-radius: var(--radius-pill);
+  padding: 2px 8px;
+  letter-spacing: 0.04em;
+}
+
+/* Clickable page chips */
+.scan-page-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0 12px;
+}
+.scan-page-chip {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: var(--fail-bg);
+  color: var(--fail);
+  border: 1px solid var(--fail);
+  border-radius: var(--radius-pill);
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: background 120ms, color 120ms;
+}
+.scan-page-chip:hover {
+  background: var(--fail);
+  color: #fff;
+}
+.scan-page-more {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  padding: 3px 6px;
+  align-self: center;
+}
+
+/* Inline solver suggestion */
+.scan-solver {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  margin-top: 6px;
+}
+.scan-solver-avatar {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #fff;
+  flex-shrink: 0;
+}
+.scan-solver-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 100px;
+}
+.scan-solver-name { font-weight: 600; font-size: 0.88rem; }
+.scan-solver-spec { font-size: 0.78rem; color: var(--accent-ink); }
+.scan-solver-links {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.scan-solver-btn {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--line-strong);
+  background: var(--paper-raised);
+  color: var(--ink);
+  text-decoration: none;
+  transition: background 130ms, border-color 130ms;
+  white-space: nowrap;
+}
+.scan-solver-btn:hover { background: var(--accent-bg); border-color: var(--accent); color: var(--accent-ink); }
+.scan-solver-btn-ghost {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--ink-muted);
+}
+.scan-solver-btn-ghost:hover { color: var(--accent-ink); border-color: var(--accent); background: var(--accent-bg); }
 
 /* ═══════════════════════════════════════════════════════════
    Find-help link on result rows

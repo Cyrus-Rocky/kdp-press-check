@@ -4,51 +4,49 @@
 
 <div class="page-layout">
 
-  {# ── Left column: hero + explainer ── #}
   <div class="col-hero">
     <section class="hero">
       <h1>See your book exactly as it will print.</h1>
-      <p>Upload your interior PDF and get a true two-page spread preview — the same view a reader gets when they open the book. Catch gutter crowding, awkward chapter breaks, and image placement before KDP ever sees the file.</p>
+      <p>Upload your interior PDF and get a true two-page spread preview with KDP-style margin guides, a full compliance scan, and an instant safety-zone check — page by page.</p>
     </section>
 
     <div class="info-card">
-      <h3>What the previewer shows</h3>
+      <h3>What the scan does</h3>
       <ul>
-        <li>Real pages rendered from your PDF — not a simulation</li>
-        <li>Two-page spread (left page / right page) just like a printed book</li>
-        <li>Your cover rendered as a standalone front-cover display</li>
-        <li>All pages in your PDF rendered — no cap on page count</li>
-        <li>Trim dimensions and total page count shown in the header</li>
+        <li>Renders every page at screen resolution — no page limit</li>
+        <li>Two-page spread view, just like holding the printed book</li>
+        <li>KDP-style guide lines showing the 0.25" safety margin</li>
+        <li>Detects text or images inside the safety zone, by page number</li>
+        <li>Runs a full KDP compliance check (trim, margins, bleed, fonts, images)</li>
+        <li>Suggests the right freelancer for every problem found</li>
       </ul>
     </div>
 
     <div class="info-card" style="margin-top:16px;">
-      <h3>Common things to look for</h3>
+      <h3>Common things to spot</h3>
       <ul>
-        <li>Text too close to the gutter (inner edge)</li>
-        <li>Chapter openers landing at the bottom of a page</li>
-        <li>Images that are cut off or too small</li>
-        <li>Headers / footers missing on some pages</li>
-        <li>Title page and copyright page present and readable</li>
+        <li>Text crowding the gutter on facing pages</li>
+        <li>Chapter openers at the bottom of a page</li>
+        <li>Headers or footers outside the safe zone</li>
+        <li>Images that bleed into the margin</li>
+        <li>Missing title page or copyright page</li>
       </ul>
     </div>
 
-    <p style="font-size:0.82rem; color:var(--ink-muted); margin-top:16px; line-height:1.6;">
-      Nothing is stored — both files are deleted from the server the moment rendering is complete.
+    <p style="font-size:0.82rem;color:var(--ink-muted);margin-top:16px;line-height:1.6;">
+      Nothing stored — files are deleted the moment scanning is complete.
     </p>
   </div>
 
-  {# ── Right column: scanner UI ── #}
   <div class="col-form">
-
     <form id="preview-form" action="{{ url_for('check_preview') }}" method="post"
           enctype="multipart/form-data">
 
-      {# Scanner bed #}
       <div class="scanner-bed" id="scanner-bed">
         <div class="scanner-lid" aria-hidden="true">
           <span class="scanner-brand">KDP Press Check</span>
-          <span class="scanner-model">Book Previewer</span>
+          <span class="scanner-model">Book Scanner</span>
+          <span class="scanner-led" id="scanner-led" aria-hidden="true"></span>
         </div>
 
         <div class="scanner-platen">
@@ -58,7 +56,7 @@
           {# Interior slot #}
           <div class="scan-slot" id="slot-interior">
             <div class="scan-slot-label">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                 <rect x="4" y="2" width="12" height="18" rx="2" stroke="currentColor" stroke-width="1.8"/>
                 <rect x="8" y="2" width="12" height="18" rx="2" fill="var(--paper-raised)" stroke="currentColor" stroke-width="1.8"/>
                 <path d="M11 8h5M11 12h5M11 16h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -66,10 +64,9 @@
               Interior PDF
               <span class="scan-slot-required">required</span>
             </div>
-            <div class="scan-drop" id="drop-interior" tabindex="0" role="button"
-                 aria-label="Upload interior PDF">
+            <div class="scan-drop" id="drop-interior" tabindex="0" role="button" aria-label="Upload interior PDF">
               <div class="scan-drop-idle" id="interior-idle">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
                   <path d="M12 3v11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
                   <path d="M8 10l4-4 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                   <path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
@@ -78,11 +75,11 @@
                 <span class="scan-drop-hint">or click to browse</span>
               </div>
               <div class="scan-drop-ready" id="interior-ready" style="display:none;">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="color:var(--pass);">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" style="color:var(--pass);">
                   <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
                   <path d="M8 12l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                <span id="interior-filename" style="font-family:var(--font-mono); font-size:0.82rem; word-break:break-all;"></span>
+                <span id="interior-filename" style="font-family:var(--font-mono);font-size:0.82rem;word-break:break-all;"></span>
                 <button type="button" class="scan-clear" id="interior-clear">✕ Clear</button>
               </div>
             </div>
@@ -90,14 +87,12 @@
                    style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;">
           </div>
 
-          <div class="scan-divider" aria-hidden="true">
-            <span>+ optional cover</span>
-          </div>
+          <div class="scan-divider" aria-hidden="true"><span>+ optional cover</span></div>
 
           {# Cover slot #}
           <div class="scan-slot scan-slot-optional" id="slot-cover">
             <div class="scan-slot-label">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                 <rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" stroke-width="1.8"/>
                 <rect x="6" y="6" width="12" height="8" rx="1" fill="var(--accent-bg)" stroke="var(--accent)" stroke-width="1.2"/>
                 <path d="M8 18h8M8 15h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -105,10 +100,9 @@
               Cover PDF
               <span class="scan-slot-optional-tag">optional</span>
             </div>
-            <div class="scan-drop scan-drop-sm" id="drop-cover" tabindex="0" role="button"
-                 aria-label="Upload cover PDF (optional)">
+            <div class="scan-drop scan-drop-sm" id="drop-cover" tabindex="0" role="button" aria-label="Upload cover PDF (optional)">
               <div class="scan-drop-idle" id="cover-idle">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                   <path d="M12 3v11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
                   <path d="M8 10l4-4 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                   <path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
@@ -117,23 +111,22 @@
                 <span class="scan-drop-hint">or click to browse</span>
               </div>
               <div class="scan-drop-ready" id="cover-ready" style="display:none;">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="color:var(--pass);">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="color:var(--pass);">
                   <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
                   <path d="M8 12l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                <span id="cover-filename" style="font-family:var(--font-mono); font-size:0.82rem; word-break:break-all;"></span>
+                <span id="cover-filename" style="font-family:var(--font-mono);font-size:0.82rem;word-break:break-all;"></span>
                 <button type="button" class="scan-clear" id="cover-clear">✕ Clear</button>
               </div>
             </div>
             <input type="file" name="cover" id="cover-file" accept=".pdf"
                    style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;">
           </div>
-
-        </div>{# /.scanner-platen #}
+        </div>
 
         <div class="scanner-base">
           <button type="submit" class="scanner-btn" id="scanner-btn" disabled>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
               <rect x="2" y="8" width="20" height="8" rx="2" stroke="currentColor" stroke-width="1.8"/>
               <path d="M6 8V5a2 2 0 012-2h8a2 2 0 012 2v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
               <circle cx="18" cy="12" r="1.5" fill="currentColor"/>
@@ -143,32 +136,42 @@
           </button>
           <span class="scanner-status" id="scanner-status">Add your interior PDF to begin</span>
         </div>
-      </div>{# /.scanner-bed #}
+      </div>
 
     </form>
   </div>
 </div>
 
 <script>
-function wireSlot(dropId, inputId, idleId, readyId, filenameId, clearId, statusMsg) {
-  var drop = document.getElementById(dropId);
-  var input = document.getElementById(inputId);
-  var idle = document.getElementById(idleId);
-  var ready = document.getElementById(readyId);
-  var fnEl = document.getElementById(filenameId);
+var light = document.getElementById("scanner-light");
+var led   = document.getElementById("scanner-led");
+
+function setScannerState(state) {
+  // state: "idle" | "ready" | "scanning"
+  light.className = "scanner-light";
+  led.className   = "scanner-led";
+  if (state === "ready")   { light.classList.add("ready");   led.classList.add("ready"); }
+  if (state === "scanning"){ light.classList.add("scanning"); led.classList.add("scanning"); }
+}
+
+function wireSlot(dropId, inputId, idleId, readyId, filenameId, clearId) {
+  var drop     = document.getElementById(dropId);
+  var input    = document.getElementById(inputId);
+  var idle     = document.getElementById(idleId);
+  var ready    = document.getElementById(readyId);
+  var fnEl     = document.getElementById(filenameId);
   var clearBtn = document.getElementById(clearId);
 
   function setFile(file) {
-    fnEl.textContent = file.name;
-    idle.style.display = "none";
+    fnEl.textContent  = file.name;
+    idle.style.display  = "none";
     ready.style.display = "flex";
     drop.classList.add("has-file");
     updateStatus();
   }
-
   function clearFile() {
     input.value = "";
-    idle.style.display = "flex";
+    idle.style.display  = "flex";
     ready.style.display = "none";
     drop.classList.remove("has-file");
     updateStatus();
@@ -185,49 +188,48 @@ function wireSlot(dropId, inputId, idleId, readyId, filenameId, clearId, statusM
     if (input.files.length) setFile(input.files[0]);
   });
   clearBtn.addEventListener("click", function(e) { e.stopPropagation(); clearFile(); });
-
-  drop.addEventListener("dragover", function(e) { e.preventDefault(); drop.classList.add("drag-over"); });
-  drop.addEventListener("dragleave", function() { drop.classList.remove("drag-over"); });
+  drop.addEventListener("dragover",  function(e) { e.preventDefault(); drop.classList.add("drag-over"); });
+  drop.addEventListener("dragleave", function()  { drop.classList.remove("drag-over"); });
   drop.addEventListener("drop", function(e) {
     e.preventDefault(); drop.classList.remove("drag-over");
     var f = e.dataTransfer.files[0];
     if (!f) return;
-    if (!f.name.toLowerCase().endsWith(".pdf")) {
-      alert("Please upload a PDF file.");
-      return;
-    }
+    if (!f.name.toLowerCase().endsWith(".pdf")) { alert("Please upload a PDF file."); return; }
     var dt = new DataTransfer(); dt.items.add(f); input.files = dt.files;
     setFile(f);
   });
 }
 
 function updateStatus() {
-  var btn = document.getElementById("scanner-btn");
-  var status = document.getElementById("scanner-status");
-  var hasInterior = document.getElementById("interior-file").files.length > 0;
-  var hasCover = document.getElementById("cover-file").files.length > 0;
+  var btn          = document.getElementById("scanner-btn");
+  var statusEl     = document.getElementById("scanner-status");
+  var hasInterior  = document.getElementById("interior-file").files.length > 0;
+  var hasCover     = document.getElementById("cover-file").files.length > 0;
 
   btn.disabled = !hasInterior;
+
   if (!hasInterior) {
-    status.textContent = "Add your interior PDF to begin";
+    statusEl.textContent = "Add your interior PDF to begin";
+    setScannerState("idle");
   } else if (hasCover) {
-    status.textContent = "Interior + cover ready — click Scan & Preview";
+    statusEl.textContent = "Interior + cover ready — click Scan & Preview";
+    setScannerState("ready");
   } else {
-    status.textContent = "Interior ready — click Scan & Preview";
+    statusEl.textContent = "Interior ready — click Scan & Preview";
+    setScannerState("ready");
   }
 }
 
 wireSlot("drop-interior","interior-file","interior-idle","interior-ready","interior-filename","interior-clear");
-wireSlot("drop-cover","cover-file","cover-idle","cover-ready","cover-filename","cover-clear");
+wireSlot("drop-cover",   "cover-file",   "cover-idle",   "cover-ready",   "cover-filename",   "cover-clear");
 updateStatus();
 
 document.getElementById("preview-form").addEventListener("submit", function() {
-  var btn = document.getElementById("scanner-btn");
+  var btn   = document.getElementById("scanner-btn");
   var label = document.getElementById("scanner-btn-label");
-  var light = document.getElementById("scanner-light");
   btn.disabled = true;
   label.textContent = "Scanning…";
-  light.classList.add("scanning");
+  setScannerState("scanning");
 });
 </script>
 {% endblock %}

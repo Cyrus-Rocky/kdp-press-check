@@ -199,7 +199,19 @@ def check_preview():
             cover_file.save(cover_path)
 
     job_id = uuid.uuid4().hex
+    check_report = None
+    margin_report = None
     try:
+        # Run compliance check + margin scan BEFORE rendering (file still on disk)
+        try:
+            check_report = run_all_checks(interior_path)
+        except Exception:
+            logger.warning("Preview compliance check failed", exc_info=True)
+        try:
+            margin_report = preview_renderer.check_page_margins(interior_path)
+        except Exception:
+            logger.warning("Preview margin scan failed", exc_info=True)
+
         meta = preview_renderer.render_job(UPLOAD_DIR, job_id, interior_path, cover_path)
     except Exception:
         logger.exception("Preview render failed")
@@ -211,6 +223,13 @@ def check_preview():
         if cover_path and os.path.exists(cover_path):
             os.remove(cover_path)
 
+    from problem_solvers_data import SOLVERS, CHECK_TO_CATEGORY as C2C
+
+    def best_solver(check_title):
+        cat = C2C.get(check_title, "formatting")
+        matches = [s for s in SOLVERS if cat in s["categories"]]
+        return matches[0] if matches else SOLVERS[0]
+
     return render_template(
         "preview_result.html",
         active_mode="preview",
@@ -218,6 +237,9 @@ def check_preview():
         job_id=job_id,
         interior_meta=meta["interior"],
         cover_meta=meta.get("cover"),
+        check_report=check_report,
+        margin_report=margin_report,
+        best_solver=best_solver,
     )
 
 

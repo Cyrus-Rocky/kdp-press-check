@@ -99,6 +99,82 @@ def render_job(upload_dir: str, job_id: str,
     return meta
 
 
+# ── Margin / safety-zone analysis ────────────────────────────────────────────
+
+SAFETY_MARGIN_IN = 0.25   # KDP recommended safe zone from trim edge
+SAFETY_MARGIN_PT = SAFETY_MARGIN_IN * 72
+
+
+def check_page_margins(pdf_path: str) -> dict:
+    """Scan every page for content inside the 0.25" safety zone.
+
+    Returns:
+      {
+        "total_pages": int,
+        "violations": [
+          {"page": 1-based int, "issues": ["text near left margin", ...]}
+        ],
+        "summary": str
+      }
+    """
+    doc = fitz.open(pdf_path)
+    violations = []
+
+    for i in range(doc.page_count):
+        page = doc[i]
+        r = page.rect
+        w, h = r.width, r.height
+        s = SAFETY_MARGIN_PT
+
+        safe = fitz.Rect(s, s, w - s, h - s)
+        page_issues = set()
+
+        # Text blocks
+        for block in page.get_text("blocks"):
+            bx0, by0, bx1, by1 = block[:4]
+            text = (block[4] if len(block) > 4 else "").strip()
+            if not text:
+                continue
+            br = fitz.Rect(bx0, by0, bx1, by1)
+            if bx0 < s:
+                page_issues.add("text near left/inside margin")
+            if bx1 > w - s:
+                page_issues.add("text near right/outside margin")
+            if by0 < s:
+                page_issues.add("text near top margin")
+            if by1 > h - s:
+                page_issues.add("text near bottom margin")
+
+        # Images
+        for img in page.get_images(full=True):
+            try:
+                bbox = page.get_image_bbox(img[7])
+                if bbox.is_empty:
+                    continue
+                if bbox.x0 < s or bbox.x1 > w - s or bbox.y0 < s or bbox.y1 > h - s:
+                    page_issues.add("image extends into safety margin")
+            except Exception:
+                pass
+
+        if page_issues:
+            violations.append({"page": i + 1, "issues": sorted(page_issues)})
+
+    doc.close()
+
+    if not violations:
+        summary = "All pages clear — no content found inside the 0.25\" safety margin."
+    else:
+        pages_hit = len(violations)
+        summary = (f"{pages_hit} page{'s' if pages_hit != 1 else ''} have content "
+                   f"inside the 0.25\" safety zone.")
+
+    return {
+        "total_pages": doc.page_count if not doc.is_closed else 0,
+        "violations": violations,
+        "summary": summary,
+    }
+
+
 # ── Serving ───────────────────────────────────────────────────────────────────
 
 def page_file(upload_dir: str, job_id: str, kind: str, page_num: int):

@@ -2,29 +2,33 @@
 {% block title %}Preview — {{ interior_filename }} — KDP Press Check{% endblock %}
 {% block content %}
 
+{# ── Header bar ── #}
 <div class="bv-header">
   <div>
     <h1 class="bv-title">Book Preview</h1>
     <p class="bv-subtitle">
       <span class="bv-mono">{{ interior_filename }}</span>
-      &nbsp;·&nbsp;
-      {{ interior_meta.page_count }} page{{ 's' if interior_meta.page_count != 1 else '' }}
-      &nbsp;·&nbsp;
-      {{ interior_meta.width_in }}" × {{ interior_meta.height_in }}"
-      {% if cover_meta %}
-        &nbsp;·&nbsp; cover included
-      {% endif %}
+      &nbsp;·&nbsp; {{ interior_meta.page_count }} page{{ 's' if interior_meta.page_count != 1 else '' }}
+      &nbsp;·&nbsp; {{ interior_meta.width_in }}" × {{ interior_meta.height_in }}"
+      {% if cover_meta %}&nbsp;·&nbsp; cover included{% endif %}
     </p>
   </div>
   <div class="bv-header-actions">
+    <button type="button" class="bv-btn bv-btn-guide" id="btn-guides" aria-pressed="true">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+        <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.8" stroke-dasharray="3 2"/>
+        <path d="M3 9h18M3 15h18M9 3v18M15 3v18" stroke="currentColor" stroke-width="1" opacity="0.5"/>
+      </svg>
+      Guides: On
+    </button>
     <a href="{{ url_for('preview_index') }}" class="bv-btn">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
         <path d="M19 12H5M5 12l7-7M5 12l7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      New preview
+      New scan
     </a>
     <a href="{{ url_for('index') }}" class="bv-btn">
-      Run compliance check
+      Full compliance check
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
         <path d="M5 12h14M14 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
@@ -32,63 +36,70 @@
   </div>
 </div>
 
+{# ── Guide legend ── #}
+<div class="guide-legend" id="guide-legend">
+  <span class="guide-legend-item guide-legend-safety">
+    <span class="guide-swatch guide-swatch-safety"></span>Safety margin (0.25")
+  </span>
+  <span class="guide-legend-sep">·</span>
+  <span style="font-size:0.78rem;color:var(--ink-muted);">
+    Content should stay inside the blue dashed line to avoid being cut off.
+    {% if margin_report and margin_report.violations %}
+      <strong style="color:var(--fail);">
+        {{ margin_report.violations | length }} page{{ 's' if margin_report.violations|length != 1 else '' }} flagged — scroll to Scan Report below.
+      </strong>
+    {% endif %}
+  </span>
+</div>
+
+{# ── Book viewer ── #}
 <div class="book-viewer" id="book-viewer">
 
-  {# Cover panel #}
   {% if cover_meta %}
-  <div class="bv-panel" id="cover-panel">
+  <div class="bv-panel">
     <div class="bv-panel-label">Front Cover</div>
     <div class="bv-cover-wrap">
-      <img id="cover-img"
-           src="{{ url_for('preview_img', job_id=job_id, kind='cover', page_num=0) }}"
+      <img src="{{ url_for('preview_img', job_id=job_id, kind='cover', page_num=0) }}"
            alt="Front cover" class="bv-cover-img" draggable="false">
     </div>
-    <div class="bv-panel-caption">
-      {{ cover_meta.width_in }}" × {{ cover_meta.height_in }}"
-    </div>
+    <div class="bv-panel-caption">{{ cover_meta.width_in }}" × {{ cover_meta.height_in }}"</div>
   </div>
   {% endif %}
 
-  {# Two-page spread #}
   <div class="bv-spread-shell">
-
     <div class="bv-spread" id="spread">
-      <div class="bv-page bv-page-left">
-        <div class="bv-page-inner" id="page-left-inner">
-          <div class="bv-page-skeleton" id="skel-left"></div>
-        </div>
+      <div class="bv-page bv-page-left" id="page-left">
+        <div class="bv-page-inner" id="page-left-inner"></div>
         <div class="bv-page-num" id="num-left"></div>
       </div>
       <div class="bv-gutter" aria-hidden="true"></div>
-      <div class="bv-page bv-page-right">
-        <div class="bv-page-inner" id="page-right-inner">
-          <div class="bv-page-skeleton" id="skel-right"></div>
-        </div>
+      <div class="bv-page bv-page-right" id="page-right">
+        <div class="bv-page-inner" id="page-right-inner"></div>
         <div class="bv-page-num" id="num-right"></div>
       </div>
     </div>
 
     <div class="bv-controls">
-      <button class="bv-btn" id="btn-first" aria-label="First page" title="First page">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+      <button class="bv-btn" id="btn-first" title="First page">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
           <path d="M11 17l-5-5 5-5M18 17l-5-5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
-      <button class="bv-btn" id="btn-prev" aria-label="Previous spread">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+      <button class="bv-btn" id="btn-prev">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
           <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         Prev
       </button>
       <span class="bv-page-indicator" id="page-indicator">—</span>
-      <button class="bv-btn" id="btn-next" aria-label="Next spread">
+      <button class="bv-btn" id="btn-next">
         Next
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
           <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
-      <button class="bv-btn" id="btn-last" aria-label="Last page" title="Last page">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+      <button class="bv-btn" id="btn-last" title="Last page">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
           <path d="M13 17l5-5-5-5M6 17l5-5-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
@@ -96,132 +107,322 @@
 
     <div class="bv-jump-row">
       <label for="page-jump" class="bv-jump-label">Go to page</label>
-      <input type="number" id="page-jump" class="bv-jump-input" min="1"
-             value="1" aria-label="Page number to jump to">
+      <input type="number" id="page-jump" class="bv-jump-input" min="1" value="1">
       <button class="bv-btn" id="btn-jump">Go</button>
-      <span class="bv-hint">← → arrow keys to turn pages</span>
+      <span class="bv-hint">← → arrow keys · Home / End</span>
     </div>
   </div>
-
 </div>
 
+{# ── Scan Report ── #}
+<div class="scan-report" id="scan-report">
+  <div class="scan-report-header">
+    <h2 class="scan-report-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <rect x="9" y="3" width="6" height="4" rx="1" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M9 12h6M9 16h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      Scan Report
+    </h2>
+
+    {# Overall verdict #}
+    {%- set ns = namespace(has_fails=false) -%}
+    {%- if check_report -%}
+      {%- for r in check_report.results -%}
+        {%- if not r.ok and not r.warning_only -%}{%- set ns.has_fails = true -%}{%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
+    {% set has_compliance_fails = ns.has_fails %}
+    {% set has_margin_issues = margin_report and margin_report.violations | length > 0 %}
+    {% if not has_compliance_fails and not has_margin_issues %}
+      <div class="scan-verdict scan-verdict-pass">
+        <span class="scan-verdict-emoji">👍</span>
+        <div>
+          <strong>Looking good!</strong>
+          <span>No blocking issues found. Always confirm in KDP's own previewer before submitting.</span>
+        </div>
+      </div>
+    {% else %}
+      <div class="scan-verdict scan-verdict-fail">
+        <span class="scan-verdict-emoji">⚠️</span>
+        <div>
+          <strong>Issues found</strong>
+          <span>Fix the items below before uploading to KDP.</span>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  {# ── Margin / safety-zone violations ── #}
+  {% if margin_report %}
+  <div class="scan-section">
+    <h3 class="scan-section-title">Safety Margin Check</h3>
+    {% if margin_report.violations %}
+      <div class="scan-issue scan-issue-fail">
+        <div class="scan-issue-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M4 4l16 16M20 4L4 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="scan-issue-body">
+          <p class="scan-issue-title">Content inside the 0.25" safety zone</p>
+          <p class="scan-issue-desc">{{ margin_report.summary }} These items may be cut off or look uncomfortably tight in print.</p>
+          <div class="scan-page-list">
+            {% for v in margin_report.violations[:20] %}
+              <button type="button" class="scan-page-chip" data-page="{{ v.page }}"
+                      title="{{ v.issues | join(', ') }}">p.{{ v.page }}</button>
+            {% endfor %}
+            {% if margin_report.violations | length > 20 %}
+              <span class="scan-page-more">+{{ margin_report.violations|length - 20 }} more</span>
+            {% endif %}
+          </div>
+          <p class="scan-fix-label">How to fix it</p>
+          <p class="scan-fix-text">In your layout application, ensure all text and images stay at least 0.25" from the trim edge (0.375" on the inside/gutter edge). The blue guide line in the viewer above marks the safe zone.</p>
+
+          {# Suggest a formatter #}
+          {% set sol = best_solver("Margins") %}
+          {% if sol %}
+          <div class="scan-solver">
+            <div class="scan-solver-avatar" style="background:{{ sol.color }};">{{ sol.initials }}</div>
+            <div class="scan-solver-info">
+              <span class="scan-solver-name">{{ sol.name }}</span>
+              <span class="scan-solver-spec">{{ sol.specialty }}</span>
+            </div>
+            <div class="scan-solver-links">
+              {% for p in sol.platforms[:2] %}
+                <a href="{{ p.url }}" target="_blank" rel="noopener" class="scan-solver-btn">{{ p.name }}</a>
+              {% endfor %}
+              <a href="{{ url_for('problem_solvers', cat='formatting') }}" class="scan-solver-btn scan-solver-btn-ghost">All formatters →</a>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    {% else %}
+      <div class="scan-issue scan-issue-pass">
+        <div class="scan-issue-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M5 12l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="scan-issue-body">
+          <p class="scan-issue-title">All clear — {{ margin_report.summary }}</p>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {# ── KDP Compliance results ── #}
+  {% if check_report %}
+  <div class="scan-section">
+    <h3 class="scan-section-title">KDP Compliance Check</h3>
+    {% set blocking = check_report.results | rejectattr('warning_only', 'defined') | list %}
+    {% for r in check_report.results %}
+      {% if not r.ok and not r.warning_only %}
+        <div class="scan-issue scan-issue-fail">
+          <div class="scan-issue-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M4 4l16 16M20 4L4 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="scan-issue-body">
+            <p class="scan-issue-title">{{ r.title }}</p>
+            <p class="scan-issue-desc">{{ r.summary }}</p>
+            {% if r.fix %}
+              <p class="scan-fix-label">How to fix it</p>
+              <p class="scan-fix-text">{{ r.fix }}</p>
+            {% endif %}
+            {% set sol = best_solver(r.title) %}
+            {% if sol %}
+            <div class="scan-solver">
+              <div class="scan-solver-avatar" style="background:{{ sol.color }};">{{ sol.initials }}</div>
+              <div class="scan-solver-info">
+                <span class="scan-solver-name">{{ sol.name }}</span>
+                <span class="scan-solver-spec">{{ sol.specialty }}</span>
+              </div>
+              <div class="scan-solver-links">
+                {% for p in sol.platforms[:2] %}
+                  <a href="{{ p.url }}" target="_blank" rel="noopener" class="scan-solver-btn">{{ p.name }}</a>
+                {% endfor %}
+                <a href="{{ url_for('problem_solvers') }}" class="scan-solver-btn scan-solver-btn-ghost">Browse all →</a>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      {% elif r.warning_only and not r.ok %}
+        <div class="scan-issue scan-issue-warn">
+          <div class="scan-issue-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M12 9v4M12 16.5v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M10.3 4l-7.4 13a2 2 0 001.7 3h14.8a2 2 0 001.7-3L13.7 4a2 2 0 00-3.4 0z" stroke="currentColor" stroke-width="1.8"/>
+            </svg>
+          </div>
+          <div class="scan-issue-body">
+            <p class="scan-issue-title">{{ r.title }} <span class="scan-note-chip">NOTE</span></p>
+            <p class="scan-issue-desc">{{ r.summary }}</p>
+            {% if r.fix %}<p class="scan-fix-text" style="margin-top:4px;">{{ r.fix }}</p>{% endif %}
+          </div>
+        </div>
+      {% else %}
+        <div class="scan-issue scan-issue-pass">
+          <div class="scan-issue-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M5 12l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="scan-issue-body">
+            <p class="scan-issue-title">{{ r.title }}</p>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+
+</div>{# /.scan-report #}
+
+{# ── Data for JS ── #}
 <script>
 (function () {
-  var JOB_ID      = {{ job_id | tojson }};
-  var TOTAL       = {{ interior_meta.page_count }};
-  var spread      = 0;                          // 0-based spread index
-  var totalSpreads = Math.ceil(TOTAL / 2);
-  var imgCache    = {};                         // page_num → <img> element (preloaded)
+  var JOB_ID   = {{ job_id | tojson }};
+  var TOTAL    = {{ interior_meta.page_count }};
+  var WIDTH_IN = {{ interior_meta.width_in }};
+  var HEIGHT_IN= {{ interior_meta.height_in }};
+  var FLAGGED  = {{ (margin_report.violations | map(attribute='page') | list) | tojson if margin_report else '[]' }};
 
-  function pageUrl(n) {
-    return "/preview-img/" + JOB_ID + "/interior/" + n;
-  }
+  var spread        = 0;
+  var totalSpreads  = Math.ceil(TOTAL / 2);
+  var imgCache      = {};
+  var showGuides    = true;
+
+  function pageUrl(n) { return "/preview-img/" + JOB_ID + "/interior/" + n; }
 
   function preload(n) {
     if (n < 0 || n >= TOTAL || imgCache[n]) return;
-    var img = new Image();
-    img.src = pageUrl(n);
-    imgCache[n] = img;
+    var img = new Image(); img.src = pageUrl(n); imgCache[n] = img;
   }
 
-  function setPage(inner, skelId, numId, pageIdx) {
-    var skel = document.getElementById(skelId);
-    var numEl = document.getElementById(numId);
+  function isFlagged(pageNum1Based) { return FLAGGED.indexOf(pageNum1Based) !== -1; }
 
-    if (pageIdx < 0 || pageIdx >= TOTAL) {
-      inner.innerHTML = "";
-      numEl.textContent = "";
-      return;
+  function buildPageInner(inner, pageIdx) {
+    if (pageIdx < 0 || pageIdx >= TOTAL) { inner.innerHTML = ""; return; }
+
+    inner.innerHTML = '<div class="bv-page-skeleton"></div>';
+
+    var wrapper = document.createElement("div");
+    wrapper.className = "bv-img-wrapper";
+    // aspect ratio so % guides work perfectly
+    wrapper.style.aspectRatio = WIDTH_IN + " / " + HEIGHT_IN;
+
+    var img = document.createElement("img");
+    img.src       = pageUrl(pageIdx);
+    img.alt       = "Page " + (pageIdx + 1);
+    img.draggable = false;
+    img.className = "bv-page-img";
+
+    // Safety-margin guide overlay (percentage-based)
+    var guide = document.createElement("div");
+    guide.className = "page-guide-safety";
+    var hPct = (0.25 / WIDTH_IN  * 100).toFixed(3) + "%";
+    var vPct = (0.25 / HEIGHT_IN * 100).toFixed(3) + "%";
+    guide.style.inset = vPct + " " + hPct;
+    if (!showGuides) guide.style.display = "none";
+    guide.dataset.guide = "safety";
+
+    // Flagged indicator
+    var flag = null;
+    if (isFlagged(pageIdx + 1)) {
+      flag = document.createElement("div");
+      flag.className = "page-flag-badge";
+      flag.textContent = "⚠ Content near edge";
     }
 
-    numEl.textContent = pageIdx + 1;
+    wrapper.appendChild(img);
+    wrapper.appendChild(guide);
+    if (flag) wrapper.appendChild(flag);
 
-    if (imgCache[pageIdx] && imgCache[pageIdx].complete && imgCache[pageIdx].naturalWidth > 0) {
-      var img = imgCache[pageIdx].cloneNode();
-      img.style.width = "100%";
-      img.style.height = "100%";
-      img.style.objectFit = "contain";
-      img.style.display = "block";
-      img.draggable = false;
-      inner.innerHTML = "";
-      inner.appendChild(img);
-      if (skel) skel.style.display = "none";
-    } else {
-      if (skel) skel.style.display = "block";
-      var fresh = document.createElement("img");
-      fresh.src = pageUrl(pageIdx);
-      fresh.alt = "Page " + (pageIdx + 1);
-      fresh.style.cssText = "width:100%;height:100%;object-fit:contain;display:none;";
-      fresh.draggable = false;
-      inner.appendChild(fresh);
-      imgCache[pageIdx] = fresh;
-      fresh.onload = function () {
-        if (skel) skel.style.display = "none";
-        fresh.style.display = "block";
-      };
-    }
+    inner.innerHTML = "";
+    inner.appendChild(wrapper);
+
+    imgCache[pageIdx] = img;
+    img.onload = function () {
+      var skel = inner.querySelector(".bv-page-skeleton");
+      if (skel) skel.remove();
+    };
   }
 
   function renderSpread() {
     var li = spread * 2;
     var ri = li + 1;
-
-    var leftInner  = document.getElementById("page-left-inner");
-    var rightInner = document.getElementById("page-right-inner");
-    leftInner.innerHTML  = '<div class="bv-page-skeleton" id="skel-left"></div>';
-    rightInner.innerHTML = '<div class="bv-page-skeleton" id="skel-right"></div>';
-
-    setPage(leftInner,  "skel-left",  "num-left",  li);
-    setPage(rightInner, "skel-right", "num-right", ri);
-
-    // Preload adjacent spreads
-    preload(li - 2); preload(li - 1);
-    preload(ri + 1); preload(ri + 2);
+    buildPageInner(document.getElementById("page-left-inner"),  li);
+    buildPageInner(document.getElementById("page-right-inner"), ri);
+    document.getElementById("num-left").textContent  = li < TOTAL ? li + 1 : "";
+    document.getElementById("num-right").textContent = ri < TOTAL ? ri + 1 : "";
 
     var ind = document.getElementById("page-indicator");
-    if (ri < TOTAL) {
-      ind.textContent = "Pages " + (li + 1) + " – " + (ri + 1) + " of " + TOTAL;
-    } else {
-      ind.textContent = "Page " + (li + 1) + " of " + TOTAL;
-    }
+    ind.textContent = ri < TOTAL
+      ? "Pages " + (li+1) + " – " + (ri+1) + " of " + TOTAL
+      : "Page "  + (li+1) + " of " + TOTAL;
 
     document.getElementById("btn-first").disabled = spread === 0;
     document.getElementById("btn-prev").disabled  = spread === 0;
     document.getElementById("btn-next").disabled  = spread >= totalSpreads - 1;
     document.getElementById("btn-last").disabled  = spread >= totalSpreads - 1;
     document.getElementById("page-jump").value    = li + 1;
+
+    preload(li-2); preload(li-1); preload(ri+1); preload(ri+2);
   }
 
-  function goTo(pageNum) {
-    var s = Math.floor(pageNum / 2);
-    if (s < 0) s = 0;
-    if (s >= totalSpreads) s = totalSpreads - 1;
-    spread = s;
+  function goTo(p) {
+    var s = Math.floor(p / 2);
+    spread = Math.max(0, Math.min(s, totalSpreads - 1));
     renderSpread();
+    document.getElementById("spread").scrollIntoView({behavior:"smooth", block:"nearest"});
   }
 
-  document.getElementById("btn-first").addEventListener("click", function () { goTo(0); });
-  document.getElementById("btn-prev").addEventListener("click",  function () { if (spread > 0) { spread--; renderSpread(); } });
-  document.getElementById("btn-next").addEventListener("click",  function () { if (spread < totalSpreads - 1) { spread++; renderSpread(); } });
-  document.getElementById("btn-last").addEventListener("click",  function () { goTo(TOTAL - 1); });
-
-  document.getElementById("btn-jump").addEventListener("click", function () {
-    var v = parseInt(document.getElementById("page-jump").value, 10);
-    if (!isNaN(v)) goTo(v - 1);
-  });
-  document.getElementById("page-jump").addEventListener("keydown", function (e) {
-    if (e.key === "Enter") { var v = parseInt(this.value, 10); if (!isNaN(v)) goTo(v - 1); }
-  });
-
-  document.addEventListener("keydown", function (e) {
-    if (document.activeElement === document.getElementById("page-jump")) return;
-    if (e.key === "ArrowLeft"  && spread > 0)              { spread--; renderSpread(); }
-    if (e.key === "ArrowRight" && spread < totalSpreads-1) { spread++; renderSpread(); }
-    if (e.key === "Home") goTo(0);
-    if (e.key === "End")  goTo(TOTAL - 1);
+  // Guide toggle
+  document.getElementById("btn-guides").addEventListener("click", function () {
+    showGuides = !showGuides;
+    this.setAttribute("aria-pressed", showGuides);
+    this.querySelector("span") || (this.lastChild.textContent = showGuides ? " Guides: On" : " Guides: Off");
+    this.innerHTML = this.innerHTML.replace(/Guides: (On|Off)/, "Guides: " + (showGuides ? "On" : "Off"));
+    document.querySelectorAll("[data-guide]").forEach(function (el) {
+      el.style.display = showGuides ? "" : "none";
+    });
+    document.getElementById("guide-legend").style.display = showGuides ? "" : "none";
   });
 
-  // Preload first 4 pages immediately, then start
+  // Nav buttons
+  document.getElementById("btn-first").addEventListener("click", function(){ goTo(0); });
+  document.getElementById("btn-prev").addEventListener("click",  function(){ if(spread>0){spread--;renderSpread();} });
+  document.getElementById("btn-next").addEventListener("click",  function(){ if(spread<totalSpreads-1){spread++;renderSpread();} });
+  document.getElementById("btn-last").addEventListener("click",  function(){ goTo(TOTAL-1); });
+  document.getElementById("btn-jump").addEventListener("click",  function(){
+    var v=parseInt(document.getElementById("page-jump").value,10);
+    if(!isNaN(v)) goTo(v-1);
+  });
+  document.getElementById("page-jump").addEventListener("keydown", function(e){
+    if(e.key==="Enter"){ var v=parseInt(this.value,10); if(!isNaN(v)) goTo(v-1); }
+  });
+  document.addEventListener("keydown", function(e){
+    if(document.activeElement===document.getElementById("page-jump")) return;
+    if(e.key==="ArrowLeft"  && spread>0)             { spread--; renderSpread(); }
+    if(e.key==="ArrowRight" && spread<totalSpreads-1){ spread++; renderSpread(); }
+    if(e.key==="Home") goTo(0);
+    if(e.key==="End")  goTo(TOTAL-1);
+  });
+
+  // Click on page-chip jumps to that page
+  document.querySelectorAll(".scan-page-chip").forEach(function(chip){
+    chip.addEventListener("click", function(){
+      goTo(parseInt(this.dataset.page, 10) - 1);
+    });
+  });
+
+  // Preload first 4 pages and render
   preload(0); preload(1); preload(2); preload(3);
   renderSpread();
 })();
