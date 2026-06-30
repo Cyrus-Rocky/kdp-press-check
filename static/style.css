@@ -29,7 +29,7 @@
 
   --radius-sm: 8px;
   --radius-pill: 999px;
-  --container: 760px;
+  --container: 1120px;
   --shadow-soft: 0 2px 10px rgba(59, 42, 24, 0.07);
   --shadow-soft-dark: 0 2px 12px rgba(0, 0, 0, 0.35);
   --theme-transition: background-color 220ms ease, color 220ms ease, border-color 220ms ease;
@@ -267,6 +267,54 @@ a { color: var(--accent-ink); }
   font-size: 0.8rem;
   color: var(--ink-muted);
   margin: 6px 0 0;
+}
+
+/* ---------- two-column page layout ---------- */
+.page-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+
+.page-layout .col-hero {
+  position: sticky;
+  top: 32px;
+}
+
+@media (max-width: 860px) {
+  .page-layout {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .page-layout .col-hero { position: static; }
+}
+
+/* ---------- info card ---------- */
+.info-card {
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 24px 28px;
+  box-shadow: var(--shadow-soft);
+}
+[data-theme="dark"] .info-card { box-shadow: var(--shadow-soft-dark); }
+
+.info-card + .info-card { margin-top: 16px; }
+
+.info-card h3 {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.info-card ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--ink-muted);
+  font-size: 0.88rem;
+  line-height: 1.75;
 }
 
 /* ---------- hero copy ---------- */
@@ -673,6 +721,275 @@ button:focus-visible,
   .dropzone { padding: 36px 16px; }
   .stamp { font-size: 0.95rem; padding: 8px 14px; }
   .proof-head { flex-direction: column; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Scanner UI (Preview page)
+═══════════════════════════════════════════════════════════ */
+
+.scanner-bed {
+  background: var(--paper-raised);
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  box-shadow: var(--shadow-soft), 0 8px 32px rgba(59,42,24,0.10);
+  overflow: hidden;
+}
+[data-theme="dark"] .scanner-bed {
+  box-shadow: var(--shadow-soft-dark), 0 8px 32px rgba(0,0,0,0.35);
+}
+
+/* Top lid of the scanner */
+.scanner-lid {
+  background: linear-gradient(160deg, var(--ink) 0%, color-mix(in srgb, var(--ink) 80%, var(--accent)) 100%);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+[data-theme="dark"] .scanner-lid {
+  background: linear-gradient(160deg, #1A1208 0%, #2E1E0A 100%);
+}
+
+.scanner-brand {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--accent-fill);
+  letter-spacing: 0.04em;
+}
+.scanner-model {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Platen — the glass scan bed */
+.scanner-platen {
+  padding: 24px;
+  position: relative;
+  background: var(--paper);
+  border-top: 3px solid var(--line-strong);
+  border-bottom: 3px solid var(--line-strong);
+}
+
+/* Subtle dot-grid texture on the platen */
+.scanner-grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, var(--line) 1px, transparent 1px);
+  background-size: 20px 20px;
+  opacity: 0.4;
+  pointer-events: none;
+  border-radius: 0;
+}
+
+/* Scan light beam */
+.scanner-light {
+  position: absolute;
+  left: 0; right: 0;
+  top: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent 0%, var(--accent-fill) 30%, var(--accent) 50%, var(--accent-fill) 70%, transparent 100%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms;
+}
+.scanner-light.scanning {
+  opacity: 1;
+  animation: scan-beam 1.8s ease-in-out infinite;
+}
+@keyframes scan-beam {
+  0%   { top: 0; }
+  50%  { top: calc(100% - 3px); }
+  100% { top: 0; }
+}
+
+/* Scan slots (drop zones) */
+.scan-slot {
+  position: relative;
+  margin-bottom: 12px;
+}
+.scan-slot:last-of-type { margin-bottom: 0; }
+
+.scan-slot-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 8px;
+}
+.scan-slot-required {
+  background: var(--accent-bg);
+  color: var(--accent-ink);
+  border-radius: 4px;
+  padding: 1px 7px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.scan-slot-optional-tag {
+  background: var(--pass-bg);
+  color: var(--pass);
+  border-radius: 4px;
+  padding: 1px 7px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Drop zone inside the platen */
+.scan-drop {
+  position: relative;
+  z-index: 1;
+  border: 2px dashed var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--paper-raised);
+  padding: 32px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 160ms, background 160ms;
+  min-height: 140px;
+}
+.scan-drop-sm {
+  min-height: 100px;
+  padding: 20px 16px;
+}
+
+.scan-drop:hover,
+.scan-drop:focus-visible {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  outline: none;
+}
+.scan-drop.drag-over {
+  border-color: var(--accent-fill);
+  background: var(--accent-bg);
+}
+.scan-drop.has-file {
+  border-color: var(--pass);
+  border-style: solid;
+  background: var(--pass-bg);
+}
+
+.scan-drop-idle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-muted);
+  font-size: 0.9rem;
+}
+.scan-drop-hint {
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  opacity: 0.7;
+}
+
+.scan-drop-ready {
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink);
+}
+
+.scan-clear {
+  background: none;
+  border: none;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  cursor: pointer;
+  padding: 2px 6px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.scan-clear:hover { color: var(--fail); }
+
+.scan-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.scan-divider::before,
+.scan-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line-strong);
+}
+
+/* Scanner base with the big green button */
+.scanner-base {
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--line);
+  border-top: 1px solid var(--line-strong);
+}
+
+.scanner-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+  color: var(--accent-fill-text);
+  background: var(--accent-fill);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 13px 28px;
+  min-height: 48px;
+  cursor: pointer;
+  box-shadow: 0 3px 0 var(--accent-ink), var(--shadow-soft);
+  transition: background 160ms, transform 80ms, box-shadow 80ms;
+  flex-shrink: 0;
+}
+.scanner-btn:hover:not(:disabled) {
+  background: var(--accent-ink);
+  color: var(--paper-raised);
+  box-shadow: 0 2px 0 rgba(0,0,0,0.3);
+  transform: translateY(1px);
+}
+.scanner-btn:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 0px 0 var(--accent-ink);
+}
+.scanner-btn:disabled {
+  background: var(--line-strong);
+  color: var(--ink-muted);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.scanner-status {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  line-height: 1.4;
 }
 
 /* ═══════════════════════════════════════════════════════════
