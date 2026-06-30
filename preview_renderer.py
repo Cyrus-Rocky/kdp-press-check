@@ -1,48 +1,116 @@
-"""Renders PDF pages to base64-encoded JPEG images for the in-browser
-book previewer. Uses PyMuPDF (fitz) — already a project dependency.
+"""Renders PDF pages to individual JPEG files for the in-browser book previewer.
 
-Keeps rendered images small enough to embed inline in HTML while still
-being sharp enough to read text. JPEG at 96 DPI is ~30-80 KB per page
-depending on content; 20 pages ≈ 1-1.5 MB total, acceptable for a web page.
+Pages are saved to a job directory on disk and served on-demand by the Flask
+app — the browser fetches only the two pages currently visible, so total page
+count is no longer limited by HTML payload size.
+
+Job dirs live under UPLOAD_DIR/preview_<job_id>/ and are deleted automatically
+after PREVIEW_DIR_TTL seconds (30 minutes) on the next preview request.
 """
-import base64
+import json
+import os
+import shutil
+import time
+
 import fitz  # PyMuPDF
 
 RENDER_DPI = 96
 JPEG_QUALITY = 78
-MAX_PAGES = 20
+PREVIEW_DIR_TTL = 1800  # 30 minutes
 
 
-def render_pages(pdf_path: str, max_pages: int = MAX_PAGES) -> list:
-    """Returns a list of dicts: {index, width, height, data_uri}."""
+# ── Directory helpers ─────────────────────────────────────────────────────────
+
+def _job_dir(upload_dir: str, job_id: str) -> str:
+    return os.path.join(upload_dir, f"preview_{job_id}")
+
+
+def cleanup_old_previews(upload_dir: str) -> None:
+    cutoff = time.time() - PREVIEW_DIR_TTL
+    try:
+        for name in os.listdir(upload_dir):
+            if not name.startswith("preview_"):
+                continue
+            path = os.path.join(upload_dir, name)
+            if os.path.isdir(path) and os.path.getmtime(path) < cutoff:
+                shutil.rmtree(path, ignore_errors=True)
+    except OSError:
+        pass
+
+
+# ── Rendering ─────────────────────────────────────────────────────────────────
+
+def render_to_dir(pdf_path: str, out_dir: str, kind: str = "interior") -> dict:
+    """Render every page of a PDF into JPEG files inside out_dir/<kind>/.
+
+    Returns a metadata dict: {page_count, width_px, height_px, width_in, height_in}.
+    """
+    dest = os.path.join(out_dir, kind)
+    os.makedirs(dest, exist_ok=True)
+
     doc = fitz.open(pdf_path)
-    pages = []
-    count = min(doc.page_count, max_pages)
     mat = fitz.Matrix(RENDER_DPI / 72, RENDER_DPI / 72)
-    for i in range(count):
+    first_w = first_h = 0
+
+    for i in range(doc.page_count):
         page = doc[i]
         pix = page.get_pixmap(matrix=mat, alpha=False)
+        if i == 0:
+            first_w, first_h = pix.width, pix.height
         jpeg_bytes = pix.tobytes("jpeg", jpg_quality=JPEG_QUALITY)
-        data_uri = "data:image/jpeg;base64," + base64.b64encode(jpeg_bytes).decode()
-        pages.append({
-            "index": i,
-            "width": pix.width,
-            "height": pix.height,
-            "data_uri": data_uri,
-        })
+        with open(os.path.join(dest, f"{i:04d}.jpg"), "wb") as f:
+            f.write(jpeg_bytes)
+
+    # Physical dimensions from the first page
+    dims = {"width_in": 0.0, "height_in": 0.0}
+    if doc.page_count > 0:
+        r = doc[0].rect
+        dims = {"width_in": round(r.width / 72, 2), "height_in": round(r.height / 72, 2)}
+
+    page_count = doc.page_count
     doc.close()
-    return pages
+
+    meta = {
+        "page_count": page_count,
+        "width_px": first_w,
+        "height_px": first_h,
+        **dims,
+    }
+    return meta
 
 
-def page_dimensions(pdf_path: str) -> dict:
-    """Returns {width_in, height_in, page_count} from the first page."""
-    doc = fitz.open(pdf_path)
-    if doc.page_count == 0:
-        doc.close()
-        return {"width_in": 0, "height_in": 0, "page_count": 0}
-    rect = doc[0].rect
-    w_in = round(rect.width / 72, 2)
-    h_in = round(rect.height / 72, 2)
-    count = doc.page_count
-    doc.close()
-    return {"width_in": w_in, "height_in": h_in, "page_count": count}
+def render_job(upload_dir: str, job_id: str,
+               interior_path: str, cover_path: str = None) -> dict:
+    """Render interior (and optional cover) into a job dir. Returns metadata."""
+    cleanup_old_previews(upload_dir)
+
+    job = _job_dir(upload_dir, job_id)
+    os.makedirs(job, exist_ok=True)
+
+    interior_meta = render_to_dir(interior_path, job, "interior")
+    cover_meta = None
+    if cover_path:
+        cover_meta = render_to_dir(cover_path, job, "cover")
+
+    meta = {"interior": interior_meta, "cover": cover_meta}
+    with open(os.path.join(job, "meta.json"), "w") as f:
+        json.dump(meta, f)
+
+    return meta
+
+
+# ── Serving ───────────────────────────────────────────────────────────────────
+
+def page_file(upload_dir: str, job_id: str, kind: str, page_num: int):
+    """Return the absolute path to a rendered page file, or None if missing."""
+    path = os.path.join(_job_dir(upload_dir, job_id), kind, f"{page_num:04d}.jpg")
+    return path if os.path.exists(path) else None
+
+
+def load_meta(upload_dir: str, job_id: str) -> dict:
+    """Load metadata for an existing job. Returns None if the job is gone."""
+    meta_path = os.path.join(_job_dir(upload_dir, job_id), "meta.json")
+    if not os.path.exists(meta_path):
+        return None
+    with open(meta_path) as f:
+        return json.load(f)

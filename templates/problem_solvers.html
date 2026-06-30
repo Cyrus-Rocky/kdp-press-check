@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Problem Solvers — KDP Press Check{% endblock %}
+{% block content %}
+
+<div class="page-layout">
+
+  {# ── Left: hero ── #}
+  <div class="col-hero">
+    <section class="hero">
+      <h1>Problem Solvers.</h1>
+      <p>Found an issue with your manuscript? These freelancers specialise in exactly the problems KDP Press Check flags — formatting, cover design, editing, and Kindle conversion. Click any profile to go straight to their platform page.</p>
+    </section>
+
+    <div class="info-card">
+      <h3>How it works</h3>
+      <ul>
+        <li>Browse by specialty below</li>
+        <li>Click "View on Fiverr / Upwork / Kwork" to open their profile on the platform</li>
+        <li>Hire, negotiate, and pay directly on the freelancing platform — we don't handle any payment</li>
+        <li>From the check results page, every failed check has a "Find help" link that brings you here filtered by category</li>
+      </ul>
+    </div>
+
+    <div class="info-card" style="margin-top:16px;">
+      <h3>Are you a freelancer?</h3>
+      <p style="margin:0 0 10px; font-size:0.88rem; color:var(--ink-muted); line-height:1.6;">
+        We're building self-serve profiles. If you're a book formatter, cover designer, editor, or Kindle specialist, let us know and we'll reach out when it's ready.
+      </p>
+      <a href="mailto:asaoluemmanuel998@gmail.com?subject=Problem%20Solver%20Profile%20Request&body=Name%3A%0ASpecialty%3A%0APlatform%20link%3A%0ABio%3A"
+         class="ps-join-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+          <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Apply to join
+      </a>
+    </div>
+  </div>
+
+  {# ── Right: directory ── #}
+  <div class="col-form">
+
+    {# Category filter tabs #}
+    <div class="ps-filter" role="tablist" aria-label="Filter by specialty">
+      {% for c in categories %}
+        <a href="{{ url_for('problem_solvers', cat=c.key) }}"
+           class="ps-tab {{ 'is-active' if active_cat == c.key else '' }}"
+           role="tab" aria-selected="{{ 'true' if active_cat == c.key else 'false' }}">
+          {{ c.label }}
+        </a>
+      {% endfor %}
+    </div>
+
+    {# Solver cards #}
+    <div class="ps-grid">
+      {% for s in solvers %}
+        {% if active_cat == 'all' or active_cat in s.categories %}
+        <div class="ps-card">
+          <div class="ps-card-top">
+            <div class="ps-avatar" style="background:{{ s.color }};">{{ s.initials }}</div>
+            <div class="ps-card-meta">
+              <span class="ps-name">{{ s.name }}</span>
+              <span class="ps-specialty">{{ s.specialty }}</span>
+              <span class="ps-turnaround">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;">
+                  <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+                  <path d="M12 7v5l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                {{ s.turnaround }}
+              </span>
+            </div>
+          </div>
+
+          <p class="ps-bio">{{ s.bio }}</p>
+
+          <div class="ps-tags">
+            {% for tag in s.tags %}
+              <span class="ps-tag">{{ tag }}</span>
+            {% endfor %}
+          </div>
+
+          <div class="ps-platforms">
+            {% for p in s.platforms %}
+              <a href="{{ p.url }}" target="_blank" rel="noopener noreferrer"
+                 class="ps-platform-btn ps-platform-{{ p.name | lower }}">
+                <span class="ps-platform-icon">{{ p.icon }}</span>
+                {{ p.name }}
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" style="flex-shrink:0; opacity:0.6;">
+                  <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <p style="text-align:center; font-size:0.82rem; color:var(--ink-muted); margin-top:24px; line-height:1.6;">
+      Platform links open the freelancer's profile on Fiverr, Upwork, or Kwork.
+      KDP Press Check is not affiliated with any platform and earns nothing from referrals.
+    </p>
+
+  </div>
+</div>
+{% endblock %}

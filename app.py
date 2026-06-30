@@ -2,7 +2,7 @@ import logging
 import os
 import uuid
 
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, send_file, abort
 from werkzeug.exceptions import RequestEntityTooLarge
 
 from checker import run_all_checks
@@ -12,6 +12,7 @@ from epub_checker import run_all_checks_epub
 from text_format_checker import run_all_checks_text_format
 import kdp_rules as rules
 import preview_renderer
+from problem_solvers_data import CHECK_TO_CATEGORY
 
 UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "uploads")
 ALLOWED_EXT = {".pdf", ".docx", ".txt", ".rtf", ".odt"}
@@ -72,7 +73,8 @@ def check():
         if os.path.exists(path):
             os.remove(path)
 
-    return render_template("result.html", report=report, filename=file.filename, active_mode="interior")
+    return render_template("result.html", report=report, filename=file.filename,
+                           active_mode="interior", CHECK_TO_CATEGORY=CHECK_TO_CATEGORY)
 
 
 @app.route("/cover", methods=["GET"])
@@ -125,7 +127,8 @@ def check_cover():
         if os.path.exists(path):
             os.remove(path)
 
-    return render_template("result.html", report=report, filename=file.filename, active_mode="cover")
+    return render_template("result.html", report=report, filename=file.filename,
+                           active_mode="cover", CHECK_TO_CATEGORY=CHECK_TO_CATEGORY)
 
 
 @app.route("/kindle", methods=["GET"])
@@ -162,13 +165,13 @@ def check_kindle():
         if os.path.exists(path):
             os.remove(path)
 
-    return render_template("result.html", report=report, filename=file.filename, active_mode="kindle")
+    return render_template("result.html", report=report, filename=file.filename,
+                           active_mode="kindle", CHECK_TO_CATEGORY=CHECK_TO_CATEGORY)
 
 
 @app.route("/preview", methods=["GET"])
 def preview_index():
-    return render_template("preview_index.html", active_mode="preview",
-                           max_pages=preview_renderer.MAX_PAGES)
+    return render_template("preview_index.html", active_mode="preview")
 
 
 @app.route("/check-preview", methods=["POST"])
@@ -195,14 +198,9 @@ def check_preview():
             cover_path = os.path.join(UPLOAD_DIR, f"{uuid.uuid4().hex}.pdf")
             cover_file.save(cover_path)
 
+    job_id = uuid.uuid4().hex
     try:
-        interior_pages = preview_renderer.render_pages(interior_path)
-        interior_dims = preview_renderer.page_dimensions(interior_path)
-        cover_pages = []
-        cover_dims = None
-        if cover_path:
-            cover_pages = preview_renderer.render_pages(cover_path, max_pages=1)
-            cover_dims = preview_renderer.page_dimensions(cover_path)
+        meta = preview_renderer.render_job(UPLOAD_DIR, job_id, interior_path, cover_path)
     except Exception:
         logger.exception("Preview render failed")
         flash("We couldn't render that PDF. It may be corrupted or password-protected.")
@@ -213,22 +211,36 @@ def check_preview():
         if cover_path and os.path.exists(cover_path):
             os.remove(cover_path)
 
-    import json
-    pages_json = json.dumps(interior_pages)
-    truncated = interior_dims["page_count"] > preview_renderer.MAX_PAGES
-
     return render_template(
         "preview_result.html",
         active_mode="preview",
         interior_filename=interior_file.filename,
-        pages_json=pages_json,
-        total_pages=len(interior_pages),
-        interior_dims=interior_dims,
-        cover_pages=cover_pages,
-        cover_dims=cover_dims,
-        truncated=truncated,
-        max_pages=preview_renderer.MAX_PAGES,
+        job_id=job_id,
+        interior_meta=meta["interior"],
+        cover_meta=meta.get("cover"),
     )
+
+
+@app.route("/preview-img/<job_id>/<kind>/<int:page_num>")
+def preview_img(job_id, kind, page_num):
+    if kind not in ("interior", "cover"):
+        abort(404)
+    # Sanitise job_id — must be a 32-char hex string
+    if not job_id.isalnum() or len(job_id) != 32:
+        abort(404)
+    path = preview_renderer.page_file(UPLOAD_DIR, job_id, kind, page_num)
+    if path is None:
+        abort(404)
+    return send_file(path, mimetype="image/jpeg",
+                     max_age=1800, conditional=True)
+
+
+@app.route("/problem-solvers")
+def problem_solvers():
+    from problem_solvers_data import SOLVERS, CATEGORIES
+    cat = request.args.get("cat", "all")
+    return render_template("problem_solvers.html", active_mode="solvers",
+                           solvers=SOLVERS, categories=CATEGORIES, active_cat=cat)
 
 
 @app.errorhandler(RequestEntityTooLarge)
@@ -238,6 +250,8 @@ def handle_too_large(_exc):
         destination = "cover_index"
     elif request.path == "/check-kindle":
         destination = "kindle_index"
+    elif request.path == "/check-preview":
+        destination = "preview_index"
     else:
         destination = "index"
     return redirect(url_for(destination)), 413
