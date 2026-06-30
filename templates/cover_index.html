@@ -8,7 +8,7 @@
     barcode placement zone.</p>
 </section>
 
-<form id="upload-form" action="{{ url_for('check_cover') }}" method="post" enctype="multipart/form-data" novalidate>
+<form id="upload-form" action="{{ url_for('check_cover') }}" method="post" enctype="multipart/form-data" novalidate data-accept=".pdf">
   <div class="field-grid">
     <div class="field">
       <label for="trim-select">Trim size</label>

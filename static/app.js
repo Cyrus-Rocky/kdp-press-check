@@ -22,7 +22,7 @@
     return mb >= 1 ? mb.toFixed(1) + " MB" : Math.round(bytes / 1024) + " KB";
   }
 
-  var ALLOWED_EXTENSIONS = [".pdf", ".docx", ".txt", ".rtf", ".odt"];
+  var ALLOWED_EXTENSIONS = (form.dataset.accept || ".pdf,.docx,.txt,.rtf,.odt,.epub").split(",");
 
   function setFile(file) {
     if (!file) return;
@@ -32,7 +32,7 @@
       if (name.endsWith(".doc")) {
         announce("Legacy .doc files aren't supported. Save it as .docx in Word, then upload that.");
       } else {
-        announce("That file type isn't supported. Choose a PDF, Word, TXT, RTF, or ODT manuscript file.");
+        announce("That file type isn't supported for this page. Check the accepted formats listed above.");
       }
       return;
     }

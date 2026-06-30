@@ -11,7 +11,7 @@
     to a third party.</p>
 </section>
 
-<form id="upload-form" action="{{ url_for('check') }}" method="post" enctype="multipart/form-data" novalidate>
+<form id="upload-form" action="{{ url_for('check') }}" method="post" enctype="multipart/form-data" novalidate data-accept=".pdf,.docx,.txt,.rtf,.odt">
   <div class="dropzone" id="dropzone">
     <span class="bracket-r" aria-hidden="true"></span>
     <span class="scanline" aria-hidden="true"></span>

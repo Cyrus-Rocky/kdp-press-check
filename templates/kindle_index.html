@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <h1>Catch what breaks a Kindle book before a reader does.</h1>
+  <p>Upload your EPUB — the same file you'd submit to KDP or build with Kindle Create. We
+    check the table of contents, cover image dimensions, oversized images, embedded font
+    licensing, delivery file size, and the same writing/content checks as the interior
+    checker. EPUB has no fixed printed page, so trim/margin/bleed aren't part of this one —
+    use the Interior checker for that.</p>
+</section>
+
+<form id="upload-form" action="{{ url_for('check_kindle') }}" method="post" enctype="multipart/form-data" novalidate data-accept=".epub">
+  <div class="dropzone" id="dropzone">
+    <span class="bracket-r" aria-hidden="true"></span>
+    <span class="scanline" aria-hidden="true"></span>
+
+    <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 3v12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M7 8l5-5 5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M5 16v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+
+    <label for="file-input" class="instructions">
+      Drop your .epub file here, or
+      <button type="button" class="browse" id="browse-btn">choose a file</button>
+    </label>
+    <p class="filehint">EPUB only &middot; up to 200 MB</p>
+
+    <input type="file" name="ebook" id="file-input" accept="application/epub+zip,.epub">
+
+    <div class="filename-display" id="file-display">
+      <span id="file-name"></span>
+      <button type="button" class="remove" id="file-remove">Remove</button>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button type="submit" class="primary" id="submit-btn" disabled>
+      <span class="label">Run press check</span>
+      <span class="spinner"><span class="spinner-dash" aria-hidden="true"></span> Checking ebook&hellip;</span>
+    </button>
+    <p class="footnote">Usually takes a few seconds.</p>
+  </div>
+
+  <p id="form-status" role="status" aria-live="polite" style="position:absolute; left:-9999px;"></p>
+</form>
+
+<p class="footnote" style="margin-top:48px;">Don't have an EPUB yet? Kindle Create, Vellum, and Calibre can all export one from your manuscript.</p>
+{% endblock %}

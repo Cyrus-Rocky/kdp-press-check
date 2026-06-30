@@ -98,3 +98,23 @@ def cover_dimensions_in(trim_w_in: float, trim_h_in: float, page_count: int,
     total_w = (trim_w_in * 2) + spine_w + (COVER_BLEED_IN * 2)
     total_h = trim_h_in + (COVER_BLEED_IN * 2)
     return total_w, total_h, spine_w
+
+
+# --- Kindle / EPUB spec -----------------------------------------------------
+# Amazon's published Kindle cover and file guidelines (Kindle Create / KDP
+# digital publishing requirements).
+KINDLE_COVER_MIN_LONG_SIDE_PX = 2500
+KINDLE_COVER_RECOMMENDED_LONG_SIDE_PX = 2560
+KINDLE_COVER_MIN_ASPECT_RATIO = 1.4   # height / width
+KINDLE_COVER_MAX_ASPECT_RATIO = 1.8
+
+# A single embedded image larger than this is almost always wasted file size
+# on an e-reader screen — e-ink/LCD displays don't benefit from print-grade
+# resolution the way a physical page does.
+KINDLE_IMAGE_MAX_REASONABLE_PX = 4000
+
+# KDP's international delivery fee (70% royalty plan) is calculated per MB
+# above this size — large files quietly cost the author money per sale.
+KINDLE_DELIVERY_FEE_THRESHOLD_MB = 3.0
+# Amazon's hard ceiling on EPUB file size.
+KINDLE_MAX_FILE_SIZE_MB = 650.0

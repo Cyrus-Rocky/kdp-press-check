@@ -8,6 +8,7 @@ from werkzeug.exceptions import RequestEntityTooLarge
 from checker import run_all_checks
 from cover_checker import run_all_cover_checks
 from docx_checker import run_all_checks_docx
+from epub_checker import run_all_checks_epub
 from text_format_checker import run_all_checks_text_format
 import kdp_rules as rules
 
@@ -126,10 +127,52 @@ def check_cover():
     return render_template("result.html", report=report, filename=file.filename, active_mode="cover")
 
 
+@app.route("/kindle", methods=["GET"])
+def kindle_index():
+    return render_template("kindle_index.html", active_mode="kindle")
+
+
+@app.route("/check-kindle", methods=["POST"])
+def check_kindle():
+    file = request.files.get("ebook")
+    if not file or file.filename == "":
+        flash("Please choose an EPUB file to upload.")
+        return redirect(url_for("kindle_index"))
+
+    ext = os.path.splitext(file.filename)[1].lower()
+    if ext != ".epub":
+        flash("Kindle files must be a .epub file (export from Kindle Create, Vellum, Calibre, etc.).")
+        return redirect(url_for("kindle_index"))
+
+    safe_name = f"{uuid.uuid4().hex}{ext}"
+    path = os.path.join(UPLOAD_DIR, safe_name)
+    file.save(path)
+
+    try:
+        report = run_all_checks_epub(path)
+    except Exception:
+        logger.exception("Failed to analyze kindle upload %s (%s)", safe_name, file.filename)
+        flash(
+            "We couldn't read that file. It may be corrupted or not a valid EPUB — "
+            "try re-exporting it and upload again."
+        )
+        return redirect(url_for("kindle_index"))
+    finally:
+        if os.path.exists(path):
+            os.remove(path)
+
+    return render_template("result.html", report=report, filename=file.filename, active_mode="kindle")
+
+
 @app.errorhandler(RequestEntityTooLarge)
 def handle_too_large(_exc):
-    flash("That file is larger than 200 MB. Choose a smaller PDF.")
-    destination = "cover_index" if request.path == "/check-cover" else "index"
+    flash("That file is larger than 200 MB. Choose a smaller file.")
+    if request.path == "/check-cover":
+        destination = "cover_index"
+    elif request.path == "/check-kindle":
+        destination = "kindle_index"
+    else:
+        destination = "index"
     return redirect(url_for(destination)), 413
 
 
