@@ -15,6 +15,7 @@ import fitz  # PyMuPDF
 
 import classify
 import content_quality
+import frontmatter
 import kdp_rules as rules
 
 
@@ -383,7 +384,11 @@ def run_all_checks(pdf_path: str) -> dict:
             check_image_resolution(doc),
             check_metadata(doc),
         ]
-        results += content_quality.run(_full_text(doc))
+        full_text = _full_text(doc)
+        results += content_quality.run(full_text)
+        doc_title = (doc.metadata or {}).get("title") or None
+        first_page_text = doc[0].get_text() if doc.page_count > 0 else ""
+        results += frontmatter.run(full_text, first_page_text, doc_title)
         blocking_results = [r for r in results if not r.get("warning_only")]
         summary_ok = all(r["ok"] for r in blocking_results)
         issue_count = sum(1 for r in blocking_results if not r["ok"])

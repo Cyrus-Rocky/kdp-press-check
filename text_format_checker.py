@@ -6,6 +6,7 @@ information — we say so explicitly instead of guessing.
 import classify
 import content_quality
 import formats
+import frontmatter
 
 
 def check_print_geometry_unavailable() -> dict:
@@ -36,6 +37,7 @@ def run_all_checks_text_format(path: str, ext: str) -> dict:
 
     results = [doc_type_result, check_print_geometry_unavailable()]
     results += content_quality.run(full_text, data.get("headings"))
+    results.append(frontmatter.check_copyright_page(full_text))
 
     blocking_results = [r for r in results if not r.get("warning_only")]
     summary_ok = all(r["ok"] for r in blocking_results)

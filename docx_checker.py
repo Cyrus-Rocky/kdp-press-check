@@ -15,6 +15,7 @@ from PIL import Image
 
 import classify
 import content_quality
+import frontmatter
 import kdp_rules as rules
 
 EMU_PER_INCH = 914400
@@ -22,6 +23,29 @@ EMU_PER_INCH = 914400
 
 def _emu_to_in(emu) -> float:
     return (emu or 0) / EMU_PER_INCH
+
+
+def _first_page_text_docx(doc, max_fallback_paragraphs: int = 5) -> str:
+    """Text up to the first explicit (manual) page break, or the first few
+    non-empty paragraphs if no manual break is found — Word doesn't expose
+    rendered page boundaries without actually paginating the document."""
+    ns = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+    collected = []
+    non_empty_count = 0
+    for p in doc.paragraphs:
+        has_page_break = any(
+            br.get(f"{ns}type") == "page"
+            for run in p.runs
+            for br in run._element.findall(f"{ns}br")
+        )
+        if p.text.strip():
+            collected.append(p.text)
+            non_empty_count += 1
+        if has_page_break:
+            break
+        if non_empty_count >= max_fallback_paragraphs:
+            break
+    return "\n".join(collected)
 
 
 def check_content_type_docx(doc) -> dict:
@@ -234,6 +258,10 @@ def run_all_checks_docx(docx_path: str) -> dict:
     headings = [p.text for p in doc.paragraphs
                 if p.style and p.style.name and p.style.name.startswith("Heading") and p.text.strip()]
     results += content_quality.run(full_text, headings)
+
+    doc_title = (doc.core_properties.title or "").strip() or None
+    first_page_text = _first_page_text_docx(doc)
+    results += frontmatter.run(full_text, first_page_text, doc_title)
 
     blocking_results = [r for r in results if not r.get("warning_only")]
     summary_ok = all(r["ok"] for r in blocking_results)

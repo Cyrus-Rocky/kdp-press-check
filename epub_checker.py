@@ -17,6 +17,7 @@ from PIL import Image
 
 import classify
 import content_quality
+import frontmatter
 import kdp_rules as rules
 
 _NS = {
@@ -363,6 +364,7 @@ def run_all_checks_epub(path: str) -> dict:
             results.append(check_font_licensing(items))
             results.append(check_file_size(file_size))
             results += content_quality.run(full_text, headings)
+            results.append(frontmatter.check_copyright_page(full_text))
         else:
             estimated_pages = 1
 
