@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Book Previewer — KDP Press Check{% endblock %}
+{% block content %}
+
+<section class="hero">
+  <h1 class="hero-title">Book Previewer</h1>
+  <p class="hero-sub">
+    Upload your interior PDF (and optionally your cover) to see a realistic
+    two-page spread preview — exactly how your book will look to a reader
+    before you commit to publishing it.
+  </p>
+</section>
+
+<div class="card" style="margin-bottom: 2rem;">
+  <h2 class="card-title" style="margin-bottom:0.25rem;">What this does</h2>
+  <p style="margin:0 0 0.75rem; color:var(--ink-muted); font-size:0.9rem; line-height:1.6;">
+    Renders your actual PDF pages at screen resolution so you can catch layout
+    surprises — text running into the gutter, chapter headings that land on a
+    wrong page, images that look off — before KDP ever sees the file.
+    The first {{ max_pages }} pages are shown (cover + up to {{ max_pages - 1 }} interior pages).
+  </p>
+  <ul style="margin:0; padding-left:1.25rem; color:var(--ink-muted); font-size:0.88rem; line-height:1.8;">
+    <li>Navigate with arrow keys or the Prev / Next buttons</li>
+    <li>Two-page spread view mirrors how a reader holds the book</li>
+    <li>Cover shown as a standalone front-cover display</li>
+    <li>Nothing is stored — files are deleted immediately after rendering</li>
+  </ul>
+</div>
+
+<form class="upload-form" action="{{ url_for('check_preview') }}" method="post"
+      enctype="multipart/form-data" data-accept=".pdf">
+  <div class="drop-zone" id="drop-zone-interior">
+    <svg class="drop-icon" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+      <rect x="8" y="4" width="26" height="36" rx="3" stroke="currentColor" stroke-width="2.2"/>
+      <rect x="14" y="8" width="26" height="36" rx="3" fill="var(--paper-raised)" stroke="currentColor" stroke-width="2.2"/>
+      <path d="M20 20h14M20 25h14M20 30h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+    <p class="drop-label">Drop your <strong>interior PDF</strong> here</p>
+    <p class="drop-sub">or click to browse — PDF only</p>
+    <p class="drop-filename" id="interior-name" style="display:none;"></p>
+    <input type="file" name="interior" id="interior-file" accept=".pdf" class="file-input" required>
+  </div>
+
+  <div class="drop-zone" id="drop-zone-cover" style="margin-top:1rem; opacity:0.85;">
+    <svg class="drop-icon" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+      <rect x="8" y="4" width="32" height="40" rx="3" stroke="currentColor" stroke-width="2.2"/>
+      <rect x="10" y="10" width="28" height="18" rx="2" fill="var(--accent-bg)" stroke="var(--accent)" stroke-width="1.5"/>
+      <path d="M16 36h16M16 31h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+    <p class="drop-label">Drop your <strong>cover PDF</strong> here <span style="color:var(--ink-muted); font-weight:400;">(optional)</span></p>
+    <p class="drop-sub">or click to browse — PDF only</p>
+    <p class="drop-filename" id="cover-name" style="display:none;"></p>
+    <input type="file" name="cover" id="cover-file" accept=".pdf" class="file-input">
+  </div>
+
+  <button type="submit" class="btn-submit" id="submit-btn" style="margin-top:1.5rem;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="3" y="4" width="12" height="16" rx="2" stroke="currentColor" stroke-width="2"/>
+      <rect x="9" y="4" width="12" height="16" rx="2" fill="var(--paper-raised)" stroke="currentColor" stroke-width="2"/>
+      <path d="M6 9h6M6 12h6M6 15h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+    </svg>
+    Render Preview
+  </button>
+</form>
+
+<script>
+  function wireDropZone(dropZoneId, inputId, nameId) {
+    var dz = document.getElementById(dropZoneId);
+    var input = document.getElementById(inputId);
+    var nameEl = document.getElementById(nameId);
+
+    dz.addEventListener("click", function () { input.click(); });
+
+    input.addEventListener("change", function () {
+      if (input.files.length) {
+        nameEl.textContent = input.files[0].name;
+        nameEl.style.display = "block";
+        dz.classList.add("has-file");
+      }
+    });
+
+    dz.addEventListener("dragover", function (e) {
+      e.preventDefault();
+      dz.classList.add("drag-over");
+    });
+    dz.addEventListener("dragleave", function () {
+      dz.classList.remove("drag-over");
+    });
+    dz.addEventListener("drop", function (e) {
+      e.preventDefault();
+      dz.classList.remove("drag-over");
+      var files = e.dataTransfer.files;
+      if (files.length) {
+        var dt = new DataTransfer();
+        dt.items.add(files[0]);
+        input.files = dt.files;
+        nameEl.textContent = files[0].name;
+        nameEl.style.display = "block";
+        dz.classList.add("has-file");
+      }
+    });
+  }
+
+  wireDropZone("drop-zone-interior", "interior-file", "interior-name");
+  wireDropZone("drop-zone-cover", "cover-file", "cover-name");
+
+  document.querySelector(".upload-form").addEventListener("submit", function () {
+    var btn = document.getElementById("submit-btn");
+    btn.disabled = true;
+    btn.textContent = "Rendering pages…";
+  });
+</script>
+{% endblock %}

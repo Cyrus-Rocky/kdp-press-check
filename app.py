@@ -11,6 +11,7 @@ from docx_checker import run_all_checks_docx
 from epub_checker import run_all_checks_epub
 from text_format_checker import run_all_checks_text_format
 import kdp_rules as rules
+import preview_renderer
 
 UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "uploads")
 ALLOWED_EXT = {".pdf", ".docx", ".txt", ".rtf", ".odt"}
@@ -162,6 +163,72 @@ def check_kindle():
             os.remove(path)
 
     return render_template("result.html", report=report, filename=file.filename, active_mode="kindle")
+
+
+@app.route("/preview", methods=["GET"])
+def preview_index():
+    return render_template("preview_index.html", active_mode="preview",
+                           max_pages=preview_renderer.MAX_PAGES)
+
+
+@app.route("/check-preview", methods=["POST"])
+def check_preview():
+    interior_file = request.files.get("interior")
+    cover_file = request.files.get("cover")
+
+    if not interior_file or interior_file.filename == "":
+        flash("Please choose an interior PDF to preview.")
+        return redirect(url_for("preview_index"))
+
+    ext = os.path.splitext(interior_file.filename)[1].lower()
+    if ext != ".pdf":
+        flash("The interior file must be a PDF.")
+        return redirect(url_for("preview_index"))
+
+    interior_path = os.path.join(UPLOAD_DIR, f"{uuid.uuid4().hex}.pdf")
+    interior_file.save(interior_path)
+    cover_path = None
+
+    if cover_file and cover_file.filename:
+        cext = os.path.splitext(cover_file.filename)[1].lower()
+        if cext == ".pdf":
+            cover_path = os.path.join(UPLOAD_DIR, f"{uuid.uuid4().hex}.pdf")
+            cover_file.save(cover_path)
+
+    try:
+        interior_pages = preview_renderer.render_pages(interior_path)
+        interior_dims = preview_renderer.page_dimensions(interior_path)
+        cover_pages = []
+        cover_dims = None
+        if cover_path:
+            cover_pages = preview_renderer.render_pages(cover_path, max_pages=1)
+            cover_dims = preview_renderer.page_dimensions(cover_path)
+    except Exception:
+        logger.exception("Preview render failed")
+        flash("We couldn't render that PDF. It may be corrupted or password-protected.")
+        return redirect(url_for("preview_index"))
+    finally:
+        if os.path.exists(interior_path):
+            os.remove(interior_path)
+        if cover_path and os.path.exists(cover_path):
+            os.remove(cover_path)
+
+    import json
+    pages_json = json.dumps(interior_pages)
+    truncated = interior_dims["page_count"] > preview_renderer.MAX_PAGES
+
+    return render_template(
+        "preview_result.html",
+        active_mode="preview",
+        interior_filename=interior_file.filename,
+        pages_json=pages_json,
+        total_pages=len(interior_pages),
+        interior_dims=interior_dims,
+        cover_pages=cover_pages,
+        cover_dims=cover_dims,
+        truncated=truncated,
+        max_pages=preview_renderer.MAX_PAGES,
+    )
 
 
 @app.errorhandler(RequestEntityTooLarge)

@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}Preview — {{ interior_filename }} — KDP Press Check{% endblock %}
+{% block content %}
+
+<section class="hero" style="margin-bottom:1rem;">
+  <h1 class="hero-title" style="font-size:1.6rem;">Book Preview</h1>
+  <p class="hero-sub" style="margin-bottom:0;">
+    <span style="font-family:var(--font-mono);font-size:0.85em;opacity:0.7;">{{ interior_filename }}</span>
+    &nbsp;·&nbsp; {{ total_pages }} page{{ 's' if total_pages != 1 else '' }} rendered
+    {% if interior_dims %}
+      &nbsp;·&nbsp; {{ interior_dims.width_in }}" × {{ interior_dims.height_in }}"
+      &nbsp;·&nbsp; {{ interior_dims.page_count }} page{{ 's' if interior_dims.page_count != 1 else '' }} total
+    {% endif %}
+    {% if truncated %}
+      &nbsp;·&nbsp; <span style="color:var(--warn);">first {{ max_pages }} pages shown</span>
+    {% endif %}
+  </p>
+</section>
+
+{# ── Book viewer ──────────────────────────────────────────── #}
+<div class="book-viewer" id="book-viewer">
+
+  {# Cover panel (shown only when a cover was uploaded) #}
+  {% if cover_pages %}
+  <div class="bv-panel" id="cover-panel">
+    <div class="bv-panel-label">Front Cover</div>
+    <div class="bv-cover-wrap">
+      <img src="{{ cover_pages[0].data_uri }}" alt="Front cover"
+           class="bv-cover-img" draggable="false">
+    </div>
+    <div class="bv-panel-caption">
+      Cover PDF · {{ cover_dims.width_in }}" × {{ cover_dims.height_in }}"
+    </div>
+  </div>
+  {% endif %}
+
+  {# Spread viewer #}
+  <div class="bv-spread-shell" id="spread-shell">
+    <div class="bv-spread" id="spread">
+      <div class="bv-page bv-page-left" id="page-left">
+        <div class="bv-page-inner" id="page-left-inner"></div>
+        <div class="bv-page-num" id="page-num-left"></div>
+      </div>
+      <div class="bv-gutter" aria-hidden="true"></div>
+      <div class="bv-page bv-page-right" id="page-right">
+        <div class="bv-page-inner" id="page-right-inner"></div>
+        <div class="bv-page-num" id="page-num-right"></div>
+      </div>
+    </div>
+
+    <div class="bv-controls">
+      <button class="bv-btn" id="btn-prev" aria-label="Previous spread">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Prev
+      </button>
+      <span class="bv-page-indicator" id="page-indicator"></span>
+      <button class="bv-btn" id="btn-next" aria-label="Next spread">
+        Next
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+    <p class="bv-hint">Use ← → arrow keys to turn pages</p>
+  </div>
+
+</div>{# /.book-viewer #}
+
+<div style="text-align:center; margin-top:1.5rem;">
+  <a href="{{ url_for('preview_index') }}" class="bv-btn" style="display:inline-flex; gap:0.4rem; align-items:center; text-decoration:none;">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+      <path d="M19 12H5M5 12l7-7M5 12l7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Preview another file
+  </a>
+  &nbsp;&nbsp;
+  <a href="{{ url_for('index') }}" class="bv-btn" style="display:inline-flex; gap:0.4rem; align-items:center; text-decoration:none;">
+    Run compliance check
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+      <path d="M5 12h14M14 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </a>
+</div>
+
+{# Page data injected for JS #}
+<script>
+var PAGES = {{ pages_json | safe }};
+var spread = 0; // current spread index (0 = pages 0-1, 1 = pages 2-3, …)
+var totalSpreads = Math.ceil(PAGES.length / 2);
+
+function loadImg(inner, page) {
+  inner.innerHTML = "";
+  if (!page) return;
+  var img = document.createElement("img");
+  img.src = page.data_uri;
+  img.alt = "Page " + (page.index + 1);
+  img.draggable = false;
+  img.style.width = "100%";
+  img.style.height = "100%";
+  img.style.objectFit = "contain";
+  img.style.display = "block";
+  inner.appendChild(img);
+}
+
+function renderSpread() {
+  var li = spread * 2;
+  var ri = li + 1;
+  var leftPage = PAGES[li] || null;
+  var rightPage = PAGES[ri] || null;
+
+  loadImg(document.getElementById("page-left-inner"), leftPage);
+  loadImg(document.getElementById("page-right-inner"), rightPage);
+
+  document.getElementById("page-num-left").textContent = leftPage ? (li + 1) : "";
+  document.getElementById("page-num-right").textContent = rightPage ? (ri + 1) : "";
+
+  var indicator = document.getElementById("page-indicator");
+  if (rightPage) {
+    indicator.textContent = "Pages " + (li + 1) + " – " + (ri + 1) + " of " + PAGES.length;
+  } else {
+    indicator.textContent = "Page " + (li + 1) + " of " + PAGES.length;
+  }
+
+  document.getElementById("btn-prev").disabled = spread === 0;
+  document.getElementById("btn-next").disabled = spread >= totalSpreads - 1;
+}
+
+document.getElementById("btn-prev").addEventListener("click", function () {
+  if (spread > 0) { spread--; renderSpread(); }
+});
+document.getElementById("btn-next").addEventListener("click", function () {
+  if (spread < totalSpreads - 1) { spread++; renderSpread(); }
+});
+document.addEventListener("keydown", function (e) {
+  if (e.key === "ArrowLeft" && spread > 0) { spread--; renderSpread(); }
+  if (e.key === "ArrowRight" && spread < totalSpreads - 1) { spread++; renderSpread(); }
+});
+
+renderSpread();
+</script>
+{% endblock %}
