@@ -14,8 +14,8 @@ import time
 
 import fitz  # PyMuPDF
 
-RENDER_DPI = 96
-JPEG_QUALITY = 78
+RENDER_DPI = 72
+JPEG_QUALITY = 72
 PREVIEW_DIR_TTL = 1800  # 30 minutes
 
 
@@ -58,6 +58,7 @@ def render_to_dir(pdf_path: str, out_dir: str, kind: str = "interior") -> dict:
         if i == 0:
             first_w, first_h = pix.width, pix.height
         jpeg_bytes = pix.tobytes("jpeg", jpg_quality=JPEG_QUALITY)
+        del pix  # free pixmap memory immediately
         with open(os.path.join(dest, f"{i:04d}.jpg"), "wb") as f:
             f.write(jpeg_bytes)
 
@@ -159,6 +160,7 @@ def check_page_margins(pdf_path: str) -> dict:
         if page_issues:
             violations.append({"page": i + 1, "issues": sorted(page_issues)})
 
+    total_pages = doc.page_count
     doc.close()
 
     if not violations:
@@ -169,7 +171,7 @@ def check_page_margins(pdf_path: str) -> dict:
                    f"inside the 0.25\" safety zone.")
 
     return {
-        "total_pages": doc.page_count if not doc.is_closed else 0,
+        "total_pages": total_pages,
         "violations": violations,
         "summary": summary,
     }
