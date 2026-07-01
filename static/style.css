@@ -1804,6 +1804,7 @@ button:focus-visible,
   color: #fff;
   flex-shrink: 0;
 }
-.ps-platform-fiverr  .ps-platform-icon { background: #1DBF73; }
-.ps-platform-upwork  .ps-platform-icon { background: #14A800; }
-.ps-platform-kwork   .ps-platform-icon { background: #FF6B35; }
+.ps-platform-fiverr       .ps-platform-icon { background: #1DBF73; }
+.ps-platform-upwork       .ps-platform-icon { background: #14A800; }
+.ps-platform-kwork        .ps-platform-icon { background: #FF6B35; }
+.ps-platform-protalentshub .ps-platform-icon { background: #2563EB; }
