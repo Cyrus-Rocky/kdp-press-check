@@ -54,7 +54,10 @@
     <div class="ps-grid">
       {% for s in solvers %}
         {% if active_cat == 'all' or active_cat in s.categories %}
-        <div class="ps-card">
+        <div class="ps-card{% if s.featured %} ps-card-featured{% endif %}">
+          {% if s.featured %}
+            <span class="ps-featured-badge">⭐ Featured</span>
+          {% endif %}
           <div class="ps-card-top">
             <div class="ps-avatar" style="background:{{ s.color }};">{{ s.initials }}</div>
             <div class="ps-card-meta">
@@ -78,10 +81,19 @@
             {% endfor %}
           </div>
 
+          {% if s.gig_url %}
+            <a href="{{ s.gig_url }}" target="_blank" rel="noopener noreferrer" class="ps-view-gig-btn">
+              View Gig
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          {% endif %}
+
           <div class="ps-platforms">
             {% for p in s.platforms %}
               <a href="{{ p.url }}" target="_blank" rel="noopener noreferrer"
-                 class="ps-platform-btn ps-platform-{{ p.name | lower }}">
+                 class="ps-platform-btn ps-platform-{{ p.name | lower | replace(' ', '') }}">
                 <span class="ps-platform-icon">{{ p.icon }}</span>
                 {{ p.name }}
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" style="flex-shrink:0; opacity:0.6;">

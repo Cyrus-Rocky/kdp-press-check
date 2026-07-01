@@ -1808,3 +1808,42 @@ button:focus-visible,
 .ps-platform-upwork       .ps-platform-icon { background: #14A800; }
 .ps-platform-kwork        .ps-platform-icon { background: #FF6B35; }
 .ps-platform-protalentshub .ps-platform-icon { background: #2563EB; }
+
+/* Featured card */
+.ps-card-featured {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  position: relative;
+}
+.ps-featured-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+  color: var(--accent);
+  background: var(--paper);
+  border: 1.5px solid var(--accent);
+  border-radius: 20px;
+  padding: 2px 10px;
+  margin-bottom: 10px;
+}
+
+/* View Gig button */
+.ps-view-gig-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: var(--font-display);
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 8px 16px;
+  text-decoration: none;
+  transition: opacity 140ms;
+}
+.ps-view-gig-btn:hover { opacity: 0.88; }

@@ -8,6 +8,8 @@ Each solver has:
   - turnaround              (e.g. "3–5 days")
   - platforms               (list of {name, url, icon} — links to their profiles)
   - tags                    (skill chips)
+  - featured                (optional bool — shown with a badge)
+  - gig_url                 (optional — direct link to their specific gig listing)
 
 V1: manually curated. V2: self-serve sign-up with a database.
 """
@@ -21,6 +23,25 @@ CATEGORIES = [
 ]
 
 SOLVERS = [
+    # ── Featured / verified solvers with real gig listings ───────────────────
+    {
+        "name": "Dan Farnandez",
+        "initials": "DF",
+        "color": "#1E3A8A",
+        "specialty": "KDP Book Formatter & Editor",
+        "categories": ["formatting", "editing", "kindle"],
+        "bio": "Turns rough drafts into polished, publish-ready books. Covers KDP paperback formatting, ebook formatting, copy editing, and proofreading in one package.",
+        "turnaround": "Ask seller",
+        "tags": ["Paperback Formatting", "Kindle EPUB", "Copy Editing", "Proofreading", "KDP-Ready"],
+        "featured": True,
+        "gig_url": "https://protalentshub.com/gig/i-will-do-book-formatting-paperback-formatting-kindle-ebook-formatting-for-amazon-kdp",
+        "platforms": [
+            {"name": "ProTalentsHub", "url": "https://protalentshub.com/gig/i-will-do-book-formatting-paperback-formatting-kindle-ebook-formatting-for-amazon-kdp", "icon": "P"},
+            {"name": "Fiverr",        "url": "https://www.fiverr.com/dan_farnandez",                                                                                  "icon": "F"},
+        ],
+    },
+
+    # ── Curated solvers ───────────────────────────────────────────────────────
     {
         "name": "Marcus J.",
         "initials": "MJ",
@@ -31,9 +52,9 @@ SOLVERS = [
         "turnaround": "2–4 days",
         "tags": ["Trim & Margins", "Bleed Setup", "Front Matter", "Word → PDF"],
         "platforms": [
-            {"name": "Fiverr",        "url": "https://www.fiverr.com/search/gigs?query=kdp+interior+formatting&source=main_banner",           "icon": "F"},
-            {"name": "Upwork",        "url": "https://www.upwork.com/search/profiles/?q=kdp+book+formatting",                                  "icon": "U"},
-            {"name": "ProTalentsHub", "url": "https://protalentshub.com/category.php?slug=writing-translation",                                "icon": "P"},
+            {"name": "Fiverr",        "url": "https://www.fiverr.com/search/gigs?query=kdp+interior+formatting&source=main_banner", "icon": "F"},
+            {"name": "Upwork",        "url": "https://www.upwork.com/search/profiles/?q=kdp+book+formatting",                       "icon": "U"},
+            {"name": "ProTalentsHub", "url": "https://protalentshub.com/gigs.php?cat=writing-translation",                          "icon": "P"},
         ],
     },
     {
@@ -46,9 +67,9 @@ SOLVERS = [
         "turnaround": "3–5 days",
         "tags": ["Full Wrap Cover", "Spine Calc", "300 DPI", "CMYK/RGB"],
         "platforms": [
-            {"name": "Fiverr",        "url": "https://www.fiverr.com/search/gigs?query=kdp+book+cover+design",          "icon": "F"},
-            {"name": "Kwork",         "url": "https://kwork.com/search?query=book+cover+design+kdp",                  "icon": "K"},
-            {"name": "ProTalentsHub", "url": "https://protalentshub.com/category.php?slug=graphics-design",           "icon": "P"},
+            {"name": "Fiverr",        "url": "https://www.fiverr.com/search/gigs?query=kdp+book+cover+design", "icon": "F"},
+            {"name": "Kwork",         "url": "https://kwork.com/search?query=book+cover+design+kdp",           "icon": "K"},
+            {"name": "ProTalentsHub", "url": "https://protalentshub.com/gigs.php?cat=graphics-design",         "icon": "P"},
         ],
     },
     {
@@ -61,9 +82,9 @@ SOLVERS = [
         "turnaround": "5–7 days",
         "tags": ["Typos", "Repeated Words", "Consistency", "Style Guide"],
         "platforms": [
-            {"name": "Upwork",        "url": "https://www.upwork.com/search/profiles/?q=proofreading+book+editor",      "icon": "U"},
-            {"name": "Fiverr",        "url": "https://www.fiverr.com/search/gigs?query=book+proofreading",            "icon": "F"},
-            {"name": "ProTalentsHub", "url": "https://protalentshub.com/category.php?slug=writing-translation",       "icon": "P"},
+            {"name": "Upwork",        "url": "https://www.upwork.com/search/profiles/?q=proofreading+book+editor", "icon": "U"},
+            {"name": "Fiverr",        "url": "https://www.fiverr.com/search/gigs?query=book+proofreading",         "icon": "F"},
+            {"name": "ProTalentsHub", "url": "https://protalentshub.com/gigs.php?cat=writing-translation",         "icon": "P"},
         ],
     },
     {
@@ -76,9 +97,9 @@ SOLVERS = [
         "turnaround": "2–3 days",
         "tags": ["EPUB3", "Kindle Create", "TOC / Nav", "File Size"],
         "platforms": [
-            {"name": "Fiverr",        "url": "https://www.fiverr.com/search/gigs?query=epub+kindle+formatting",     "icon": "F"},
-            {"name": "Upwork",        "url": "https://www.upwork.com/search/profiles/?q=epub+kindle+ebook",         "icon": "U"},
-            {"name": "ProTalentsHub", "url": "https://protalentshub.com/category.php?slug=programming-tech",        "icon": "P"},
+            {"name": "Fiverr",        "url": "https://www.fiverr.com/search/gigs?query=epub+kindle+formatting", "icon": "F"},
+            {"name": "Upwork",        "url": "https://www.upwork.com/search/profiles/?q=epub+kindle+ebook",     "icon": "U"},
+            {"name": "ProTalentsHub", "url": "https://protalentshub.com/gigs.php?cat=writing-translation",      "icon": "P"},
         ],
     },
     {
@@ -91,9 +112,9 @@ SOLVERS = [
         "turnaround": "4–6 days",
         "tags": ["InDesign", "Font Embedding", "Chapter Styles", "Image DPI"],
         "platforms": [
-            {"name": "Upwork",        "url": "https://www.upwork.com/search/profiles/?q=book+typesetting+indesign",  "icon": "U"},
-            {"name": "Kwork",         "url": "https://kwork.com/search?query=typesetting+book",                       "icon": "K"},
-            {"name": "ProTalentsHub", "url": "https://protalentshub.com/category.php?slug=writing-translation",       "icon": "P"},
+            {"name": "Upwork",        "url": "https://www.upwork.com/search/profiles/?q=book+typesetting+indesign", "icon": "U"},
+            {"name": "Kwork",         "url": "https://kwork.com/search?query=typesetting+book",                      "icon": "K"},
+            {"name": "ProTalentsHub", "url": "https://protalentshub.com/gigs.php?cat=writing-translation",           "icon": "P"},
         ],
     },
     {
@@ -106,9 +127,9 @@ SOLVERS = [
         "turnaround": "5–7 days",
         "tags": ["eBook Cover", "Print Wrap", "Genre Design", "Unlimited Revisions"],
         "platforms": [
-            {"name": "Fiverr",        "url": "https://www.fiverr.com/search/gigs?query=book+cover+design+print",  "icon": "F"},
-            {"name": "Kwork",         "url": "https://kwork.com/search?query=book+cover+design",                   "icon": "K"},
-            {"name": "ProTalentsHub", "url": "https://protalentshub.com/category.php?slug=graphics-design",        "icon": "P"},
+            {"name": "Fiverr",        "url": "https://www.fiverr.com/search/gigs?query=book+cover+design+print", "icon": "F"},
+            {"name": "Kwork",         "url": "https://kwork.com/search?query=book+cover+design",                  "icon": "K"},
+            {"name": "ProTalentsHub", "url": "https://protalentshub.com/gigs.php?cat=graphics-design",            "icon": "P"},
         ],
     },
     {
@@ -121,9 +142,9 @@ SOLVERS = [
         "turnaround": "7–14 days",
         "tags": ["Developmental Edit", "Plot & Structure", "Chapter Flow", "Manuscript"],
         "platforms": [
-            {"name": "Upwork",        "url": "https://www.upwork.com/search/profiles/?q=developmental+editor+book",  "icon": "U"},
-            {"name": "Fiverr",        "url": "https://www.fiverr.com/search/gigs?query=developmental+editing+book",  "icon": "F"},
-            {"name": "ProTalentsHub", "url": "https://protalentshub.com/category.php?slug=writing-translation",      "icon": "P"},
+            {"name": "Upwork",        "url": "https://www.upwork.com/search/profiles/?q=developmental+editor+book", "icon": "U"},
+            {"name": "Fiverr",        "url": "https://www.fiverr.com/search/gigs?query=developmental+editing+book", "icon": "F"},
+            {"name": "ProTalentsHub", "url": "https://protalentshub.com/gigs.php?cat=writing-translation",          "icon": "P"},
         ],
     },
     {
@@ -136,9 +157,9 @@ SOLVERS = [
         "turnaround": "7–10 days",
         "tags": ["Interior + EPUB", "Cover", "Metadata", "KDP Upload"],
         "platforms": [
-            {"name": "Fiverr",        "url": "https://www.fiverr.com/search/gigs?query=kdp+publishing+full+service",   "icon": "F"},
-            {"name": "Upwork",        "url": "https://www.upwork.com/search/profiles/?q=kdp+self+publishing",         "icon": "U"},
-            {"name": "ProTalentsHub", "url": "https://protalentshub.com/category.php?slug=end-to-end-projects",       "icon": "P"},
+            {"name": "Fiverr",        "url": "https://www.fiverr.com/search/gigs?query=kdp+publishing+full+service", "icon": "F"},
+            {"name": "Upwork",        "url": "https://www.upwork.com/search/profiles/?q=kdp+self+publishing",        "icon": "U"},
+            {"name": "ProTalentsHub", "url": "https://protalentshub.com/gigs.php?cat=writing-translation",           "icon": "P"},
         ],
     },
 ]
