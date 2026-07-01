@@ -541,6 +541,100 @@ def check_orphans_widows(doc) -> dict:
     }
 
 
+def _parse_toc_page(page) -> list:
+    """Parse visual TOC entries from a page. Returns [(title, page_num), ...]."""
+    import re
+    entries = []
+    for line in page.get_text().splitlines():
+        line = line.strip()
+        if len(line) < 4:
+            continue
+        m = re.match(r'^(.+?)[\s\.·•…\-]{3,}\s*(\d{1,4})\s*$', line)
+        if m:
+            title = re.sub(r'\s+', ' ', m.group(1)).strip()
+            page_num = int(m.group(2))
+            if len(title) > 2 and 0 < page_num <= 2000:
+                entries.append((title, page_num))
+    return entries
+
+
+def _find_heading_page(doc, title: str) -> int | None:
+    """Search every page for the heading text. Returns 1-based page number or None."""
+    needle = title.lower().strip()[:35]
+    if not needle:
+        return None
+    for i, page in enumerate(doc):
+        if needle in page.get_text().lower():
+            return i + 1
+    return None
+
+
+def check_toc_accuracy(doc) -> dict:
+    """Verify TOC page numbers match where chapters actually appear in the PDF."""
+    # Try embedded PDF outline/bookmarks first
+    toc_entries = []
+    pdf_toc = doc.get_toc()
+    if pdf_toc:
+        toc_entries = [(item[1], item[2]) for item in pdf_toc if len(item) >= 3 and item[2] > 0]
+
+    # Fall back to visual TOC parsing if no bookmarks
+    if not toc_entries:
+        toc_page_idx = None
+        for i in range(min(15, doc.page_count)):
+            text = doc[i].get_text().lower()
+            if "table of contents" in text or (i < 6 and "contents" in text):
+                toc_page_idx = i
+                break
+        if toc_page_idx is not None:
+            toc_entries = _parse_toc_page(doc[toc_page_idx])
+
+    if not toc_entries:
+        return {
+            "title": "TOC Accuracy", "ok": True, "warning_only": True,
+            "summary": "No Table of Contents found to verify.",
+            "detail": "No PDF outline bookmarks or recognisable TOC page detected.",
+        }
+
+    mismatches = []
+    not_found = []
+    for title, listed_page in toc_entries[:40]:  # cap at 40 entries
+        actual = _find_heading_page(doc, title)
+        if actual is None:
+            not_found.append(title[:40])
+        elif abs(actual - listed_page) > 1:
+            mismatches.append((title[:40], listed_page, actual))
+
+    checked = len(toc_entries)
+    if not mismatches and not not_found:
+        return {
+            "title": "TOC Accuracy", "ok": True,
+            "summary": f"All {checked} TOC entries point to the correct page.",
+            "detail": f"Verified {checked} entries from the Table of Contents — all match.",
+        }
+
+    parts = []
+    if mismatches:
+        parts.append(f"{len(mismatches)} wrong page number(s)")
+    if not_found:
+        parts.append(f"{len(not_found)} chapter(s) not found")
+
+    detail_lines = [f'"{t}" — TOC says p.{l}, actually p.{a}' for t, l, a in mismatches[:8]]
+    if not_found:
+        detail_lines += [f'Could not locate: "{t}"' for t in not_found[:4]]
+
+    return {
+        "title": "TOC Accuracy", "ok": False,
+        "summary": f"TOC has {' and '.join(parts)} out of {checked} entries checked.",
+        "fix": (
+            "Update your Table of Contents before exporting the PDF. In Word: right-click the "
+            "TOC → Update Field → Update entire table. In InDesign: update the TOC style under "
+            "Layout > Update Table of Contents. Wrong TOC page numbers can cause KDP to reject "
+            "the file during review."
+        ),
+        "detail": "\n".join(detail_lines),
+    }
+
+
 def run_all_checks(pdf_path: str) -> dict:
     doc = fitz.open(pdf_path)
     try:
@@ -554,6 +648,7 @@ def run_all_checks(pdf_path: str) -> dict:
             check_image_resolution(doc),
             check_color_pages(doc),
             check_orphans_widows(doc),
+            check_toc_accuracy(doc),
             check_metadata(doc),
         ]
         full_text = _full_text(doc)

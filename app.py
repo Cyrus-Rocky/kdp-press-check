@@ -156,6 +156,97 @@ def royalty_calculator():
     return render_template("royalty_calculator.html", active_mode="royalty")
 
 
+@app.route("/estimate-pages", methods=["GET"])
+def estimate_pages_index():
+    return render_template("page_estimator.html", active_mode="estimate")
+
+
+@app.route("/estimate-pages", methods=["POST"])
+def estimate_pages():
+    file = request.files.get("manuscript")
+    if not file or file.filename == "":
+        flash("Please choose a Word (.docx) file.")
+        return redirect(url_for("estimate_pages_index"))
+    if not file.filename.lower().endswith(".docx"):
+        flash("Page estimation only works with Word (.docx) files.")
+        return redirect(url_for("estimate_pages_index"))
+
+    try:
+        trim_w = float(request.form.get("trim_w", "6"))
+        trim_h = float(request.form.get("trim_h", "9"))
+        font_size = int(request.form.get("font_size", "12"))
+    except ValueError:
+        flash("Invalid trim size or font size.")
+        return redirect(url_for("estimate_pages_index"))
+
+    safe_name = f"{uuid.uuid4().hex}.docx"
+    path = os.path.join(UPLOAD_DIR, safe_name)
+    file.save(path)
+
+    try:
+        from docx import Document as _DocxDoc
+        _doc = _DocxDoc(path)
+        words = sum(len(p.text.split()) for p in _doc.paragraphs if p.text.strip())
+        para_count = sum(1 for p in _doc.paragraphs if p.text.strip())
+        section_breaks = sum(
+            1 for p in _doc.paragraphs
+            if any(kw in p.text.lower() for kw in ["chapter", "part ", "section"])
+        )
+
+        # Words-per-page table keyed by (trim_w, trim_h) at 12pt, 1.2 line spacing
+        WPP_BASE = {
+            (5.0, 8.0):   280, (5.5, 8.5): 330, (6.0, 9.0):   420,
+            (6.14, 9.21): 435, (7.0, 10.0): 550, (8.0, 10.0):  680,
+            (8.5, 11.0):  770,
+        }
+        # Find closest trim match
+        best_key = min(WPP_BASE.keys(), key=lambda k: abs(k[0]-trim_w)+abs(k[1]-trim_h))
+        wpp_12pt = WPP_BASE[best_key]
+        # Scale for font size (12pt = 1.0 baseline)
+        font_scale = (12.0 / font_size) ** 2
+        wpp = max(50, round(wpp_12pt * font_scale))
+
+        raw_pages = words / wpp if wpp else 0
+        # Add ~15% for chapter breaks, front matter, blank pages
+        overhead = max(6, round(raw_pages * 0.15))
+        estimated = round(raw_pages) + overhead
+
+        # KDP page count must be even (books have front and back)
+        if estimated % 2 != 0:
+            estimated += 1
+        estimated = max(24, estimated)  # KDP minimum
+
+        result = {
+            "word_count": words,
+            "para_count": para_count,
+            "section_breaks": section_breaks,
+            "words_per_page": wpp,
+            "raw_pages": round(raw_pages),
+            "overhead": overhead,
+            "estimated_pages": estimated,
+            "trim": f"{trim_w}\" × {trim_h}\"",
+            "font_size": font_size,
+            # KDP printing costs at estimated page count
+            "cost_bw":    round(0.85 + 0.012 * estimated, 2),
+            "cost_color": round(0.85 + 0.070 * estimated, 2),
+        }
+    except Exception:
+        logger.exception("Page estimation failed for %s", safe_name)
+        flash("We couldn't read that Word file — try saving it as .docx again.")
+        return redirect(url_for("estimate_pages_index"))
+    finally:
+        if os.path.exists(path):
+            os.remove(path)
+
+    return render_template("page_estimator.html", active_mode="estimate",
+                           result=result, filename=file.filename)
+
+
+@app.route("/genre-checklist", methods=["GET"])
+def genre_checklist():
+    return render_template("genre_checklist.html", active_mode="genre")
+
+
 @app.route("/kindle", methods=["GET"])
 def kindle_index():
     return render_template("kindle_index.html", active_mode="kindle")

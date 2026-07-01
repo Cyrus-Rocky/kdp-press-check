@@ -187,4 +187,5 @@ CHECK_TO_CATEGORY = {
     "Color Content":          "formatting",
     "Orphans & Widows":       "formatting",
     "PDF Metadata":           "formatting",
+    "TOC Accuracy":           "formatting",
 }

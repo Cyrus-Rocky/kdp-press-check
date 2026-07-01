@@ -1,0 +1,304 @@
+{% extends "base.html" %}
+{% block title %}Genre-Based KDP Checklist — KDP Press Check{% endblock %}
+{% block content %}
+
+<div class="page-layout">
+  <div class="col-hero">
+    <section class="hero">
+      <h1>Genre-Based KDP Checklist</h1>
+      <p>KDP has different technical requirements depending on your book type. Select your genre and get an exact checklist of what you need before you upload.</p>
+    </section>
+    <div class="info-card">
+      <h3>Why genre matters</h3>
+      <ul>
+        <li>Children's picture books <em>require</em> full bleed — novels don't</li>
+        <li>Cookbooks almost always need premium color printing</li>
+        <li>Large-print books need specific font and margin minimums</li>
+        <li>Comics and graphic novels need different trim sizes than prose</li>
+        <li>Textbooks need the right trim to compete on Amazon with print versions</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-form">
+    <div class="genre-selector">
+      <label class="form-label" for="genre-select">Select your book type</label>
+      <select id="genre-select" class="form-select genre-select-input">
+        <option value="">— choose a genre —</option>
+        <option value="novel">Novel / Fiction</option>
+        <option value="nonfiction">Non-Fiction / Self-Help / Memoir</option>
+        <option value="childrens">Children's Picture Book</option>
+        <option value="cookbook">Cookbook / Recipe Book</option>
+        <option value="textbook">Textbook / Workbook / Study Guide</option>
+        <option value="poetry">Poetry / Essay / Art Book</option>
+        <option value="largeprint">Large-Print Edition</option>
+        <option value="comic">Comic Book / Graphic Novel</option>
+        <option value="photo">Photography / Coffee Table Book</option>
+      </select>
+    </div>
+
+    <div id="checklist-panel" style="display:none; margin-top:24px;">
+      <div class="genre-header" id="genre-header"></div>
+      <div id="checklist-items"></div>
+      <div class="genre-tools-bar">
+        <button class="genre-btn-secondary" id="btn-check-all">Mark all done</button>
+        <button class="genre-btn-secondary" id="btn-uncheck-all">Reset</button>
+        <a id="btn-upload-link" href="{{ url_for('index') }}" class="genre-btn-primary">
+          Run full check on my PDF →
+        </a>
+      </div>
+    </div>
+
+    <div id="genre-empty" class="genre-empty-state">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" style="color:var(--ink-muted);opacity:0.4;">
+        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        <rect x="9" y="3" width="6" height="4" rx="1" stroke="currentColor" stroke-width="1.6"/>
+        <path d="M9 12h6M9 16h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      <p>Select a genre above to see its KDP requirements checklist.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+var GENRES = {
+  novel: {
+    label: "Novel / Fiction",
+    description: "Standard prose fiction — thrillers, romance, fantasy, literary fiction, etc.",
+    items: [
+      { text: "Trim size: 5×8, 5.5×8.5, or 6×9 are standard for fiction", critical: false, category: "Layout" },
+      { text: "Interior must be Black & White (unless artwork requires color)", critical: true, category: "Printing" },
+      { text: "Gutter (inside) margin: minimum 0.75\" for books under 150 pages; 0.875\" for 150–300 pages; 1.0\" for 300+ pages", critical: true, category: "Margins" },
+      { text: "Outside, top, and bottom margins: minimum 0.5\"", critical: true, category: "Margins" },
+      { text: "All fonts must be embedded in the PDF", critical: true, category: "Fonts" },
+      { text: "Total page count: between 24 and 828 pages", critical: true, category: "Pages" },
+      { text: "Front matter: title page and copyright page", critical: false, category: "Content" },
+      { text: "Table of contents (optional for novels, recommended for anthologies)", critical: false, category: "Content" },
+      { text: "Chapter headings must be consistent style throughout", critical: false, category: "Formatting" },
+      { text: "No bleed required unless you have full-page illustrations", critical: false, category: "Bleed" },
+      { text: "Page numbers in footer or header (excluding first pages of chapters)", critical: false, category: "Formatting" },
+      { text: "Widow/orphan control enabled — no single lines stranded at page tops/bottoms", critical: false, category: "Formatting" },
+    ]
+  },
+  nonfiction: {
+    label: "Non-Fiction / Self-Help / Memoir",
+    description: "Business books, memoirs, self-help, how-to guides, and general non-fiction.",
+    items: [
+      { text: "Trim size: 6×9 most common; 5.5×8.5 or 7×10 also popular", critical: false, category: "Layout" },
+      { text: "Black & White interior unless charts or photos require color", critical: true, category: "Printing" },
+      { text: "Gutter margin: 0.875\" (for most non-fiction page counts)", critical: true, category: "Margins" },
+      { text: "Table of Contents with accurate page numbers — KDP may reject wrong page numbers", critical: true, category: "Content" },
+      { text: "Front matter: title page, copyright page, dedication, TOC", critical: false, category: "Content" },
+      { text: "All fonts embedded in the PDF", critical: true, category: "Fonts" },
+      { text: "Chapter/section headings consistent style throughout", critical: false, category: "Formatting" },
+      { text: "Images at 300 DPI minimum", critical: true, category: "Images" },
+      { text: "Index (if included) must have accurate page numbers", critical: true, category: "Content" },
+      { text: "Page count between 24 and 828 pages", critical: true, category: "Pages" },
+      { text: "Running headers should not appear on chapter-opening pages", critical: false, category: "Formatting" },
+    ]
+  },
+  childrens: {
+    label: "Children's Picture Book",
+    description: "Illustrated books for young children where images dominate every spread.",
+    items: [
+      { text: "Page size MUST include 0.125\" bleed on all four sides", critical: true, category: "Bleed" },
+      { text: "Full-bleed illustrations must extend to the bleed edge (not the trim edge)", critical: true, category: "Bleed" },
+      { text: "Keep all text and important image content 0.25\" inside the trim edge (safety zone)", critical: true, category: "Margins" },
+      { text: "Premium Color printing required for illustrated picture books", critical: true, category: "Printing" },
+      { text: "Recommended trim sizes: 8.5×8.5, 8×10, or 8.5×11", critical: false, category: "Layout" },
+      { text: "All images at 300 DPI minimum at final print size", critical: true, category: "Images" },
+      { text: "Images in CMYK or RGB (KDP converts to CMYK for print)", critical: false, category: "Images" },
+      { text: "Total page count: minimum 24 pages including cover pages", critical: true, category: "Pages" },
+      { text: "No text in the bleed area (0.125\" border around image)", critical: true, category: "Bleed" },
+      { text: "Cover PDF submitted separately from interior", critical: true, category: "Cover" },
+      { text: "Font embedding required — no system fonts", critical: true, category: "Fonts" },
+      { text: "Left and right pages form spreads — lay out in facing-page view", critical: false, category: "Layout" },
+    ]
+  },
+  cookbook: {
+    label: "Cookbook / Recipe Book",
+    description: "Recipe collections, cooking guides, and food-focused books.",
+    items: [
+      { text: "Premium Color printing strongly recommended for food photography", critical: false, category: "Printing" },
+      { text: "If using color photos: all images at 300 DPI minimum", critical: true, category: "Images" },
+      { text: "Recommended trim: 7×10 or 8.5×11 for spacious recipe layouts", critical: false, category: "Layout" },
+      { text: "Gutter margin: at least 0.875\" to prevent recipes from disappearing into spine", critical: true, category: "Margins" },
+      { text: "Table of Contents with recipe names and accurate page numbers", critical: true, category: "Content" },
+      { text: "All fonts embedded in the PDF", critical: true, category: "Fonts" },
+      { text: "Consistent recipe layout throughout (ingredients, method, servings)", critical: false, category: "Formatting" },
+      { text: "If B&W: ensure food photos convert well to grayscale", critical: false, category: "Images" },
+      { text: "Page count between 24 and 828 pages", critical: true, category: "Pages" },
+      { text: "Index of recipes with accurate page numbers", critical: false, category: "Content" },
+      { text: "Full bleed food photos: add 0.125\" bleed and keep text in safety zone", critical: false, category: "Bleed" },
+    ]
+  },
+  textbook: {
+    label: "Textbook / Workbook / Study Guide",
+    description: "Educational materials, academic textbooks, workbooks, and study guides.",
+    items: [
+      { text: "Trim size: 7×10 or 8.5×11 recommended for educational content", critical: false, category: "Layout" },
+      { text: "Wide inside margin (0.875\"–1.0\") for workbook binding", critical: true, category: "Margins" },
+      { text: "All fonts embedded in the PDF", critical: true, category: "Fonts" },
+      { text: "Table of Contents with accurate page numbers", critical: true, category: "Content" },
+      { text: "Chapter and section headings must be consistent and clearly hierarchical", critical: false, category: "Formatting" },
+      { text: "All diagrams, charts, and figures at 300 DPI minimum", critical: true, category: "Images" },
+      { text: "Answer keys / appendices accurately referenced in TOC", critical: false, category: "Content" },
+      { text: "Page count between 24 and 828 pages", critical: true, category: "Pages" },
+      { text: "Workbook fill-in boxes and lines must have at least 0.1\" height for legibility", critical: false, category: "Formatting" },
+      { text: "Use cream paper for text-heavy books (easier on eyes)", critical: false, category: "Printing" },
+      { text: "Running headers with chapter names recommended", critical: false, category: "Formatting" },
+    ]
+  },
+  poetry: {
+    label: "Poetry / Essay / Art Book",
+    description: "Poetry collections, essay anthologies, literary journals, and mixed art/text books.",
+    items: [
+      { text: "Trim size: 5×8 or 5.5×8.5 typical for poetry; 7×10 or 8.5×11 for art books", critical: false, category: "Layout" },
+      { text: "Wide margins encouraged for poetry — 0.75\" inside minimum", critical: true, category: "Margins" },
+      { text: "All fonts embedded", critical: true, category: "Fonts" },
+      { text: "Consistent line-break treatment throughout", critical: false, category: "Formatting" },
+      { text: "If illustrations/artwork included: 300 DPI minimum", critical: true, category: "Images" },
+      { text: "Art books with color plates require Premium Color printing", critical: false, category: "Printing" },
+      { text: "Page count between 24 and 828 pages", critical: true, category: "Pages" },
+      { text: "Table of Contents with poem/essay titles (optional but helpful)", critical: false, category: "Content" },
+      { text: "Section breaks clearly marked between parts or sequences", critical: false, category: "Formatting" },
+    ]
+  },
+  largeprint: {
+    label: "Large-Print Edition",
+    description: "Editions formatted for readers with visual impairments — must meet accessibility standards.",
+    items: [
+      { text: "Body font size: 16pt minimum (18pt preferred)", critical: true, category: "Fonts" },
+      { text: "Line spacing: 1.5 or double-spaced minimum", critical: true, category: "Formatting" },
+      { text: "Avoid serif fonts with thin strokes — use Georgia, Palatino, or a clear serif", critical: false, category: "Fonts" },
+      { text: "All fonts embedded in the PDF", critical: true, category: "Fonts" },
+      { text: "Trim size: 6×9 or larger to accommodate larger type without tiny lines", critical: false, category: "Layout" },
+      { text: "Gutter margin: minimum 0.875\" — large-print books are often thicker", critical: true, category: "Margins" },
+      { text: "Black & White interior unless art requires color", critical: false, category: "Printing" },
+      { text: "No justified text with tight word spacing — ragged-right preferred", critical: false, category: "Formatting" },
+      { text: "\"Large Print\" must appear on the cover and title page", critical: true, category: "Content" },
+      { text: "Page count between 24 and 828 pages", critical: true, category: "Pages" },
+      { text: "High contrast text — avoid grey text on white; use pure black (#000000)", critical: true, category: "Formatting" },
+    ]
+  },
+  comic: {
+    label: "Comic Book / Graphic Novel",
+    description: "Sequential art, manga-style books, and illustrated story formats.",
+    items: [
+      { text: "Trim size: 6.625×10.25 (US comic standard) or 6×9 for graphic novels", critical: false, category: "Layout" },
+      { text: "Premium Color required for full-color comics", critical: true, category: "Printing" },
+      { text: "B&W or grayscale comics can use standard B&W printing", critical: false, category: "Printing" },
+      { text: "Full bleed panels that reach the edge: add 0.125\" bleed all sides", critical: true, category: "Bleed" },
+      { text: "Keep all speech bubbles and critical art 0.25\" inside trim edge", critical: true, category: "Bleed" },
+      { text: "All artwork at 300 DPI minimum (600 DPI preferred for B&W line art)", critical: true, category: "Images" },
+      { text: "All fonts (lettering) embedded in the PDF", critical: true, category: "Fonts" },
+      { text: "Page count: minimum 24 pages, maximum 828 pages", critical: true, category: "Pages" },
+      { text: "Right-to-left reading (manga): set reading direction in PDF metadata", critical: false, category: "Content" },
+      { text: "No text in gutters (page edges) unless intentional", critical: false, category: "Formatting" },
+    ]
+  },
+  photo: {
+    label: "Photography / Coffee Table Book",
+    description: "Photo books, portfolios, and image-led coffee table books.",
+    items: [
+      { text: "Premium Color printing required — this is a full-color product", critical: true, category: "Printing" },
+      { text: "All photos at 300 DPI minimum at final print size", critical: true, category: "Images" },
+      { text: "Trim size: 8×10, 8.5×11, or 10×8 landscape for coffee table format", critical: false, category: "Layout" },
+      { text: "Full-bleed photos: add 0.125\" bleed on all sides", critical: true, category: "Bleed" },
+      { text: "Keep captions and important content 0.25\" inside trim edge", critical: true, category: "Bleed" },
+      { text: "Color profile: sRGB (KDP converts to CMYK for printing — sRGB converts best)", critical: true, category: "Images" },
+      { text: "Page count: minimum 24 pages, maximum 828 pages", critical: true, category: "Pages" },
+      { text: "Minimal fonts — ensure any text overlaid on photos is embedded", critical: true, category: "Fonts" },
+      { text: "Avoid pure white backgrounds on facing pages — they can show as slightly different whites after printing", critical: false, category: "Printing" },
+      { text: "Review the KDP print preview carefully — color reproduction varies between home screen and print", critical: true, category: "Printing" },
+      { text: "Table of contents optional; captions consistent in style", critical: false, category: "Content" },
+    ]
+  }
+};
+
+var CATEGORY_COLORS = {
+  "Layout": "#6366f1", "Printing": "#f59e0b", "Margins": "#10b981",
+  "Fonts": "#3b82f6", "Pages": "#8b5cf6", "Content": "#ec4899",
+  "Images": "#14b8a6", "Bleed": "#ef4444", "Formatting": "#f97316",
+  "Cover": "#06b6d4"
+};
+
+function renderChecklist(genreKey) {
+  var genre = GENRES[genreKey];
+  if (!genre) return;
+
+  document.getElementById("genre-empty").style.display = "none";
+  document.getElementById("checklist-panel").style.display = "block";
+
+  // Header
+  document.getElementById("genre-header").innerHTML =
+    '<h2 class="genre-title">' + genre.label + '</h2>' +
+    '<p class="genre-desc">' + genre.description + '</p>';
+
+  // Group by category
+  var byCategory = {};
+  genre.items.forEach(function(item) {
+    if (!byCategory[item.category]) byCategory[item.category] = [];
+    byCategory[item.category].push(item);
+  });
+
+  var html = "";
+  Object.keys(byCategory).forEach(function(cat) {
+    var color = CATEGORY_COLORS[cat] || "#6b7280";
+    html += '<div class="genre-category">';
+    html += '<div class="genre-cat-label" style="color:' + color + ';">' + cat + '</div>';
+    byCategory[cat].forEach(function(item, i) {
+      var id = "item-" + cat.replace(/\s/g,"-") + "-" + i;
+      html += '<label class="genre-item' + (item.critical ? ' genre-item-critical' : '') + '" for="' + id + '">';
+      html += '<input type="checkbox" id="' + id + '" class="genre-checkbox">';
+      html += '<span class="genre-check-box"></span>';
+      html += '<span class="genre-item-text">' + item.text + '</span>';
+      if (item.critical) html += '<span class="genre-badge-required">Required</span>';
+      html += '</label>';
+    });
+    html += '</div>';
+  });
+  document.getElementById("checklist-items").innerHTML = html;
+
+  // Progress tracking
+  document.querySelectorAll(".genre-checkbox").forEach(function(cb) {
+    cb.addEventListener("change", updateProgress);
+  });
+  updateProgress();
+}
+
+function updateProgress() {
+  var all = document.querySelectorAll(".genre-checkbox");
+  var checked = document.querySelectorAll(".genre-checkbox:checked");
+  var pct = all.length ? Math.round(checked.length / all.length * 100) : 0;
+  var existing = document.getElementById("genre-progress");
+  if (!existing) {
+    var bar = document.createElement("div");
+    bar.id = "genre-progress";
+    bar.className = "genre-progress";
+    bar.innerHTML = '<div class="genre-progress-bar" id="genre-progress-fill"></div>' +
+                    '<span class="genre-progress-label" id="genre-progress-label"></span>';
+    document.getElementById("checklist-panel").insertBefore(bar, document.getElementById("checklist-items"));
+  }
+  document.getElementById("genre-progress-fill").style.width = pct + "%";
+  document.getElementById("genre-progress-label").textContent = checked.length + " / " + all.length + " complete";
+}
+
+document.getElementById("genre-select").addEventListener("change", function() {
+  if (this.value) renderChecklist(this.value);
+  else {
+    document.getElementById("genre-empty").style.display = "flex";
+    document.getElementById("checklist-panel").style.display = "none";
+  }
+});
+
+document.getElementById("btn-check-all").addEventListener("click", function() {
+  document.querySelectorAll(".genre-checkbox").forEach(function(cb) { cb.checked = true; });
+  updateProgress();
+});
+document.getElementById("btn-uncheck-all").addEventListener("click", function() {
+  document.querySelectorAll(".genre-checkbox").forEach(function(cb) { cb.checked = false; });
+  updateProgress();
+});
+</script>
+{% endblock %}

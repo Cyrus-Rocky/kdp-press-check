@@ -44,12 +44,18 @@
       </a>
       <div class="masthead-right">
         <nav class="mode-nav">
-          <a href="{{ url_for('index') }}" class="{{ 'is-active' if active_mode == 'interior' else '' }}">Interior</a>
-          <a href="{{ url_for('cover_index') }}" class="{{ 'is-active' if active_mode == 'cover' else '' }}">Cover</a>
-          <a href="{{ url_for('kindle_index') }}" class="{{ 'is-active' if active_mode == 'kindle' else '' }}">Kindle</a>
+          <span class="nav-group-label">Check</span>
+          <a href="{{ url_for('index') }}"        class="{{ 'is-active' if active_mode == 'interior' else '' }}">Interior</a>
+          <a href="{{ url_for('cover_index') }}"  class="{{ 'is-active' if active_mode == 'cover'    else '' }}">Cover</a>
+          <a href="{{ url_for('kindle_index') }}" class="{{ 'is-active' if active_mode == 'kindle'   else '' }}">Kindle</a>
           <a href="{{ url_for('preview_index') }}" class="{{ 'is-active' if active_mode == 'preview' else '' }}">Preview</a>
-          <a href="{{ url_for('royalty_calculator') }}" class="{{ 'is-active' if active_mode == 'royalty' else '' }}">Royalty Calc</a>
-          <a href="{{ url_for('problem_solvers') }}" class="{{ 'is-active' if active_mode == 'solvers' else '' }}">Problem Solvers</a>
+          <span class="nav-divider" aria-hidden="true"></span>
+          <span class="nav-group-label">Tools</span>
+          <a href="{{ url_for('royalty_calculator') }}"  class="{{ 'is-active' if active_mode == 'royalty'  else '' }}">Royalty</a>
+          <a href="{{ url_for('estimate_pages_index') }}" class="{{ 'is-active' if active_mode == 'estimate' else '' }}">Estimator</a>
+          <a href="{{ url_for('genre_checklist') }}"     class="{{ 'is-active' if active_mode == 'genre'    else '' }}">Genre Guide</a>
+          <span class="nav-divider" aria-hidden="true"></span>
+          <a href="{{ url_for('problem_solvers') }}" class="{{ 'is-active' if active_mode == 'solvers' else '' }}">Solvers</a>
         </nav>
         <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Switch to dark mode" aria-pressed="false">
           <svg class="icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true">

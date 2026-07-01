@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% block title %}Page Count Estimator — KDP Press Check{% endblock %}
+{% block content %}
+
+<div class="page-layout">
+  <div class="col-hero">
+    <section class="hero">
+      <h1>Page Count Estimator</h1>
+      <p>Upload your Word manuscript and instantly see how many pages your book will be at any trim size and font — before you pay a formatter.</p>
+    </section>
+
+    <div class="info-card">
+      <h3>What this estimates</h3>
+      <ul>
+        <li>Approximate final page count based on word count, trim size, and font size</li>
+        <li>Printing cost at that page count (B&W and color)</li>
+        <li>How trim size affects your page count and price</li>
+        <li>Typical overhead for chapter breaks, front matter, and blank pages</li>
+      </ul>
+    </div>
+
+    <div class="info-card" style="margin-top:16px;">
+      <h3>How trim size affects page count</h3>
+      <ul>
+        <li><strong>5×8 (small paperback):</strong> more pages, more expensive to print</li>
+        <li><strong>6×9 (standard trade paperback):</strong> the most common KDP size</li>
+        <li><strong>8.5×11 (large format):</strong> fewer pages, lower print cost</li>
+        <li>A 70,000-word novel can range from 220 pages (8.5×11) to 380 pages (5×8)</li>
+      </ul>
+    </div>
+
+    <p style="font-size:0.82rem;color:var(--ink-muted);margin-top:16px;line-height:1.6;">
+      Only works with Word (.docx) files. Nothing is stored — your file is deleted the moment the estimate is done.
+    </p>
+  </div>
+
+  <div class="col-form">
+    <form method="post" enctype="multipart/form-data" action="{{ url_for('estimate_pages') }}">
+
+      <div class="form-block">
+        <label class="form-label" for="manuscript">Your Word manuscript (.docx)</label>
+        <div class="dropzone" id="drop-zone">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
+            <path d="M12 3v11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M8 10l4-4 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <span id="drop-label">Drop your .docx here or click to browse</span>
+          <input type="file" name="manuscript" id="manuscript" accept=".docx" required
+                 style="position:absolute;inset:0;opacity:0;cursor:pointer;">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-block">
+          <label class="form-label" for="trim_size">Trim size</label>
+          <select name="" id="trim_size_select" class="form-select">
+            <option value="5.0|8.0">5″ × 8″</option>
+            <option value="5.5|8.5">5.5″ × 8.5″</option>
+            <option value="6.0|9.0" selected>6″ × 9″ (most common)</option>
+            <option value="6.14|9.21">6.14″ × 9.21″</option>
+            <option value="7.0|10.0">7″ × 10″</option>
+            <option value="8.0|10.0">8″ × 10″</option>
+            <option value="8.5|11.0">8.5″ × 11″</option>
+          </select>
+          <input type="hidden" name="trim_w" id="trim_w" value="6.0">
+          <input type="hidden" name="trim_h" id="trim_h" value="9.0">
+        </div>
+
+        <div class="form-block">
+          <label class="form-label" for="font_size">Body font size</label>
+          <select name="font_size" id="font_size" class="form-select">
+            <option value="10">10 pt</option>
+            <option value="11">11 pt</option>
+            <option value="12" selected>12 pt (standard)</option>
+            <option value="13">13 pt</option>
+            <option value="14">14 pt (large print)</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary" style="width:100%;margin-top:8px;">
+        Estimate Page Count
+      </button>
+    </form>
+
+    {% if result %}
+    <div class="est-result-panel">
+
+      <div class="est-headline">
+        <div class="est-big-number">{{ result.estimated_pages }}</div>
+        <div class="est-big-label">estimated pages</div>
+        <div class="est-sub">{{ result.trim }} · {{ result.font_size }}pt · {{ "{:,}".format(result.word_count) }} words</div>
+      </div>
+
+      <div class="est-breakdown-grid">
+        <div class="est-stat">
+          <span class="est-stat-val">{{ "{:,}".format(result.word_count) }}</span>
+          <span class="est-stat-label">Word count</span>
+        </div>
+        <div class="est-stat">
+          <span class="est-stat-val">{{ result.words_per_page }}</span>
+          <span class="est-stat-label">Words per page</span>
+        </div>
+        <div class="est-stat">
+          <span class="est-stat-val">{{ result.raw_pages }}</span>
+          <span class="est-stat-label">Body pages</span>
+        </div>
+        <div class="est-stat">
+          <span class="est-stat-val">+{{ result.overhead }}</span>
+          <span class="est-stat-label">Breaks &amp; front matter</span>
+        </div>
+      </div>
+
+      <div class="est-cost-section">
+        <p class="est-section-label">Printing cost at {{ result.estimated_pages }} pages (US)</p>
+        <div class="est-cost-row">
+          <div class="est-cost-item">
+            <span class="est-cost-label">Black &amp; White</span>
+            <span class="est-cost-val">${{ "%.2f"|format(result.cost_bw) }}</span>
+            <span class="est-cost-note">per copy</span>
+          </div>
+          <div class="est-cost-divider">vs</div>
+          <div class="est-cost-item">
+            <span class="est-cost-label">Premium Color</span>
+            <span class="est-cost-val">${{ "%.2f"|format(result.cost_color) }}</span>
+            <span class="est-cost-note">per copy</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="est-tips">
+        <p class="est-section-label">What this means</p>
+        {% if result.estimated_pages < 100 %}
+          <p>Your manuscript is quite short. KDP requires at least 24 pages — you're fine, but consider whether readers will feel they got enough value.</p>
+        {% elif result.estimated_pages > 600 %}
+          <p>This is a long book. KDP allows up to 828 pages for paperback. Make sure you're within that limit after formatting.</p>
+        {% else %}
+          <p>This is a typical length for a trade paperback. Your formatter will use these numbers to confirm scope and pricing.</p>
+        {% endif %}
+        <p style="margin-top:8px;">This estimate assumes standard 1.15 line spacing with typical chapter breaks and front matter. Your actual page count may vary by ±10% depending on formatting choices.</p>
+      </div>
+
+      <a href="{{ url_for('royalty_calculator') }}" class="est-cta-link">
+        Calculate your royalty at this page count →
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+document.getElementById("trim_size_select").addEventListener("change", function() {
+  var parts = this.value.split("|");
+  document.getElementById("trim_w").value = parts[0];
+  document.getElementById("trim_h").value = parts[1];
+});
+document.getElementById("manuscript").addEventListener("change", function() {
+  var label = document.getElementById("drop-label");
+  label.textContent = this.files[0] ? this.files[0].name : "Drop your .docx here or click to browse";
+});
+</script>
+{% endblock %}
