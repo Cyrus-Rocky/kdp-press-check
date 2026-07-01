@@ -27,6 +27,12 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("kdp-checker")
 
+GA_ID = os.environ.get("GA_MEASUREMENT_ID", "")
+
+@app.context_processor
+def inject_globals():
+    return {"ga_id": GA_ID}
+
 
 @app.route("/", methods=["GET"])
 def index():
