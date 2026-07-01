@@ -184,4 +184,7 @@ CHECK_TO_CATEGORY = {
     "File Size":              "kindle",
     "Font Licensing":         "kindle",
     "EPUB Structure":         "kindle",
+    "Color Content":          "formatting",
+    "Orphans & Widows":       "formatting",
+    "PDF Metadata":           "formatting",
 }

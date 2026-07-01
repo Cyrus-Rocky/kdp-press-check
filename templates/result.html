@@ -1,5 +1,21 @@
 {% extends "base.html" %}
 {% block content %}
+
+{% if cover_thumbnail_b64 %}
+<div class="cover-thumb-panel">
+  <div class="cover-thumb-wrap">
+    <img src="data:image/jpeg;base64,{{ cover_thumbnail_b64 }}"
+         alt="Cover thumbnail at Amazon listing size"
+         class="cover-thumb-img" width="160">
+    <p class="cover-thumb-label">At Amazon listing size (160 px)</p>
+  </div>
+  <div class="cover-thumb-notes">
+    <p class="cover-thumb-heading">Is your title readable at this size?</p>
+    <p>This is roughly how your cover appears in Amazon search results. Check that the title is legible, the author name is visible, and the design reads clearly without zooming in.</p>
+  </div>
+</div>
+{% endif %}
+
 <div class="proof-head">
   <div>
     <p class="meta-label">Press check result</p>

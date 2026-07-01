@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% block title %}KDP Royalty Calculator — KDP Press Check{% endblock %}
+{% block content %}
+
+<div class="page-layout">
+  <div class="col-hero">
+    <section class="hero">
+      <h1>KDP Royalty &amp; Pricing Calculator</h1>
+      <p>See exactly how much you'll earn per sale — and what KDP charges to print your book — before you set your price.</p>
+    </section>
+    <div class="info-card">
+      <h3>How KDP royalties work</h3>
+      <ul>
+        <li><strong>Paperback:</strong> You earn 60% of your list price, minus the printing cost. KDP pays the difference.</li>
+        <li><strong>Kindle eBook:</strong> 70% royalty for books priced $2.99–$9.99, minus a small delivery fee. 35% for all other prices.</li>
+        <li><strong>Minimum price:</strong> You must price your book high enough that your royalty is at least $0.00 after printing costs.</li>
+        <li>Rates shown are for the US marketplace. Other markets vary slightly.</li>
+      </ul>
+    </div>
+    <div class="info-card" style="margin-top:16px;">
+      <h3>Printing cost formula (US)</h3>
+      <ul>
+        <li><strong>B&amp;W:</strong> $0.85 fixed + $0.012 per page</li>
+        <li><strong>Premium Color:</strong> $0.85 fixed + $0.07 per page</li>
+        <li>Example: 300-page B&amp;W book = $0.85 + (300 × $0.012) = <strong>$4.45</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-form">
+    <div class="calc-card">
+      <div class="calc-tabs" role="tablist">
+        <button class="calc-tab is-active" role="tab" data-tab="paperback">Paperback</button>
+        <button class="calc-tab" role="tab" data-tab="kindle">Kindle eBook</button>
+      </div>
+
+      {# ── PAPERBACK TAB ── #}
+      <div class="calc-panel" id="tab-paperback">
+        <div class="calc-field">
+          <label for="pb-pages">Page count</label>
+          <input type="number" id="pb-pages" min="24" max="828" value="200" class="calc-input">
+        </div>
+        <div class="calc-field">
+          <label for="pb-paper">Interior type</label>
+          <select id="pb-paper" class="calc-input">
+            <option value="bw">Black &amp; White</option>
+            <option value="color">Premium Color</option>
+          </select>
+        </div>
+        <div class="calc-field">
+          <label for="pb-price">Your list price (USD $)</label>
+          <input type="number" id="pb-price" min="0.01" step="0.01" value="14.99" class="calc-input">
+        </div>
+
+        <div class="calc-result-grid" id="pb-results">
+          <div class="calc-result-item">
+            <span class="calc-result-label">Printing cost</span>
+            <span class="calc-result-value" id="pb-print-cost">—</span>
+          </div>
+          <div class="calc-result-item">
+            <span class="calc-result-label">Minimum list price</span>
+            <span class="calc-result-value" id="pb-min-price">—</span>
+          </div>
+          <div class="calc-result-item calc-result-royalty">
+            <span class="calc-result-label">Your royalty per sale</span>
+            <span class="calc-result-value" id="pb-royalty">—</span>
+          </div>
+          <div class="calc-result-item">
+            <span class="calc-result-label">Royalty rate</span>
+            <span class="calc-result-value" id="pb-rate">60%</span>
+          </div>
+        </div>
+
+        <div class="calc-earnings-bar" id="pb-bar-wrap">
+          <div class="calc-bar-segment calc-bar-print" id="pb-seg-print" title="Printing cost"></div>
+          <div class="calc-bar-segment calc-bar-kdp"   id="pb-seg-kdp"   title="KDP's share"></div>
+          <div class="calc-bar-segment calc-bar-you"   id="pb-seg-you"   title="Your royalty"></div>
+        </div>
+        <div class="calc-bar-legend">
+          <span><span class="calc-dot calc-bar-print"></span>Print cost</span>
+          <span><span class="calc-dot calc-bar-kdp"></span>KDP's 40%</span>
+          <span><span class="calc-dot calc-bar-you"></span>Your royalty</span>
+        </div>
+
+        <div class="calc-breakeven-box" id="pb-breakeven"></div>
+
+        <div class="calc-earnings-table" id="pb-table">
+          <p class="calc-table-label">Sales projections</p>
+          <table>
+            <thead><tr><th>Sales</th><th>Your earnings</th></tr></thead>
+            <tbody id="pb-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      {# ── KINDLE TAB ── #}
+      <div class="calc-panel" id="tab-kindle" style="display:none;">
+        <div class="calc-field">
+          <label for="kd-price">Your list price (USD $)</label>
+          <input type="number" id="kd-price" min="0.01" step="0.01" value="4.99" class="calc-input">
+        </div>
+        <div class="calc-field">
+          <label for="kd-size">Estimated file size (MB)</label>
+          <input type="number" id="kd-size" min="0.1" step="0.1" value="2" class="calc-input">
+          <span class="calc-hint">Typical novel: 0.5–2 MB. With many images: 5–50 MB.</span>
+        </div>
+
+        <div class="calc-result-grid" id="kd-results">
+          <div class="calc-result-item">
+            <span class="calc-result-label">Royalty tier</span>
+            <span class="calc-result-value" id="kd-tier">—</span>
+          </div>
+          <div class="calc-result-item">
+            <span class="calc-result-label">Delivery fee</span>
+            <span class="calc-result-value" id="kd-fee">—</span>
+          </div>
+          <div class="calc-result-item calc-result-royalty">
+            <span class="calc-result-label">Your royalty per sale</span>
+            <span class="calc-result-value" id="kd-royalty">—</span>
+          </div>
+          <div class="calc-result-item">
+            <span class="calc-result-label">Effective rate</span>
+            <span class="calc-result-value" id="kd-rate">—</span>
+          </div>
+        </div>
+
+        <div class="calc-earnings-bar" id="kd-bar-wrap">
+          <div class="calc-bar-segment calc-bar-print" id="kd-seg-fee"  title="Delivery fee"></div>
+          <div class="calc-bar-segment calc-bar-kdp"   id="kd-seg-kdp"  title="KDP's share"></div>
+          <div class="calc-bar-segment calc-bar-you"   id="kd-seg-you"  title="Your royalty"></div>
+        </div>
+        <div class="calc-bar-legend">
+          <span><span class="calc-dot calc-bar-print"></span>Delivery fee</span>
+          <span><span class="calc-dot calc-bar-kdp"></span>KDP's share</span>
+          <span><span class="calc-dot calc-bar-you"></span>Your royalty</span>
+        </div>
+
+        <div class="calc-breakeven-box" id="kd-breakeven"></div>
+
+        <div class="calc-earnings-table" id="kd-table">
+          <p class="calc-table-label">Sales projections</p>
+          <table>
+            <thead><tr><th>Sales</th><th>Your earnings</th></tr></thead>
+            <tbody id="kd-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── helpers ───────────────────────────────────────────────────────────────────
+function fmt(n) { return "$" + Math.max(0, n).toFixed(2); }
+function pct(n)  { return (n * 100).toFixed(1) + "%"; }
+
+function updateBar(segPrint, segKdp, segYou, printAmt, kdpAmt, youAmt) {
+  var total = printAmt + kdpAmt + youAmt;
+  if (total <= 0) return;
+  segPrint.style.width = (printAmt / total * 100).toFixed(1) + "%";
+  segKdp.style.width   = (kdpAmt   / total * 100).toFixed(1) + "%";
+  segYou.style.width   = (youAmt   / total * 100).toFixed(1) + "%";
+}
+
+function projectionRows(royalty, tbodyId) {
+  var tbody = document.getElementById(tbodyId);
+  tbody.innerHTML = "";
+  [10, 50, 100, 250, 500, 1000].forEach(function(n) {
+    var tr = document.createElement("tr");
+    tr.innerHTML = "<td>" + n.toLocaleString() + "</td><td>" + fmt(royalty * n) + "</td>";
+    tbody.appendChild(tr);
+  });
+}
+
+// ── Paperback calculator ───────────────────────────────────────────────────
+function calcPaperback() {
+  var pages    = parseFloat(document.getElementById("pb-pages").value)  || 0;
+  var paper    = document.getElementById("pb-paper").value;
+  var price    = parseFloat(document.getElementById("pb-price").value)  || 0;
+
+  var perPage  = paper === "color" ? 0.070 : 0.012;
+  var fixed    = 0.85;
+  var printCost = fixed + perPage * pages;
+  var royalty   = price * 0.60 - printCost;
+  var minPrice  = Math.ceil(printCost / 0.60 * 100) / 100;
+  var kdpShare  = price * 0.40;
+
+  document.getElementById("pb-print-cost").textContent = fmt(printCost);
+  document.getElementById("pb-min-price").textContent  = fmt(minPrice);
+  document.getElementById("pb-royalty").textContent    = royalty >= 0 ? fmt(royalty) : "—  (price too low)";
+  document.getElementById("pb-royalty").style.color    = royalty >= 0 ? "" : "var(--fail)";
+
+  if (royalty >= 0) {
+    updateBar(
+      document.getElementById("pb-seg-print"),
+      document.getElementById("pb-seg-kdp"),
+      document.getElementById("pb-seg-you"),
+      printCost, kdpShare, royalty
+    );
+    var copies = Math.ceil(100 / royalty);
+    document.getElementById("pb-breakeven").innerHTML =
+      "<strong>💡 To earn $100</strong> you need to sell <strong>" + copies.toLocaleString() + " copies</strong> at this price.";
+    projectionRows(royalty, "pb-table-body");
+  } else {
+    document.getElementById("pb-breakeven").innerHTML =
+      "<strong>⚠️ Price too low.</strong> Set your list price to at least <strong>" + fmt(minPrice) + "</strong> to earn any royalty.";
+  }
+}
+
+// ── Kindle calculator ─────────────────────────────────────────────────────
+function calcKindle() {
+  var price    = parseFloat(document.getElementById("kd-price").value) || 0;
+  var sizeMB   = parseFloat(document.getElementById("kd-size").value)  || 0;
+  var use70    = price >= 2.99 && price <= 9.99;
+  var rate     = use70 ? 0.70 : 0.35;
+  var fee      = use70 ? sizeMB * 0.15 : 0;
+  var royalty  = rate * price - fee;
+  var kdpShare = price - royalty - fee;
+
+  document.getElementById("kd-tier").textContent    = use70 ? "70% tier" : "35% tier";
+  document.getElementById("kd-fee").textContent     = use70 ? fmt(fee) : "None (35% tier)";
+  document.getElementById("kd-royalty").textContent = fmt(Math.max(0, royalty));
+  document.getElementById("kd-rate").textContent    = price > 0 ? pct(Math.max(0, royalty) / price) : "—";
+
+  updateBar(
+    document.getElementById("kd-seg-fee"),
+    document.getElementById("kd-seg-kdp"),
+    document.getElementById("kd-seg-you"),
+    Math.max(0, fee), Math.max(0, kdpShare), Math.max(0, royalty)
+  );
+
+  var copies = royalty > 0 ? Math.ceil(100 / royalty) : "—";
+  document.getElementById("kd-breakeven").innerHTML = royalty > 0
+    ? "<strong>💡 To earn $100</strong> you need to sell <strong>" + copies.toLocaleString() + " copies</strong> at this price."
+    : "<strong>⚠️ Very low royalty.</strong> Consider pricing between $2.99 and $9.99 to unlock the 70% tier.";
+
+  projectionRows(Math.max(0, royalty), "kd-table-body");
+}
+
+// ── Tab switching ─────────────────────────────────────────────────────────
+document.querySelectorAll(".calc-tab").forEach(function(btn) {
+  btn.addEventListener("click", function() {
+    document.querySelectorAll(".calc-tab").forEach(function(b) { b.classList.remove("is-active"); });
+    document.querySelectorAll(".calc-panel").forEach(function(p) { p.style.display = "none"; });
+    btn.classList.add("is-active");
+    document.getElementById("tab-" + btn.dataset.tab).style.display = "block";
+  });
+});
+
+// ── Wire up inputs ────────────────────────────────────────────────────────
+["pb-pages","pb-paper","pb-price"].forEach(function(id) {
+  document.getElementById(id).addEventListener("input", calcPaperback);
+});
+["kd-price","kd-size"].forEach(function(id) {
+  document.getElementById(id).addEventListener("input", calcKindle);
+});
+
+// Initial render
+calcPaperback();
+calcKindle();
+</script>
+{% endblock %}

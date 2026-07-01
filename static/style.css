@@ -1847,3 +1847,210 @@ button:focus-visible,
   transition: opacity 140ms;
 }
 .ps-view-gig-btn:hover { opacity: 0.88; }
+
+/* ── Cover thumbnail panel ──────────────────────────────────────────────── */
+.cover-thumb-panel {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+  background: var(--paper-raised);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 28px;
+}
+.cover-thumb-wrap { flex-shrink: 0; text-align: center; }
+.cover-thumb-img  {
+  display: block;
+  width: 160px;
+  height: auto;
+  border-radius: 4px;
+  border: 1px solid var(--line-strong);
+  box-shadow: 0 4px 12px rgba(0,0,0,.18);
+}
+.cover-thumb-label {
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  margin-top: 6px;
+  font-family: var(--font-mono);
+}
+.cover-thumb-notes { flex: 1; }
+.cover-thumb-heading {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 8px;
+  color: var(--ink);
+}
+.cover-thumb-notes p { font-size: 0.88rem; color: var(--ink-muted); line-height: 1.65; margin: 0; }
+@media (max-width: 560px) {
+  .cover-thumb-panel { flex-direction: column; }
+  .cover-thumb-img { width: 120px; }
+}
+
+/* ── Royalty Calculator ─────────────────────────────────────────────────── */
+.calc-card {
+  background: var(--paper-raised);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.calc-tabs {
+  display: flex;
+  border-bottom: 1.5px solid var(--line);
+  background: var(--paper);
+}
+.calc-tab {
+  flex: 1;
+  padding: 12px 0;
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-weight: 600;
+  background: none;
+  border: none;
+  border-bottom: 2.5px solid transparent;
+  cursor: pointer;
+  color: var(--ink-muted);
+  transition: color 140ms, border-color 140ms;
+}
+.calc-tab.is-active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.calc-panel { padding: 24px; }
+
+.calc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 16px;
+}
+.calc-field label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: var(--font-display);
+  color: var(--ink-muted);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.calc-input {
+  padding: 9px 12px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 1rem;
+  font-family: var(--font-mono);
+  transition: border-color 140ms;
+}
+.calc-input:focus { outline: none; border-color: var(--accent); }
+.calc-hint { font-size: 0.75rem; color: var(--ink-muted); line-height: 1.5; }
+
+.calc-result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 20px 0;
+}
+.calc-result-item {
+  background: var(--paper);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.calc-result-royalty {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+  grid-column: 1 / -1;
+}
+.calc-result-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-muted);
+  font-family: var(--font-display);
+}
+.calc-result-value {
+  font-size: 1.35rem;
+  font-weight: 700;
+  font-family: var(--font-display);
+  color: var(--ink);
+}
+.calc-result-royalty .calc-result-value { font-size: 1.7rem; color: var(--accent); }
+
+/* Bar chart */
+.calc-earnings-bar {
+  display: flex;
+  height: 28px;
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 4px 0 8px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+}
+.calc-bar-segment { transition: width 300ms ease; height: 100%; }
+.calc-bar-print { background: #ef4444; }
+.calc-bar-kdp   { background: var(--ink-muted); opacity: 0.4; }
+.calc-bar-you   { background: #22c55e; }
+.calc-bar-legend {
+  display: flex;
+  gap: 16px;
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  margin-bottom: 16px;
+}
+.calc-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+/* Breakeven box */
+.calc-breakeven-box {
+  background: var(--paper);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 0.88rem;
+  color: var(--ink-muted);
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+.calc-breakeven-box strong { color: var(--ink); }
+
+/* Projections table */
+.calc-table-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-muted);
+  font-family: var(--font-display);
+  margin-bottom: 6px;
+}
+.calc-earnings-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+.calc-earnings-table th {
+  text-align: left;
+  padding: 6px 10px;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-muted);
+  border-bottom: 1.5px solid var(--line);
+}
+.calc-earnings-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-mono);
+}
+.calc-earnings-table tr:last-child td { border-bottom: none; }

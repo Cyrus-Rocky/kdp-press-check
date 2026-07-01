@@ -120,8 +120,21 @@ def check_cover():
     path = os.path.join(UPLOAD_DIR, safe_name)
     file.save(path)
 
+    cover_thumbnail_b64 = None
     try:
         report = run_all_cover_checks(path, trim_w, trim_h, page_count, paper_type)
+        # Render cover thumbnail (160px wide) for the result page
+        try:
+            import fitz as _fitz, base64 as _b64
+            _doc = _fitz.open(path)
+            _page = _doc[0]
+            _scale = 160 / _page.rect.width
+            _pix = _page.get_pixmap(matrix=_fitz.Matrix(_scale, _scale), alpha=False)
+            cover_thumbnail_b64 = _b64.b64encode(_pix.tobytes("jpeg", jpg_quality=80)).decode()
+            del _pix
+            _doc.close()
+        except Exception:
+            pass
     except Exception:
         logger.exception("Failed to analyze cover upload %s (%s)", safe_name, file.filename)
         flash(
@@ -134,7 +147,13 @@ def check_cover():
             os.remove(path)
 
     return render_template("result.html", report=report, filename=file.filename,
-                           active_mode="cover", CHECK_TO_CATEGORY=CHECK_TO_CATEGORY)
+                           active_mode="cover", CHECK_TO_CATEGORY=CHECK_TO_CATEGORY,
+                           cover_thumbnail_b64=cover_thumbnail_b64)
+
+
+@app.route("/royalty-calculator", methods=["GET"])
+def royalty_calculator():
+    return render_template("royalty_calculator.html", active_mode="royalty")
 
 
 @app.route("/kindle", methods=["GET"])

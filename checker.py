@@ -357,17 +357,187 @@ def check_image_resolution(doc) -> dict:
 
 def check_metadata(doc) -> dict:
     meta = doc.metadata or {}
-    title = (meta.get("title") or "").strip()
-    if title:
-        return {"title": "Metadata", "ok": True, "warning_only": True,
-                "summary": f"Document title is set to \"{title}\".",
-                "detail": f"Document title metadata is set: \"{title}\"."}
+    title   = (meta.get("title")    or "").strip()
+    author  = (meta.get("author")   or "").strip()
+    subject = (meta.get("subject")  or "").strip()
+
+    filled = [f for f in [title, author, subject] if f]
+    missing = []
+    if not title:   missing.append("Title")
+    if not author:  missing.append("Author")
+    if not subject: missing.append("Subject")
+
+    detail_lines = [
+        f"Title:   {title or '(empty)'}",
+        f"Author:  {author or '(empty)'}",
+        f"Subject: {subject or '(empty)'}",
+    ]
+    detail = "\n".join(detail_lines)
+
+    if not missing:
+        return {
+            "title": "PDF Metadata", "ok": True, "warning_only": True,
+            "summary": f"Title, Author, and Subject fields are all set — KDP can read them.",
+            "detail": detail,
+        }
+    summary = f"PDF metadata is missing: {', '.join(missing)}. KDP reads these for discoverability."
+    fix = (
+        "Set the document properties before exporting: in Word go to File > Info and fill in "
+        "Title and Author; in InDesign use File > File Info. In your PDF export settings look "
+        "for 'Document Properties' or 'Metadata'. These fields don't affect print quality but "
+        "they show up in KDP's system and some retailers."
+    )
     return {
-        "title": "Metadata", "ok": False, "warning_only": True,
-        "summary": "The PDF's title field is empty.",
-        "fix": "Not required by KDP, but worth doing: set the document title in your "
-               "export settings (or File > Properties) to match your book's title.",
-        "detail": "Document title metadata is empty.",
+        "title": "PDF Metadata", "ok": False, "warning_only": True,
+        "summary": summary, "fix": fix, "detail": detail,
+    }
+
+
+def check_color_pages(doc) -> dict:
+    """Detect pages with color content — important because KDP charges much more for color printing."""
+    color_pages = []
+
+    for i, page in enumerate(doc):
+        is_color = False
+
+        # Check embedded images for color colorspaces
+        for img in page.get_images(full=True):
+            xref = img[0]
+            try:
+                pix = fitz.Pixmap(doc, xref)
+                cs = pix.colorspace
+                if cs and cs.n >= 3:
+                    # Has 3+ channels — but check it's not all neutral
+                    # Sample a few pixels for an actual color cast
+                    if not pix.is_monochrome:
+                        is_color = True
+                        del pix
+                        break
+                del pix
+            except Exception:
+                pass
+
+        if not is_color:
+            # Check vector drawing colors (strokes / fills)
+            try:
+                for d in page.get_drawings():
+                    for attr in ("color", "fill"):
+                        c = d.get(attr)
+                        if c and len(c) >= 3:
+                            r, g, b = float(c[0]), float(c[1]), float(c[2])
+                            if abs(r - g) > 0.04 or abs(g - b) > 0.04:
+                                is_color = True
+                                break
+                    if is_color:
+                        break
+            except Exception:
+                pass
+
+        if is_color:
+            color_pages.append(i + 1)
+
+    total = doc.page_count
+    if not color_pages:
+        return {
+            "title": "Color Content", "ok": True,
+            "summary": f"All {total} pages appear to be black & white — you can use B&W printing.",
+            "detail": "No color images or colored vector drawings detected on any page.",
+        }
+
+    # KDP US printing cost difference
+    bw_cost_ex  = round(0.85 + 0.012 * total, 2)
+    col_cost_ex = round(0.85 + 0.070 * total, 2)
+    extra       = round(col_cost_ex - bw_cost_ex, 2)
+
+    summary = (
+        f"{len(color_pages)} page(s) contain color content. "
+        f"KDP charges ${col_cost_ex:.2f} to print this book in color vs ${bw_cost_ex:.2f} "
+        f"for B&W — a ${extra:.2f} difference per copy."
+    )
+    fix = (
+        "If you intend to sell a B&W paperback, convert all color images to grayscale in your "
+        "image editor before placing them in your document. Check your cover too — the interior "
+        "file should contain no color if you're using B&W printing. If color is intentional, "
+        "make sure you select 'Premium Color' when uploading to KDP."
+    )
+    detail_pages = _page_range_label(color_pages[:10])
+    if len(color_pages) > 10:
+        detail_pages += f" and {len(color_pages)-10} more"
+    return {
+        "title": "Color Content", "ok": False, "warning_only": True,
+        "summary": summary, "fix": fix,
+        "detail": f"Color content found on: {detail_pages}.",
+    }
+
+
+def check_orphans_widows(doc) -> dict:
+    """Detect orphan and widow lines — single lines stranded at the top or bottom of a page."""
+    issues = []  # list of (page_num, kind)
+
+    def _is_heading(block) -> bool:
+        for line in block.get("lines", []):
+            for span in line.get("spans", []):
+                if span.get("size", 12) > 14:
+                    return True
+                if (span.get("flags", 0) & 16) and len(span.get("text", "").strip()) < 60:
+                    return True
+        return False
+
+    def _line_count(block) -> int:
+        return len(block.get("lines", []))
+
+    for i, page in enumerate(doc):
+        blocks = page.get_text("dict").get("blocks", [])
+        text_blocks = [b for b in blocks if b.get("type") == 0 and b.get("lines")]
+        if len(text_blocks) < 2:
+            continue
+        text_blocks.sort(key=lambda b: b["bbox"][1])
+
+        # Widow: single line at the TOP of a page (continuation from previous page)
+        first = text_blocks[0]
+        if _line_count(first) == 1 and not _is_heading(first):
+            text = " ".join(
+                s.get("text", "") for l in first["lines"] for s in l.get("spans", [])
+            ).strip()
+            if len(text) > 10:  # skip very short lines like page numbers
+                issues.append((i + 1, "widow"))
+
+        # Orphan: single line at the BOTTOM of a page (paragraph continues on next page)
+        last = text_blocks[-1]
+        if _line_count(last) == 1 and not _is_heading(last) and last is not first:
+            text = " ".join(
+                s.get("text", "") for l in last["lines"] for s in l.get("spans", [])
+            ).strip()
+            if len(text) > 10:
+                issues.append((i + 1, "orphan"))
+
+    if not issues:
+        return {
+            "title": "Orphans & Widows", "ok": True,
+            "summary": "No orphan or widow lines detected.",
+            "detail": "Every page appears to have at least two lines at the top and bottom of each paragraph block.",
+        }
+
+    orphan_pages = sorted({p for p, k in issues if k == "orphan"})
+    widow_pages  = sorted({p for p, k in issues if k == "widow"})
+    parts = []
+    if orphan_pages:
+        parts.append(f"{len(orphan_pages)} orphan(s) on {_page_range_label(orphan_pages)}")
+    if widow_pages:
+        parts.append(f"{len(widow_pages)} widow(s) on {_page_range_label(widow_pages)}")
+
+    return {
+        "title": "Orphans & Widows", "ok": False, "warning_only": True,
+        "summary": f"Found {'; '.join(parts)}. These are signs of poor paragraph flow.",
+        "fix": (
+            "In your word processor, enable widow/orphan control: in Word go to "
+            "Format > Paragraph > Line and Page Breaks and check 'Widow/Orphan control'. "
+            "In InDesign, select all text and enable Keep Options. Re-export the PDF when done."
+        ),
+        "detail": (
+            (f"Orphan pages (single line at bottom): {orphan_pages}\n" if orphan_pages else "") +
+            (f"Widow pages (single line at top): {widow_pages}" if widow_pages else "")
+        ).strip(),
     }
 
 
@@ -382,6 +552,8 @@ def run_all_checks(pdf_path: str) -> dict:
             check_bleed(doc),
             check_fonts(doc),
             check_image_resolution(doc),
+            check_color_pages(doc),
+            check_orphans_widows(doc),
             check_metadata(doc),
         ]
         full_text = _full_text(doc)
