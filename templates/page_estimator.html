@@ -39,16 +39,17 @@
 
       <div class="form-block">
         <label class="form-label" for="manuscript">Your Word manuscript (.docx)</label>
-        <div class="dropzone" id="drop-zone">
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
+        <label class="dropzone est-dropzone" id="drop-zone" for="manuscript">
+          <div class="bracket-r"></div>
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" style="color:var(--ink-muted);display:block;margin:0 auto 12px;">
             <path d="M12 3v11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
             <path d="M8 10l4-4 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
           </svg>
-          <span id="drop-label">Drop your .docx here or click to browse</span>
+          <span id="drop-label" style="font-size:0.95rem;color:var(--ink-muted);">Drop your .docx here or <span style="color:var(--accent-ink);font-weight:600;text-decoration:underline;text-underline-offset:2px;">click to browse</span></span>
           <input type="file" name="manuscript" id="manuscript" accept=".docx" required
-                 style="position:absolute;inset:0;opacity:0;cursor:pointer;">
-        </div>
+                 style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;">
+        </label>
       </div>
 
       <div class="form-row">
@@ -156,8 +157,31 @@ document.getElementById("trim_size_select").addEventListener("change", function(
   document.getElementById("trim_h").value = parts[1];
 });
 document.getElementById("manuscript").addEventListener("change", function() {
+  var zone = document.getElementById("drop-zone");
   var label = document.getElementById("drop-label");
-  label.textContent = this.files[0] ? this.files[0].name : "Drop your .docx here or click to browse";
+  if (this.files[0]) {
+    label.innerHTML = '<strong style="color:var(--ink);">' + this.files[0].name + '</strong>';
+    zone.style.borderColor = "var(--accent)";
+    zone.style.background  = "var(--accent-bg)";
+  } else {
+    label.innerHTML = 'Drop your .docx here or <span style="color:var(--accent-ink);font-weight:600;text-decoration:underline;text-underline-offset:2px;">click to browse</span>';
+    zone.style.borderColor = "";
+    zone.style.background  = "";
+  }
+});
+
+// Drag-and-drop support
+var zone = document.getElementById("drop-zone");
+zone.addEventListener("dragover",  function(e){ e.preventDefault(); zone.classList.add("is-dragover"); });
+zone.addEventListener("dragleave", function()  { zone.classList.remove("is-dragover"); });
+zone.addEventListener("drop", function(e) {
+  e.preventDefault(); zone.classList.remove("is-dragover");
+  var f = e.dataTransfer.files[0];
+  if (!f) return;
+  if (!f.name.toLowerCase().endsWith(".docx")) { alert("Please drop a .docx Word file."); return; }
+  var dt = new DataTransfer(); dt.items.add(f);
+  document.getElementById("manuscript").files = dt.files;
+  document.getElementById("manuscript").dispatchEvent(new Event("change"));
 });
 </script>
 {% endblock %}
