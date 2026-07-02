@@ -38,18 +38,19 @@
     <form method="post" enctype="multipart/form-data" action="{{ url_for('estimate_pages') }}">
 
       <div class="form-block">
-        <label class="form-label" for="manuscript">Your Word manuscript (.docx)</label>
-        <label class="dropzone est-dropzone" id="drop-zone" for="manuscript">
+        <p class="form-label">Your Word manuscript (.docx)</p>
+        <div class="dropzone" id="drop-zone" tabindex="0" role="button" aria-label="Upload Word document" style="cursor:pointer;text-align:center;">
           <div class="bracket-r"></div>
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" style="color:var(--ink-muted);display:block;margin:0 auto 12px;">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" class="icon">
             <path d="M12 3v11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
             <path d="M8 10l4-4 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
           </svg>
-          <span id="drop-label" style="font-size:0.95rem;color:var(--ink-muted);">Drop your .docx here or <span style="color:var(--accent-ink);font-weight:600;text-decoration:underline;text-underline-offset:2px;">click to browse</span></span>
+          <p class="instructions" id="drop-label">Drop your .docx here or <button type="button" class="browse" onclick="document.getElementById('manuscript').click()">click to browse</button></p>
+          <p class="filehint">.docx files only</p>
           <input type="file" name="manuscript" id="manuscript" accept=".docx" required
                  style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;">
-        </label>
+        </div>
       </div>
 
       <div class="form-row">
@@ -151,27 +152,32 @@
 </div>
 
 <script>
-document.getElementById("trim_size_select").addEventListener("change", function() {
-  var parts = this.value.split("|");
-  document.getElementById("trim_w").value = parts[0];
-  document.getElementById("trim_h").value = parts[1];
+var zone  = document.getElementById("drop-zone");
+var input = document.getElementById("manuscript");
+
+// Click anywhere on the box → open file picker
+zone.addEventListener("click", function(e) {
+  if (e.target.tagName !== "BUTTON") input.click();
 });
-document.getElementById("manuscript").addEventListener("change", function() {
-  var zone = document.getElementById("drop-zone");
+zone.addEventListener("keydown", function(e) {
+  if (e.key === "Enter" || e.key === " ") { e.preventDefault(); input.click(); }
+});
+
+// File selected
+input.addEventListener("change", function() {
   var label = document.getElementById("drop-label");
   if (this.files[0]) {
     label.innerHTML = '<strong style="color:var(--ink);">' + this.files[0].name + '</strong>';
     zone.style.borderColor = "var(--accent)";
     zone.style.background  = "var(--accent-bg)";
   } else {
-    label.innerHTML = 'Drop your .docx here or <span style="color:var(--accent-ink);font-weight:600;text-decoration:underline;text-underline-offset:2px;">click to browse</span>';
+    label.innerHTML = 'Drop your .docx here or <button type="button" class="browse" onclick="document.getElementById(\'manuscript\').click()">click to browse</button>';
     zone.style.borderColor = "";
     zone.style.background  = "";
   }
 });
 
-// Drag-and-drop support
-var zone = document.getElementById("drop-zone");
+// Drag-and-drop
 zone.addEventListener("dragover",  function(e){ e.preventDefault(); zone.classList.add("is-dragover"); });
 zone.addEventListener("dragleave", function()  { zone.classList.remove("is-dragover"); });
 zone.addEventListener("drop", function(e) {
@@ -180,8 +186,15 @@ zone.addEventListener("drop", function(e) {
   if (!f) return;
   if (!f.name.toLowerCase().endsWith(".docx")) { alert("Please drop a .docx Word file."); return; }
   var dt = new DataTransfer(); dt.items.add(f);
-  document.getElementById("manuscript").files = dt.files;
-  document.getElementById("manuscript").dispatchEvent(new Event("change"));
+  input.files = dt.files;
+  input.dispatchEvent(new Event("change"));
+});
+
+// Trim size select
+document.getElementById("trim_size_select").addEventListener("change", function() {
+  var parts = this.value.split("|");
+  document.getElementById("trim_w").value = parts[0];
+  document.getElementById("trim_h").value = parts[1];
 });
 </script>
 {% endblock %}
