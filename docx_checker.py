@@ -335,6 +335,75 @@ def check_chapter_page_breaks_docx(doc) -> dict:
     }
 
 
+def _effective_first_line_indent(p):
+    """A paragraph's first-line indent as Word will actually render it —
+    direct paragraph formatting if set, otherwise whatever its style defines."""
+    direct = p.paragraph_format.first_line_indent
+    if direct is not None:
+        return direct
+    try:
+        return p.style.paragraph_format.first_line_indent
+    except Exception:
+        return None
+
+
+def check_paragraph_indent_docx(doc) -> dict:
+    """First-line paragraph indents should be applied one consistent way —
+    a literal tab character, Word's paragraph-level "first line indent"
+    setting, or leading spaces. Mixing methods looks fine in Word but reads
+    as inconsistent once the interior is typeset for print."""
+    paragraphs = doc.paragraphs
+    heading_idx = {
+        i for i, p in enumerate(paragraphs)
+        if p.style and p.style.name and p.style.name.startswith(("Heading", "Title"))
+    }
+
+    styles = []
+    for i, p in enumerate(paragraphs):
+        if i in heading_idx or (i - 1) in heading_idx or i == 0:
+            continue  # a heading itself, or the paragraph right after one, isn't indented by convention
+        text = p.text
+        if not text.strip():
+            continue
+        if text.startswith("\t"):
+            styles.append("tab character")
+        elif text.startswith("  "):
+            styles.append("leading spaces")
+        elif (_effective_first_line_indent(p) or 0) > 0:
+            styles.append("paragraph first-line-indent format")
+        else:
+            styles.append("no indent")
+
+    if len(styles) < 5:
+        return {
+            "title": "Paragraph Indentation", "ok": True, "warning_only": True,
+            "summary": "Not enough body paragraphs found to check indent consistency.",
+            "detail": f"Checked {len(styles)} eligible paragraph(s); need at least 5.",
+        }
+
+    counts = Counter(styles)
+    minority = len(styles) - counts.most_common(1)[0][1]
+    if minority < 3:
+        dominant_style = counts.most_common(1)[0][0]
+        return {
+            "title": "Paragraph Indentation", "ok": True,
+            "summary": f"Body paragraphs consistently use \"{dominant_style}\" for their first-line indent.",
+            "detail": ", ".join(f"{s}: {n}" for s, n in counts.most_common()),
+        }
+
+    breakdown = ", ".join(f"{s} ({n})" for s, n in counts.most_common())
+    return {
+        "title": "Paragraph Indentation", "ok": False, "warning_only": True,
+        "summary": f"Paragraphs are indented {len(counts)} different ways: {breakdown}.",
+        "fix": "Pick one method — either Word's paragraph indent setting (Layout > Paragraph > "
+               "Indentation > Special > First line) applied through your body text style, or a "
+               "single literal tab at the start of every paragraph — and make every body "
+               "paragraph match. Mixing tabs, spaces, and Word's indent setting is invisible on "
+               "screen but shows up once KDP typesets the interior.",
+        "detail": breakdown,
+    }
+
+
 def check_metadata_docx(doc) -> dict:
     title = (doc.core_properties.title or "").strip()
     if title:
@@ -360,6 +429,7 @@ def run_all_checks_docx(docx_path: str) -> dict:
         check_fonts_embedded_docx(doc),
         check_font_consistency_docx(doc),
         check_chapter_page_breaks_docx(doc),
+        check_paragraph_indent_docx(doc),
         check_image_resolution_docx(doc),
         check_metadata_docx(doc),
     ]
