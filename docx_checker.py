@@ -279,6 +279,62 @@ def check_font_consistency_docx(doc) -> dict:
     }
 
 
+def _run_has_page_break(run) -> bool:
+    ns = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+    return any(br.get(f"{ns}type") == "page" for br in run._element.findall(f"{ns}br"))
+
+
+def check_chapter_page_breaks_docx(doc) -> dict:
+    """Chapter (Heading 1) titles should start on a fresh page in a print
+    interior — otherwise the previous chapter's last lines run straight into
+    the new heading, which reads as a mistake rather than a stylistic choice."""
+    paragraphs = doc.paragraphs
+    heading_indices = [
+        i for i, p in enumerate(paragraphs)
+        if p.style and p.style.name and p.style.name.startswith("Heading 1") and p.text.strip()
+    ]
+
+    if len(heading_indices) < 2:
+        return {
+            "title": "Chapter Page Breaks", "ok": True, "warning_only": True,
+            "summary": "Not enough Heading 1 chapter titles found to check for page breaks.",
+            "detail": f"Found {len(heading_indices)} Heading 1 paragraph(s). This check needs at "
+                      f"least 2 to be meaningful.",
+        }
+
+    missing = []
+    for idx in heading_indices:
+        if idx == 0:
+            continue  # the very first paragraph in the doc doesn't need a break before it
+        p = paragraphs[idx]
+        if p.paragraph_format.page_break_before:
+            continue
+        prev = paragraphs[idx - 1]
+        if any(_run_has_page_break(run) for run in prev.runs):
+            continue
+        missing.append(p.text.strip()[:40])
+
+    if not missing:
+        return {
+            "title": "Chapter Page Breaks", "ok": True,
+            "summary": f"All {len(heading_indices)} chapter heading(s) start on a fresh page.",
+            "detail": "Checked each Heading 1 paragraph for a manual page break or "
+                      "'Page break before' formatting immediately before it.",
+        }
+
+    examples = ", ".join(f"\"{m}\"" for m in missing[:5])
+    return {
+        "title": "Chapter Page Breaks", "ok": False, "warning_only": True,
+        "summary": f"{len(missing)} of {len(heading_indices)} chapter heading(s) don't start on a "
+                   f"new page, e.g. {examples}.",
+        "fix": "Click just before each chapter heading and insert a page break (Ctrl+Enter in "
+               "Word). For something that survives future edits, instead select the heading and "
+               "turn on Layout/Paragraph > Line and Page Breaks > \"Page break before\" — Word "
+               "then keeps every chapter starting on its own page automatically.",
+        "detail": ", ".join(f"\"{m}\"" for m in missing),
+    }
+
+
 def check_metadata_docx(doc) -> dict:
     title = (doc.core_properties.title or "").strip()
     if title:
@@ -303,6 +359,7 @@ def run_all_checks_docx(docx_path: str) -> dict:
         check_margins_docx(doc),
         check_fonts_embedded_docx(doc),
         check_font_consistency_docx(doc),
+        check_chapter_page_breaks_docx(doc),
         check_image_resolution_docx(doc),
         check_metadata_docx(doc),
     ]
