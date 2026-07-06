@@ -122,6 +122,45 @@ def _check_heading_consistency(headings: list) -> dict:
     }
 
 
+_SCENE_BREAK_REPEAT_SYMBOLS = set("*#~•§×◆✦∞○")
+
+
+def _check_scene_break_consistency(text: str) -> dict:
+    """Scene breaks (a blank line with a symbol marking a jump in time/POV)
+    should use one marker throughout — mixing *** in one place and # in
+    another reads as an accident, not a stylistic choice."""
+    candidates = []
+    for line in text.split("\n"):
+        compact = re.sub(r"\s+", "", line.strip())
+        if not compact or len(set(compact)) != 1:
+            continue
+        ch = compact[0]
+        if ch in _SCENE_BREAK_REPEAT_SYMBOLS or (ch == "-" and len(compact) >= 3):
+            candidates.append(ch)
+
+    if not candidates:
+        return {"title": "Scene Break Style", "ok": True,
+                "summary": "No scene-break markers (like *** or #) found to check.",
+                "detail": "Scanned for standalone lines made only of repeated symbols "
+                          "(*, #, ~, -, etc)."}
+
+    sig_counts = Counter(candidates)
+    if len(sig_counts) == 1:
+        ch, n = next(iter(sig_counts.items()))
+        return {"title": "Scene Break Style", "ok": True,
+                "summary": f"All {n} scene break(s) use the same marker (\"{ch}\").",
+                "detail": f"Marker character: \"{ch}\"."}
+
+    examples = ", ".join(f"\"{ch}\" x{n}" for ch, n in sig_counts.most_common())
+    return {
+        "title": "Scene Break Style", "ok": False, "warning_only": True,
+        "summary": f"Scene breaks use {len(sig_counts)} different markers: {examples}.",
+        "fix": "Pick one scene-break symbol (commonly *** or a centered #) and use Find & "
+               "Replace to make every scene break in the manuscript match it.",
+        "detail": examples,
+    }
+
+
 def _check_spelling(text: str) -> dict:
     words = [w for w in _WORD_TOKEN.findall(text) if len(w) >= 3]
     if not words:
@@ -155,6 +194,7 @@ def run(full_text: str, headings: list = None) -> list:
         _check_repeated_words(full_text),
         _check_spacing(full_text),
         _check_quote_consistency(full_text),
+        _check_scene_break_consistency(full_text),
         _check_spelling(full_text),
     ]
     heading_result = _check_heading_consistency(headings or [])
