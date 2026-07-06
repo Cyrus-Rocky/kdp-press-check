@@ -38,7 +38,9 @@
 </div>
 
 <p class="lede">
-  {% if report.overall_ok %}
+  {% if report.overall_ok and report.advisory_issue_count %}
+    Nothing here should stop KDP from accepting this file, but {{ report.advisory_issue_count }} thing{{ 's' if report.advisory_issue_count != 1 else '' }} marked ISSUE below are worth fixing before you publish — scroll down to see them.
+  {% elif report.overall_ok %}
     Nothing here should stop KDP from accepting this file. Always confirm in KDP's own previewer before publishing.
   {% else %}
     {{ report.issue_count }} thing{{ 's' if report.issue_count != 1 else '' }} below need fixing before this is ready to upload — each one says exactly what to change.

@@ -42,6 +42,7 @@ def run_all_checks_text_format(path: str, ext: str) -> dict:
     blocking_results = [r for r in results if not r.get("warning_only")]
     summary_ok = all(r["ok"] for r in blocking_results)
     issue_count = sum(1 for r in blocking_results if not r["ok"])
+    advisory_issue_count = sum(1 for r in results if r.get("warning_only") and not r["ok"])
 
     return {
         "page_count": page_count,
@@ -49,4 +50,5 @@ def run_all_checks_text_format(path: str, ext: str) -> dict:
         "results": results,
         "overall_ok": summary_ok,
         "issue_count": issue_count,
+        "advisory_issue_count": advisory_issue_count,
     }

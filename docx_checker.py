@@ -318,6 +318,7 @@ def run_all_checks_docx(docx_path: str) -> dict:
     blocking_results = [r for r in results if not r.get("warning_only")]
     summary_ok = all(r["ok"] for r in blocking_results)
     issue_count = sum(1 for r in blocking_results if not r["ok"])
+    advisory_issue_count = sum(1 for r in results if r.get("warning_only") and not r["ok"])
     word_count = len(full_text.split())
     estimated_pages = max(1, round(word_count / 280)) if word_count else 1
     return {
@@ -326,4 +327,5 @@ def run_all_checks_docx(docx_path: str) -> dict:
         "results": results,
         "overall_ok": summary_ok,
         "issue_count": issue_count,
+        "advisory_issue_count": advisory_issue_count,
     }

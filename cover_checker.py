@@ -173,12 +173,14 @@ def run_all_cover_checks(pdf_path: str, trim_w_in: float, trim_h_in: float,
         blocking_results = [r for r in results if not r.get("warning_only")]
         summary_ok = all(r["ok"] for r in blocking_results)
         issue_count = sum(1 for r in blocking_results if not r["ok"])
+        advisory_issue_count = sum(1 for r in results if r.get("warning_only") and not r["ok"])
         return {
             "subtitle": f"{trim_w_in}\" x {trim_h_in}\" cover · {page_count} pages · "
                         f"{rules.PAPER_TYPE_LABELS[paper_type]}",
             "results": results,
             "overall_ok": summary_ok,
             "issue_count": issue_count,
+            "advisory_issue_count": advisory_issue_count,
         }
     finally:
         doc.close()
