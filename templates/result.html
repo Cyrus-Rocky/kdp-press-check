@@ -47,7 +47,9 @@
 
 <div class="spec-table">
   {% for r in report.results %}
-    {% if r.warning_only %}
+    {% if r.warning_only and not r.ok %}
+      {% set state = 'fail' %}{% set label = 'ISSUE' %}
+    {% elif r.warning_only %}
       {% set state = 'warn' %}{% set label = 'NOTE' %}
     {% elif r.ok %}
       {% set state = 'ok' %}{% set label = 'OK' %}
@@ -76,7 +78,7 @@
             <p>{{ r.fix }}</p>
           </div>
         {% endif %}
-        {% if not r.ok and not r.warning_only %}
+        {% if not r.ok %}
           {% set cat = CHECK_TO_CATEGORY.get(r.title, 'all') %}
           <a href="{{ url_for('problem_solvers', cat=cat) }}"
              class="find-help-link" title="Find a freelancer who fixes this">
