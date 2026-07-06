@@ -9,6 +9,7 @@ until after you submit it, so checking before export still catches the things
 that would otherwise surprise you.
 """
 import io
+from collections import Counter
 
 from docx import Document
 from PIL import Image
@@ -228,6 +229,56 @@ def check_image_resolution_docx(doc) -> dict:
     }
 
 
+def check_font_consistency_docx(doc) -> dict:
+    """Flag mixed font families/sizes in body text — a common artifact of
+    pasting in text from another document or a web page, which brings its
+    own formatting along and looks unprofessional once printed."""
+    font_counts = Counter()
+    size_counts = Counter()
+    for p in doc.paragraphs:
+        style_name = p.style.name if p.style else ""
+        if style_name.startswith("Heading") or style_name.startswith("Title"):
+            continue
+        for run in p.runs:
+            if not run.text.strip():
+                continue
+            if run.font.name:
+                font_counts[run.font.name] += 1
+            if run.font.size:
+                size_counts[run.font.size.pt] += 1
+
+    # A handful of stray runs (e.g. one italicized word) isn't worth flagging —
+    # only surface it once a real second font/size shows up repeatedly.
+    minority_threshold = 3
+    problems = []
+    if len(font_counts) > 1:
+        minority = sum(font_counts.values()) - font_counts.most_common(1)[0][1]
+        if minority >= minority_threshold:
+            fonts_list = ", ".join(f"{f} ({n})" for f, n in font_counts.most_common())
+            problems.append(f"body text mixes {len(font_counts)} font families: {fonts_list}")
+    if len(size_counts) > 1:
+        minority = sum(size_counts.values()) - size_counts.most_common(1)[0][1]
+        if minority >= minority_threshold:
+            sizes_list = ", ".join(f"{s:g}pt ({n})" for s, n in size_counts.most_common())
+            problems.append(f"body text mixes {len(size_counts)} font sizes: {sizes_list}")
+
+    if not problems:
+        return {
+            "title": "Font Consistency", "ok": True, "warning_only": True,
+            "summary": "Body text uses a consistent font throughout.",
+            "detail": "No mixed font-family or font-size overrides found in body paragraphs.",
+        }
+    return {
+        "title": "Font Consistency", "ok": False, "warning_only": True,
+        "summary": "Inconsistent formatting found: " + "; ".join(problems) + ".",
+        "fix": "This usually happens when text is pasted in from another document or a web "
+               "page and brings its own formatting along. Select the whole manuscript body, "
+               "clear direct formatting (Ctrl+Spacebar in Word), and re-apply a single font "
+               "and size throughout.",
+        "detail": "; ".join(problems),
+    }
+
+
 def check_metadata_docx(doc) -> dict:
     title = (doc.core_properties.title or "").strip()
     if title:
@@ -251,6 +302,7 @@ def run_all_checks_docx(docx_path: str) -> dict:
         check_page_size_consistency_docx(doc),
         check_margins_docx(doc),
         check_fonts_embedded_docx(doc),
+        check_font_consistency_docx(doc),
         check_image_resolution_docx(doc),
         check_metadata_docx(doc),
     ]
