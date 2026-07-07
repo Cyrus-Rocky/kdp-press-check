@@ -161,6 +161,9 @@ def _check_scene_break_consistency(text: str) -> dict:
     }
 
 
+_TYPO_REPEAT_THRESHOLD = 3  # a word appearing this many+ times reads as a name/invented term, not a typo
+
+
 def _check_spelling(text: str) -> dict:
     words = [w for w in _WORD_TOKEN.findall(text) if len(w) >= 3]
     if not words:
@@ -175,16 +178,37 @@ def _check_spelling(text: str) -> dict:
         return {"title": "Possible Typos", "ok": True,
                 "summary": "No words flagged against our dictionary.",
                 "detail": f"Checked {len(sample)} word(s)."}
+
     counts = Counter(w for w in sample if w in unknown)
-    top = counts.most_common(15)
-    examples = ", ".join(f"\"{w}\"" for w, _ in top[:6])
+    # A word that recurs is almost certainly a character name or invented term an author
+    # typed on purpose; a word seen once or twice is much more likely to be an actual typo.
+    repeated = {w: n for w, n in counts.items() if n >= _TYPO_REPEAT_THRESHOLD}
+    one_offs = {w: n for w, n in counts.items() if n < _TYPO_REPEAT_THRESHOLD}
+
+    if not one_offs:
+        return {
+            "title": "Possible Typos", "ok": True, "warning_only": True,
+            "summary": f"{len(counts)} word(s) aren't in our dictionary, but each appears "
+                       f"{_TYPO_REPEAT_THRESHOLD}+ times — almost certainly character names or "
+                       f"invented terms rather than typos.",
+            "detail": ", ".join(f"\"{w}\" x{n}" for w, n in Counter(repeated).most_common(15)),
+        }
+
+    top_one_offs = Counter(one_offs).most_common(15)
+    examples = ", ".join(f"\"{w}\"" for w, _ in top_one_offs[:6])
+    summary = (f"{len(one_offs)} word(s) that appear only once or twice aren't in our "
+               f"dictionary, e.g. {examples} — these are more likely to be real typos than "
+               f"recurring names.")
+    if repeated:
+        summary += (f" ({len(repeated)} other word(s) recur {_TYPO_REPEAT_THRESHOLD}+ times and "
+                     f"are left out of this list as likely names/invented terms.)")
     return {
-        "title": "Possible Typos", "ok": True, "warning_only": True,
-        "summary": f"{len(unknown)} word(s) aren't in our dictionary, e.g. {examples}.",
-        "fix": "These are guesses, not confirmed errors — character names, made-up words, "
-               "and specialized terms will always show up here, and that's expected. Skim "
-               "the list for anything that's actually a typo, especially words that repeat.",
-        "detail": ", ".join(f"\"{w}\" x{n}" for w, n in top),
+        "title": "Possible Typos", "ok": False, "warning_only": True,
+        "summary": summary,
+        "fix": "These are still guesses, not confirmed errors — but words appearing only once "
+               "or twice are worth a look first, since recurring character names and invented "
+               "words have already been filtered out of this list.",
+        "detail": ", ".join(f"\"{w}\" x{n}" for w, n in top_one_offs),
     }
 
 
