@@ -16,92 +16,135 @@
 </div>
 {% endif %}
 
-<div class="proof-head">
-  <div>
-    <p class="meta-label">Press check result</p>
-    <h1>{{ filename }}</h1>
-    <p class="pagecount">
-      {% if report.subtitle %}
-        {{ report.subtitle }}
-      {% elif report.page_count_is_estimate %}
-        ~{{ report.page_count }} page{{ 's' if report.page_count != 1 else '' }} (estimated from word count — Word has no fixed page count)
-      {% else %}
-        {{ report.page_count }} page{{ 's' if report.page_count != 1 else '' }} analyzed
-      {% endif %}
-    </p>
-  </div>
-  {% if report.overall_ok %}
-    <div class="stamp pass" role="img" aria-label="Overall result: pass">PASS</div>
-  {% else %}
-    <div class="stamp fail" role="img" aria-label="Overall result: needs fixes">NEEDS FIXES</div>
-  {% endif %}
-</div>
+{% set blocking_rows = report.results | rejectattr('warning_only', 'defined') | list %}
+{% set advisory_rows = report.results | selectattr('warning_only', 'defined') | list %}
+{% set fail_count = report.issue_count %}
+{% set issue_count = report.advisory_issue_count %}
+{% set note_count = report.note_count %}
+{% set ok_count = report.ok_count %}
+{% set src_label = 'Cover check' if active_mode == 'cover' else ('Kindle check' if active_mode == 'kindle' else 'Interior check') %}
+{% set g_label = 'EPUB structure' if active_mode == 'kindle' else 'Print geometry — blocking' %}
+{% set c_label = 'Content & delivery' if active_mode == 'kindle' else 'Content & proofreading — advisory' %}
 
-<p class="lede">
-  {% if report.overall_ok and report.advisory_issue_count %}
-    Nothing here should stop KDP from accepting this file, but {{ report.advisory_issue_count }} thing{{ 's' if report.advisory_issue_count != 1 else '' }} marked ISSUE below are worth fixing before you publish — scroll down to see them.
-  {% elif report.overall_ok %}
-    Nothing here should stop KDP from accepting this file. Always confirm in KDP's own previewer before publishing.
-  {% else %}
-    {{ report.issue_count }} thing{{ 's' if report.issue_count != 1 else '' }} below need fixing before this is ready to upload — each one says exactly what to change.
-  {% endif %}
-</p>
+{% macro group_sub(rows) %}
+  {% set passed = rows | selectattr('ok') | list | length %}
+  {% set flagged = rows | length - passed %}
+  {{ passed }} of {{ rows | length }} passed{% if flagged %} — {{ flagged }} flagged{% endif %}
+{% endmacro %}
 
-<div class="spec-table">
-  {% for r in report.results %}
-    {% if r.warning_only and not r.ok %}
-      {% set state = 'fail' %}{% set label = 'ISSUE' %}
-    {% elif r.warning_only %}
-      {% set state = 'warn' %}{% set label = 'NOTE' %}
-    {% elif r.ok %}
-      {% set state = 'ok' %}{% set label = 'OK' %}
-    {% else %}
-      {% set state = 'fail' %}{% set label = 'FAIL' %}
-    {% endif %}
-    <div class="spec-row">
-      <span class="status-icon {{ state }}" aria-hidden="true">
-        {% if state == 'ok' %}
-          <svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        {% elif state == 'fail' %}
-          <svg viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        {% else %}
-          <svg viewBox="0 0 16 16" fill="none"><path d="M8 5.5v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="8" cy="11.5" r="0.9" fill="currentColor"/></svg>
-        {% endif %}
+{% macro render_row(r) %}
+  {% if r.warning_only and not r.ok %}
+    {% set state, label = 'issue', 'ISSUE' %}
+  {% elif r.warning_only %}
+    {% set state, label = 'note', 'NOTE' %}
+  {% elif r.ok %}
+    {% set state, label = 'ok', 'OK' %}
+  {% else %}
+    {% set state, label = 'fail', 'FAIL' %}
+  {% endif %}
+  {% set expandable = r.fix or r.detail %}
+  {% if expandable %}
+  <details class="result-row" {% if state in ('fail', 'issue') %}open{% endif %}>
+    <summary class="result-row-head">
+      <span class="result-chip {{ state }}">{{ label }}</span>
+      <span class="result-row-text">
+        <span class="result-row-title">{{ r.title }}</span>
+        <span class="result-row-sum">{{ r.summary }}</span>
       </span>
-      <div class="body">
-        <div class="row-head">
-          <h3>{{ r.title }}</h3>
-          <span class="chip {{ state }}">{{ label }}</span>
+      <span class="result-chev" aria-hidden="true">▾</span>
+    </summary>
+    <div class="result-row-body">
+      {% if r.fix %}
+        <div class="result-fix">
+          <span class="result-fix-label">How to fix it</span>
+          <p>{{ r.fix }}</p>
         </div>
-        <p class="summary">{{ r.summary }}</p>
-        {% if r.fix %}
-          <div class="fix-box {{ state }}">
-            <span class="fix-label">{{ 'Worth doing' if state == 'warn' else 'How to fix it' }}</span>
-            <p>{{ r.fix }}</p>
-          </div>
-        {% endif %}
-        {% if not r.ok %}
-          {% set cat = CHECK_TO_CATEGORY.get(r.title, 'all') %}
-          <a href="{{ url_for('problem_solvers', cat=cat) }}"
-             class="find-help-link" title="Find a freelancer who fixes this">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-              <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
-              <path d="M20 20l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              <path d="M11 8v6M8 11h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-            Find help with this →
-          </a>
-        {% endif %}
-        {% if r.detail %}
-          <details class="tech-detail">
-            <summary>Show technical detail</summary>
-            <pre>{{ r.detail }}</pre>
-          </details>
-        {% endif %}
-      </div>
+      {% endif %}
+      {% if r.detail %}
+        <pre class="result-detail-text">{{ r.detail }}</pre>
+      {% endif %}
+      {% if not r.ok %}
+        {% set cat = CHECK_TO_CATEGORY.get(r.title, 'all') %}
+        <a href="{{ url_for('problem_solvers', cat=cat) }}" class="find-help-link">Find help with this →</a>
+      {% endif %}
     </div>
-  {% endfor %}
+  </details>
+  {% else %}
+  <div class="result-row result-row-flat">
+    <div class="result-row-head">
+      <span class="result-chip {{ state }}">{{ label }}</span>
+      <span class="result-row-text">
+        <span class="result-row-title">{{ r.title }}</span>
+        <span class="result-row-sum">{{ r.summary }}</span>
+      </span>
+    </div>
+  </div>
+  {% endif %}
+{% endmacro %}
+
+<button type="button" class="back-link" onclick="history.back()">← Run another check</button>
+
+<div class="result-banner {{ 'is-pass' if report.overall_ok else 'is-fail' }}">
+  <div class="result-banner-top">
+    <div class="result-banner-copy">
+      <div class="result-eyebrow">{{ src_label }} · {{ filename }}</div>
+      <div class="result-title">{{ 'Ready for KDP.' if report.overall_ok else 'Needs fixes before upload.' }}</div>
+      <p class="result-sub">
+        {% if not report.overall_ok %}
+          {{ fail_count }} blocking issue{{ 's' if fail_count != 1 else '' }} would stop KDP from accepting this file. They're listed first, each with a fix you can do today — or hand off.
+        {% elif issue_count %}
+          Nothing here blocks KDP acceptance. {{ issue_count }} advisory finding{{ 's' if issue_count != 1 else '' }} below {{ 'are' if issue_count != 1 else 'is' }} worth a look — none will stop your upload.
+        {% else %}
+          Nothing blocks KDP acceptance. Upload when you're ready.
+        {% endif %}
+      </p>
+    </div>
+    <div class="result-stamp">{{ 'Pass' if report.overall_ok else 'Needs fixes' }}</div>
+  </div>
+  <div class="result-tally">
+    <span class="{{ 'is-hot' if fail_count else '' }}">{{ fail_count }} blocking</span>
+    <span>{{ issue_count }} advisory issue{{ 's' if issue_count != 1 else '' }}</span>
+    <span>{{ note_count }} note{{ 's' if note_count != 1 else '' }}</span>
+    <span class="is-ok">{{ ok_count }} passed</span>
+  </div>
 </div>
+
+{% if blocking_rows %}
+<div class="result-group">
+  <div class="result-group-head">
+    <span class="result-group-label">{{ g_label }}</span>
+    <span class="result-group-sub">{{ group_sub(blocking_rows) }}</span>
+  </div>
+  {% for r in blocking_rows %}{{ render_row(r) }}{% endfor %}
+</div>
+{% endif %}
+
+{% if advisory_rows %}
+<div class="result-group">
+  <div class="result-group-head">
+    <span class="result-group-label">{{ c_label }}</span>
+    <span class="result-group-sub">{{ group_sub(advisory_rows) }}</span>
+  </div>
+  {% for r in advisory_rows %}{{ render_row(r) }}{% endfor %}
+</div>
+{% endif %}
+
+{% set ns = namespace(help_count=0) %}
+{% for r in report.results %}
+  {% if not r.ok and r.title in CHECK_TO_CATEGORY %}
+    {% set ns.help_count = ns.help_count + 1 %}
+  {% endif %}
+{% endfor %}
+{% if ns.help_count > 0 %}
+<div class="help-band">
+  <div class="help-band-copy">
+    <div class="help-band-eyebrow">If you'd rather not do this yourself</div>
+    <div class="help-band-title">{{ ns.help_count }} issue{{ 's' if ns.help_count != 1 else '' }} below match a specialist in our directory.</div>
+    <p class="help-band-sub">Formatting, cover and editing freelancers who work on KDP books every week. We link out — no markup, no middleman.</p>
+  </div>
+  <a href="{{ url_for('problem_solvers') }}" class="cta-pill invert">See who can fix this →</a>
+</div>
+{% endif %}
 
 <div class="results-actions">
   <a class="button" href="{{ url_for('cover_index') if active_mode == 'cover' else url_for('index') }}">Check another file</a>
