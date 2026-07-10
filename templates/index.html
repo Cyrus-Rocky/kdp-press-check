@@ -1,84 +1,65 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="page-layout">
-  <div class="col-hero">
-    <section class="hero">
-      <h1>Find out if your manuscript will print clean — before KDP tells you it won't.</h1>
-      <p>Upload your paperback interior and we check every spec KDP will flag at submission — so you fix it on your schedule, not theirs.</p>
-    </section>
+<section class="hero-single">
+  <div class="eyebrow">Interior check · Paperback</div>
+  <h1 class="hero-display">Catch it before KDP&nbsp;does.</h1>
+  <p class="hero-lead">Upload your paperback interior and get the full report KDP won't give you — margins, fonts, bleed, image resolution, and everything else it checks at submission — before you risk a rejected upload.</p>
 
-    <div class="info-card">
-      <h3>What gets checked</h3>
-      <ul>
-        <li>Trim size & page size consistency</li>
-        <li>Margins (inside, outside, top, bottom)</li>
-        <li>Bleed area</li>
-        <li>Font embedding</li>
-        <li>Image resolution (300 DPI minimum)</li>
-        <li>Metadata / document title</li>
-        <li>Typos, repeated words, heading consistency</li>
-        <li>Copyright page &amp; title page detection</li>
-        <li>Screenplay / non-book content flagging</li>
-      </ul>
+  <form id="upload-form" action="{{ url_for('check') }}" method="post"
+        enctype="multipart/form-data" novalidate data-accept=".pdf,.docx,.txt,.rtf,.odt" class="upload-form-lg">
+    <div class="dropzone" id="dropzone">
+      <span class="bracket-r" aria-hidden="true"></span>
+      <span class="scanline" aria-hidden="true"></span>
+
+      <label for="file-input" class="instructions">Drop your interior file here, or
+        <button type="button" class="browse" id="browse-btn">click to browse</button>
+      </label>
+      <p class="filehint">PDF · DOCX · TXT · RTF · ODT</p>
+
+      <input type="file" name="manuscript" id="file-input"
+             accept="application/pdf,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx,.txt,.rtf,application/vnd.oasis.opendocument.text,.odt">
+
+      <div class="filename-display" id="file-display">
+        <span id="file-name"></span>
+        <button type="button" class="remove" id="file-remove">Remove</button>
+      </div>
     </div>
 
-    <div class="info-card" style="margin-top:16px;">
-      <h3>Supported formats</h3>
-      <ul>
-        <li><strong>PDF</strong> — full print geometry checks</li>
-        <li><strong>Word (.docx)</strong> — layout + content checks</li>
-        <li><strong>TXT, RTF, ODT</strong> — content checks only</li>
-      </ul>
+    <div class="actions-inline">
+      <button type="submit" class="primary" id="submit-btn" disabled>
+        <span class="label">Run press check →</span>
+        <span class="spinner"><span class="spinner-dash" aria-hidden="true"></span> Checking manuscript&hellip;</span>
+      </button>
+      <span class="footnote-inline">Nothing is stored — your file is deleted the moment the check is done.</span>
     </div>
-  </div>
 
-  <div class="col-form">
-    <form id="upload-form" action="{{ url_for('check') }}" method="post"
-          enctype="multipart/form-data" novalidate data-accept=".pdf,.docx,.txt,.rtf,.odt">
-      <div class="dropzone" id="dropzone">
-        <span class="bracket-r" aria-hidden="true"></span>
-        <span class="scanline" aria-hidden="true"></span>
+    <p id="form-status" role="status" aria-live="polite"
+       style="position:absolute; left:-9999px;"></p>
+  </form>
+</section>
 
-        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M12 3v12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-          <path d="M7 8l5-5 5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M5 16v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-        </svg>
-
-        <label for="file-input" class="instructions">
-          Drop your manuscript here, or
-          <button type="button" class="browse" id="browse-btn">choose a file</button>
-        </label>
-        <p class="filehint">PDF · Word · TXT · RTF · ODT &middot; up to 200 MB</p>
-
-        <input type="file" name="manuscript" id="file-input"
-               accept="application/pdf,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx,.txt,.rtf,application/vnd.oasis.opendocument.text,.odt">
-
-        <div class="filename-display" id="file-display">
-          <span id="file-name"></span>
-          <button type="button" class="remove" id="file-remove">Remove</button>
-        </div>
-      </div>
-
-      <div class="actions">
-        <button type="submit" class="primary" id="submit-btn" disabled>
-          <span class="label">Run press check</span>
-          <span class="spinner"><span class="spinner-dash" aria-hidden="true"></span> Checking manuscript&hellip;</span>
-        </button>
-        <p class="footnote">Usually a few seconds. Longer books take a little more.</p>
-      </div>
-
-      <p id="form-status" role="status" aria-live="polite"
-         style="position:absolute; left:-9999px;"></p>
-    </form>
-
-    <p class="footnote" style="margin-top:28px; text-align:left;">
-      Checking a paperback interior.
-      Need your <a href="{{ url_for('cover_index') }}">cover checked</a> or your
-      <a href="{{ url_for('kindle_index') }}">Kindle EPUB</a> instead?
-    </p>
-  </div>
+<div class="tool-grid">
+  <a class="tool-card" href="{{ url_for('cover_index') }}">
+    <span class="tool-card-title">Cover check</span>
+    <p>Validate your full-wrap cover — spine width, bleed, barcode zone.</p>
+    <span class="tool-card-link">Open →</span>
+  </a>
+  <a class="tool-card" href="{{ url_for('kindle_index') }}">
+    <span class="tool-card-title">Kindle check</span>
+    <p>Validate your EPUB — nav, cover image, fonts, delivery-fee weight.</p>
+    <span class="tool-card-link">Open →</span>
+  </a>
+  <a class="tool-card" href="{{ url_for('preview_index') }}">
+    <span class="tool-card-title">Book preview</span>
+    <p>See your book as a printed spread, with margin guides overlaid.</p>
+    <span class="tool-card-link">Open →</span>
+  </a>
+  <a class="tool-card" href="{{ url_for('royalty_calculator') }}">
+    <span class="tool-card-title">Royalty calculator</span>
+    <p>Know your printing cost, royalty per copy and breakeven point.</p>
+    <span class="tool-card-link">Open →</span>
+  </a>
 </div>
 
 {% endblock %}

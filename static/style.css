@@ -444,69 +444,141 @@ a { color: var(--accent-ink); }
 }
 .hero p strong { color: var(--ink); }
 
+/* ---------- single-column hero (Home) ---------- */
+.hero-single { padding-top: 32px; }
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--pc-coral);
+  margin-bottom: 20px;
+}
+.hero-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(38px, 6.5vw, 76px);
+  line-height: 1.03;
+  letter-spacing: -1.4px;
+  color: var(--pc-strong);
+  margin: 0 0 24px;
+  max-width: 820px;
+}
+.hero-lead {
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--pc-muted);
+  max-width: 580px;
+  margin: 0 0 48px;
+}
+.upload-form-lg { max-width: 720px; }
+
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 40px;
+  margin-top: 88px;
+}
+.tool-card {
+  display: block;
+  border-top: 1px solid var(--pc-strong);
+  padding-top: 20px;
+  text-decoration: none;
+  color: inherit;
+}
+.tool-card-title {
+  display: block;
+  font-size: 22px;
+  font-family: var(--font-display);
+  letter-spacing: -0.3px;
+  color: var(--pc-strong);
+  margin-bottom: 8px;
+}
+.tool-card p {
+  font-size: 14px;
+  color: var(--pc-muted);
+  margin: 0 0 14px;
+}
+.tool-card-link {
+  font-size: 14px;
+  color: var(--pc-ink);
+  text-decoration: underline;
+}
+.tool-card:hover .tool-card-link { color: var(--pc-blue); }
+
 /* ---------- upload frame (crop-mark bracket) ---------- */
 .dropzone {
   position: relative;
-  border: 1.5px dashed var(--line-strong);
-  border-radius: var(--radius-sm);
-  padding: 48px 24px;
+  border: 1.5px dashed var(--pc-rule);
+  border-radius: var(--radius-lg);
+  padding: 56px 32px;
   text-align: center;
-  background: var(--paper-raised);
-  box-shadow: var(--shadow-soft);
-  transition: border-color 180ms ease, background-color 180ms ease;
+  background: transparent;
+  transition: border-color 150ms ease, background-color 150ms ease;
 }
-:root[data-theme="dark"] .dropzone { box-shadow: var(--shadow-soft-dark); }
 .dropzone::before, .dropzone::after,
 .dropzone .bracket-r::before, .dropzone .bracket-r::after {
   content: "";
   position: absolute;
-  width: 22px;
-  height: 22px;
-  border: 2px solid var(--ink);
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--pc-strong);
 }
-.dropzone::before { top: -2px; left: -2px; border-right: none; border-bottom: none; }
-.dropzone::after { bottom: -2px; left: -2px; border-right: none; border-top: none; }
-.dropzone .bracket-r::before { top: -2px; right: -2px; border-left: none; border-bottom: none; }
-.dropzone .bracket-r::after { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+.dropzone::before { top: 14px; left: 14px; border-right: none; border-bottom: none; }
+.dropzone::after { bottom: 14px; left: 14px; border-right: none; border-top: none; }
+.dropzone .bracket-r::before { top: 14px; right: 14px; border-left: none; border-bottom: none; }
+.dropzone .bracket-r::after { bottom: 14px; right: 14px; border-left: none; border-top: none; }
 
 .dropzone.is-dragover {
-  border-color: var(--accent);
-  background: var(--accent-bg);
+  border-color: var(--pc-coral);
+  background: var(--pc-issue-bg);
 }
 
 .dropzone .icon {
   width: 38px;
   height: 38px;
   margin: 0 auto 16px;
-  color: var(--ink-muted);
+  color: var(--pc-muted);
   display: block;
 }
 
-.dropzone .instructions { font-size: 0.98rem; margin: 0 0 6px; }
+.dropzone .instructions {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--pc-strong);
+  margin: 0 0 12px;
+}
 .dropzone .instructions .browse {
-  color: var(--accent-ink);
-  font-weight: 600;
+  font-family: var(--font-body);
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--pc-blue);
+  font-weight: 400;
   text-decoration: underline;
   text-underline-offset: 2px;
   cursor: pointer;
   background: none;
   border: none;
-  font: inherit;
+  font-size: 14px;
   padding: 0;
 }
 .dropzone .filehint {
   font-family: var(--font-mono);
-  font-size: 0.8rem;
-  color: var(--ink-muted);
+  font-size: 11px;
+  letter-spacing: 1.2px;
+  color: var(--pc-faint);
+  margin-top: 20px;
 }
 
 .filename-display {
   margin-top: 18px;
   font-family: var(--font-mono);
   font-size: 0.9rem;
-  color: var(--ink);
-  background: var(--paper);
-  border: 1px solid var(--line);
+  color: var(--pc-strong);
+  background: var(--pc-card);
+  border: 1px solid var(--pc-rule);
   border-radius: var(--radius-sm);
   padding: 8px 14px;
   display: none;
@@ -519,7 +591,7 @@ a { color: var(--accent-ink); }
 .filename-display .remove {
   background: none;
   border: none;
-  color: var(--fail);
+  color: var(--pc-blue);
   cursor: pointer;
   font-size: 0.85rem;
   font-family: var(--font-body);
@@ -535,25 +607,31 @@ input[type=file] {
 }
 
 .actions { margin-top: 28px; text-align: center; }
+.actions-inline {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.footnote-inline { font-size: 12px; color: var(--pc-faint); }
 
 button.primary {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 1rem;
-  letter-spacing: 0.01em;
-  color: var(--accent-fill-text);
-  background: var(--accent-fill);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--pc-cta-text);
+  background: var(--pc-cta);
   border: none;
-  padding: 14px 32px;
-  border-radius: var(--radius-sm);
+  padding: 16px 32px;
+  border-radius: var(--radius-pill);
   cursor: pointer;
-  min-height: 48px;
-  box-shadow: var(--shadow-soft);
-  transition: background-color 180ms ease, transform 80ms ease, box-shadow 180ms ease;
+  min-height: 54px;
+  transition: opacity 150ms ease, transform 80ms ease;
 }
-button.primary:hover:not(:disabled) { background: var(--accent-ink); color: var(--paper-raised); box-shadow: none; }
+button.primary:hover:not(:disabled) { opacity: 0.85; }
 button.primary:active:not(:disabled) { transform: translateY(1px); }
-button.primary:disabled { background: var(--line-strong); color: var(--ink-muted); box-shadow: none; cursor: not-allowed; }
+button.primary:disabled { background: var(--pc-rule); color: var(--pc-faint); cursor: not-allowed; }
 
 button.primary .spinner { display: none; }
 button.primary.is-loading .label { display: none; }
