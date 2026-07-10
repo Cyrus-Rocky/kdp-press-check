@@ -1,103 +1,165 @@
-/* KDP Press Check — design tokens grounded in the prepress/proof-sheet world:
-   crop marks, registration ink, spec sheets. Palette is brown / orange /
-   butter — warm and approachable rather than sterile-clinical, in both a
-   butter-cream light theme and a deep cocoa-brown dark theme. */
+/* KDP Press Check — design tokens from the "editorial tech" Claude Design
+   pass: coral + near-black on a white/near-black canvas, mono uppercase
+   labels, Space Grotesk display type. Old semantic var names (--paper,
+   --ink, --accent, --pass/--fail/--warn, etc.) are aliased onto the new
+   --pc-* tokens below so every page re-themes even before its markup is
+   individually rebuilt — see MEMORY.md project note on the reskin order. */
 
 :root {
-  --paper: #FBF1DC;
-  --paper-raised: #FFFBF0;
-  --ink: #3B2A18;
-  --ink-muted: #8C7253;
-  --line: #E8D8AF;
-  --line-strong: #D2B97F;
-  --accent: #A8580F;
-  --accent-ink: #8A4A0C;
-  --accent-fill: #E8821E;
-  --accent-fill-text: #2E1D0C;
-  --accent-bg: #FBE3C0;
-  --pass: #4F7942;
-  --pass-bg: #E8F0DE;
-  --fail: #B23A2E;
-  --fail-bg: #F6E2DC;
-  --warn: #9C6D1E;
-  --warn-bg: #F3E6C8;
-  --focus: #8A4A0C;
+  --pc-canvas: #ffffff;
+  --pc-card: #ffffff;
+  --pc-raise: #f7f6f2;
+  --pc-warm: #eeece7;
+  --pc-ink: #212121;
+  --pc-strong: #000000;
+  --pc-muted: #75758a;
+  --pc-faint: #93939f;
+  --pc-rule: #d9d9dd;
+  --pc-rule-soft: #ececee;
+  --pc-cta: #17171c;
+  --pc-cta-text: #ffffff;
+  --pc-ok: #0e7a5a;
+  --pc-ok-bg: rgba(14,122,90,0.08);
+  --pc-note: #75758a;
+  --pc-note-bg: rgba(117,117,138,0.10);
+  --pc-issue: #bd4f2c;
+  --pc-issue-bg: rgba(255,119,89,0.12);
+  --pc-fail: #b30000;
+  --pc-fail-bg: rgba(179,0,0,0.07);
+  --pc-coral: #ff7759;
+  --pc-coral-soft: #ffad9b;
+  --pc-blue: #1863dc;
+  --pc-band: #003c33;
+  --pc-band-dark: #17171c;
+  --pc-tick: #c4c1b8;
+  --pc-focus: #4c6ee6;
+
+  /* Old names, aliased — remove once every template reads --pc-* directly */
+  --paper: var(--pc-canvas);
+  --paper-raised: var(--pc-card);
+  --ink: var(--pc-ink);
+  --ink-muted: var(--pc-muted);
+  --line: var(--pc-rule);
+  --line-strong: var(--pc-rule);
+  --accent: var(--pc-coral);
+  --accent-ink: var(--pc-coral);
+  --accent-fill: var(--pc-coral);
+  --accent-fill-text: #ffffff;
+  --accent-bg: rgba(255,119,89,0.12);
+  --pass: var(--pc-ok);
+  --pass-bg: var(--pc-ok-bg);
+  --fail: var(--pc-fail);
+  --fail-bg: var(--pc-fail-bg);
+  --warn: var(--pc-issue);
+  --warn-bg: var(--pc-issue-bg);
+  --focus: var(--pc-focus);
 
   --font-display: "Space Grotesk", system-ui, sans-serif;
-  --font-body: "IBM Plex Sans", system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", "SFMono-Regular", Menlo, monospace;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "Space Mono", "SFMono-Regular", Menlo, monospace;
 
   --radius-sm: 8px;
-  --radius-pill: 999px;
-  --container: 1120px;
-  --shadow-soft: 0 2px 10px rgba(59, 42, 24, 0.07);
+  --radius-lg: 22px;
+  --radius-pill: 32px;
+  --container: 1200px;
+  --shadow-soft: 0 1px 2px rgba(23,23,28,0.04), 0 12px 32px rgba(23,23,28,0.06);
   --shadow-soft-dark: 0 2px 12px rgba(0, 0, 0, 0.35);
   --theme-transition: background-color 220ms ease, color 220ms ease, border-color 220ms ease;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #241A10;
-    --paper-raised: #322417;
-    --ink: #F5E8CC;
-    --ink-muted: #C9AD80;
-    --line: #45331F;
-    --line-strong: #5C4527;
-    --accent: #FFA94D;
-    --accent-ink: #FFC178;
-    --accent-fill: #F08C1A;
-    --accent-fill-text: #241A10;
-    --accent-bg: #3D2A14;
-    --pass: #8FBF6E;
-    --pass-bg: #25301D;
-    --fail: #E2806B;
-    --fail-bg: #3A211A;
-    --warn: #E0B45E;
-    --warn-bg: #3A2D15;
-    --focus: #FFC178;
+    --pc-canvas: #131318;
+    --pc-card: #1b1b21;
+    --pc-raise: #1f1f26;
+    --pc-warm: #232322;
+    --pc-ink: #f0f0f3;
+    --pc-strong: #ffffff;
+    --pc-muted: rgba(240,240,243,0.62);
+    --pc-faint: rgba(240,240,243,0.42);
+    --pc-rule: rgba(255,255,255,0.18);
+    --pc-rule-soft: rgba(255,255,255,0.09);
+    --pc-cta: #ffffff;
+    --pc-cta-text: #17171c;
+    --pc-ok: #5bcf9e;
+    --pc-ok-bg: rgba(91,207,158,0.13);
+    --pc-note: rgba(240,240,243,0.55);
+    --pc-note-bg: rgba(255,255,255,0.08);
+    --pc-issue: #ff9a7f;
+    --pc-issue-bg: rgba(255,119,89,0.16);
+    --pc-fail: #ff7066;
+    --pc-fail-bg: rgba(255,112,102,0.14);
+    --pc-coral-soft: rgba(255,119,89,0.5);
+    --pc-blue: #8db1ff;
+    --pc-band: #003c33;
+    --pc-band-dark: #000000;
+    --pc-tick: rgba(255,255,255,0.28);
+
+    --accent-fill-text: #17171c;
+    --accent-bg: rgba(255,119,89,0.16);
   }
 }
 
 :root[data-theme="light"] {
-  --paper: #FBF1DC;
-  --paper-raised: #FFFBF0;
-  --ink: #3B2A18;
-  --ink-muted: #8C7253;
-  --line: #E8D8AF;
-  --line-strong: #D2B97F;
-  --accent: #A8580F;
-  --accent-ink: #8A4A0C;
-  --accent-fill: #E8821E;
-  --accent-fill-text: #2E1D0C;
-  --accent-bg: #FBE3C0;
-  --pass: #4F7942;
-  --pass-bg: #E8F0DE;
-  --fail: #B23A2E;
-  --fail-bg: #F6E2DC;
-  --warn: #9C6D1E;
-  --warn-bg: #F3E6C8;
-  --focus: #8A4A0C;
+  --pc-canvas: #ffffff;
+  --pc-card: #ffffff;
+  --pc-raise: #f7f6f2;
+  --pc-warm: #eeece7;
+  --pc-ink: #212121;
+  --pc-strong: #000000;
+  --pc-muted: #75758a;
+  --pc-faint: #93939f;
+  --pc-rule: #d9d9dd;
+  --pc-rule-soft: #ececee;
+  --pc-cta: #17171c;
+  --pc-cta-text: #ffffff;
+  --pc-ok: #0e7a5a;
+  --pc-ok-bg: rgba(14,122,90,0.08);
+  --pc-note: #75758a;
+  --pc-note-bg: rgba(117,117,138,0.10);
+  --pc-issue: #bd4f2c;
+  --pc-issue-bg: rgba(255,119,89,0.12);
+  --pc-fail: #b30000;
+  --pc-fail-bg: rgba(179,0,0,0.07);
+  --pc-coral-soft: #ffad9b;
+  --pc-blue: #1863dc;
+  --pc-band: #003c33;
+  --pc-band-dark: #17171c;
+  --pc-tick: #c4c1b8;
+
+  --accent-fill-text: #ffffff;
+  --accent-bg: rgba(255,119,89,0.12);
 }
 
 :root[data-theme="dark"] {
-  --paper: #241A10;
-  --paper-raised: #322417;
-  --ink: #F5E8CC;
-  --ink-muted: #C9AD80;
-  --line: #45331F;
-  --line-strong: #5C4527;
-  --accent: #FFA94D;
-  --accent-ink: #FFC178;
-  --accent-fill: #F08C1A;
-  --accent-fill-text: #241A10;
-  --accent-bg: #3D2A14;
-  --pass: #8FBF6E;
-  --pass-bg: #25301D;
-  --fail: #E2806B;
-  --fail-bg: #3A211A;
-  --warn: #E0B45E;
-  --warn-bg: #3A2D15;
-  --focus: #FFC178;
+  --pc-canvas: #131318;
+  --pc-card: #1b1b21;
+  --pc-raise: #1f1f26;
+  --pc-warm: #232322;
+  --pc-ink: #f0f0f3;
+  --pc-strong: #ffffff;
+  --pc-muted: rgba(240,240,243,0.62);
+  --pc-faint: rgba(240,240,243,0.42);
+  --pc-rule: rgba(255,255,255,0.18);
+  --pc-rule-soft: rgba(255,255,255,0.09);
+  --pc-cta: #ffffff;
+  --pc-cta-text: #17171c;
+  --pc-ok: #5bcf9e;
+  --pc-ok-bg: rgba(91,207,158,0.13);
+  --pc-note: rgba(240,240,243,0.55);
+  --pc-note-bg: rgba(255,255,255,0.08);
+  --pc-issue: #ff9a7f;
+  --pc-issue-bg: rgba(255,119,89,0.16);
+  --pc-fail: #ff7066;
+  --pc-fail-bg: rgba(255,112,102,0.14);
+  --pc-coral-soft: rgba(255,119,89,0.5);
+  --pc-blue: #8db1ff;
+  --pc-band: #003c33;
+  --pc-band-dark: #000000;
+  --pc-tick: rgba(255,255,255,0.28);
+
+  --accent-fill-text: #17171c;
+  --accent-bg: rgba(255,119,89,0.16);
 }
 
 * { box-sizing: border-box; }
