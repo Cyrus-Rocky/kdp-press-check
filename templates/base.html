@@ -37,10 +37,13 @@
   <span class="crop-tick bl" aria-hidden="true"></span>
   <span class="crop-tick br" aria-hidden="true"></span>
 
+  <div class="announce-bar">Free press check · Catch KDP rejections before you upload</div>
+
   <div class="wrap">
     <header class="masthead">
       <a href="{{ url_for('index') }}" class="mark" style="text-decoration:none; color:inherit;">
-        KDP Press Check<span class="dot">.</span>
+        <span class="mark-dot" aria-hidden="true"></span>
+        kdp press check
       </a>
       <div class="masthead-right">
         <nav class="mode-nav">
@@ -48,22 +51,18 @@
           <a href="{{ url_for('cover_index') }}"  class="{{ 'is-active' if active_mode == 'cover'    else '' }}">Cover Check</a>
           <a href="{{ url_for('kindle_index') }}" class="{{ 'is-active' if active_mode == 'kindle'   else '' }}">Kindle Check</a>
           <a href="{{ url_for('preview_index') }}" class="{{ 'is-active' if active_mode == 'preview' else '' }}">Book Preview</a>
-          <span class="nav-divider" aria-hidden="true"></span>
           <a href="{{ url_for('royalty_calculator') }}"   class="{{ 'is-active' if active_mode == 'royalty'  else '' }}">Royalty Calc</a>
           <a href="{{ url_for('estimate_pages_index') }}" class="{{ 'is-active' if active_mode == 'estimate' else '' }}">Page Estimator</a>
           <a href="{{ url_for('genre_checklist') }}"      class="{{ 'is-active' if active_mode == 'genre'    else '' }}">Genre Guide</a>
-          <span class="nav-divider" aria-hidden="true"></span>
-          <a href="{{ url_for('problem_solvers') }}" class="{{ 'is-active' if active_mode == 'solvers' else '' }}">Problem Solvers</a>
         </nav>
-        <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Switch to dark mode" aria-pressed="false">
-          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/>
-            <path d="M12 2.5v2.4M12 19.1v2.4M4.4 4.4l1.7 1.7M17.9 17.9l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.4 19.6l1.7-1.7M17.9 6.1l1.7-1.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-          </svg>
-          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-          </svg>
-        </button>
+        <div class="masthead-actions">
+          <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Switch to dark mode" aria-pressed="false">
+            <span class="theme-dot" aria-hidden="true"></span>
+            <span class="theme-label-light">Light</span>
+            <span class="theme-label-dark">Dark</span>
+          </button>
+          <a href="{{ url_for('problem_solvers') }}" class="cta-pill {{ 'is-active' if active_mode == 'solvers' else '' }}">Find help</a>
+        </div>
       </div>
     </header>
 
