@@ -350,33 +350,74 @@ a { color: var(--accent-ink); }
 .field label {
   display: block;
   font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: var(--ink-muted);
+  font-size: 11px;
+  color: var(--pc-muted);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 6px;
+  letter-spacing: 1.4px;
+  margin-bottom: 8px;
 }
 .field select,
 .field input[type=number] {
   width: 100%;
   font-family: var(--font-body);
-  font-size: 0.98rem;
-  color: var(--ink);
-  background: var(--paper-raised);
-  border: 1.5px solid var(--line-strong);
+  font-size: 15px;
+  color: var(--pc-ink);
+  background: var(--pc-card);
+  border: 1px solid var(--pc-rule);
   border-radius: var(--radius-sm);
-  padding: 10px 12px;
-  min-height: 44px;
+  padding: 12px 14px;
+  min-height: 46px;
+  box-sizing: border-box;
 }
 .field select:focus-visible,
 .field input:focus-visible {
-  outline: 2px solid var(--focus);
+  outline: 2px solid var(--pc-focus);
   outline-offset: 1px;
 }
 .field .hint {
-  font-size: 0.8rem;
-  color: var(--ink-muted);
+  font-size: 12px;
+  color: var(--pc-faint);
   margin: 6px 0 0;
+}
+
+/* ---------- side-by-side upload + spec panel (Cover) ---------- */
+.split-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 1fr) minmax(260px, 380px);
+  gap: 40px;
+  align-items: start;
+}
+@media (max-width: 780px) {
+  .split-layout { grid-template-columns: 1fr; gap: 28px; }
+}
+.spec-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.spec-readout {
+  border: 1px solid var(--pc-rule-soft);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  background: var(--pc-raise);
+}
+.spec-readout-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--pc-muted);
+  margin: 0 0 6px;
+}
+.spec-readout-value {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  color: var(--pc-strong);
+}
+.spec-readout-note {
+  font-size: 12px;
+  color: var(--pc-faint);
+  margin: 4px 0 0;
 }
 
 /* ---------- two-column page layout ---------- */
@@ -472,6 +513,18 @@ a { color: var(--accent-ink); }
   margin: 0 0 48px;
 }
 .upload-form-lg { max-width: 720px; }
+
+.check-strip {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+  margin-top: 48px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--pc-faint);
+}
 
 .tool-grid {
   display: grid;

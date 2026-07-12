@@ -1,87 +1,116 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="hero">
-  <h1>Check your cover before the barcode lands on your title.</h1>
-  <p>Upload your full wraparound cover PDF — back cover, spine, and front cover in one file.
-    Tell us the book's trim size, page count, and paper so we can calculate the exact spine
-    width and check your file matches it, along with fonts, image resolution, and KDP's
-    barcode placement zone.</p>
+
+<section class="hero-single">
+  <div class="eyebrow">Cover check · Full wrap</div>
+  <h1 class="hero-display">Spine math, done for you.</h1>
+  <p class="hero-lead">Upload your full-wrap cover PDF and tell us the book it belongs to. We verify the dimensions, bleed, and barcode zone against KDP's template.</p>
+
+  <form id="upload-form" action="{{ url_for('check_cover') }}" method="post" enctype="multipart/form-data" novalidate data-accept=".pdf">
+    <div class="split-layout">
+      <div class="dropzone" id="dropzone">
+        <span class="bracket-r" aria-hidden="true"></span>
+        <span class="scanline" aria-hidden="true"></span>
+
+        <label for="file-input" class="instructions">Drop your cover PDF here, or
+          <button type="button" class="browse" id="browse-btn">click to browse</button>
+        </label>
+        <p class="filehint">Full-wrap PDF · back + spine + front</p>
+
+        <input type="file" name="cover" id="file-input" accept="application/pdf,.pdf">
+
+        <div class="filename-display" id="file-display">
+          <span id="file-name"></span>
+          <button type="button" class="remove" id="file-remove">Remove</button>
+        </div>
+      </div>
+
+      <div class="spec-panel">
+        <div class="field">
+          <label for="trim-select">Trim size</label>
+          <select name="trim_select" id="trim-select" required>
+            <option value="" disabled selected>Choose your book's trim size</option>
+            {% for w, h in trim_sizes %}
+              <option value="{{ w }}|{{ h }}">{{ w }}" x {{ h }}"</option>
+            {% endfor %}
+          </select>
+          <input type="hidden" name="trim_w" id="trim-w">
+          <input type="hidden" name="trim_h" id="trim-h">
+        </div>
+
+        <div class="field">
+          <label for="page-count">Interior page count</label>
+          <input type="number" name="page_count" id="page-count" min="24" max="828" step="1" placeholder="e.g. 240" required>
+        </div>
+
+        <div class="field">
+          <label for="paper-type">Paper type</label>
+          <select name="paper_type" id="paper-type" required>
+            <option value="cream">Cream paper</option>
+            <option value="white">White paper</option>
+            <option value="color">Premium color paper</option>
+          </select>
+        </div>
+
+        <div class="spec-readout">
+          <p class="spec-readout-label">Computed spine width</p>
+          <div class="spec-readout-value" id="spine-width">—</div>
+          <p class="spec-readout-note" id="wrap-size">Enter page count to calculate</p>
+        </div>
+
+        <div class="actions-inline">
+          <button type="submit" class="primary" id="submit-btn" disabled>
+            <span class="label">Check this cover →</span>
+            <span class="spinner"><span class="spinner-dash" aria-hidden="true"></span> Checking cover&hellip;</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <p id="form-status" role="status" aria-live="polite" style="position:absolute; left:-9999px;"></p>
+  </form>
+
+  <p class="footnote-inline" style="display:block; margin-top:40px; max-width:60ch;">Spine width is calculated from KDP's published formula and is approximate. Always confirm against KDP's own cover calculator before your final upload.</p>
 </section>
 
-<form id="upload-form" action="{{ url_for('check_cover') }}" method="post" enctype="multipart/form-data" novalidate data-accept=".pdf">
-  <div class="field-grid">
-    <div class="field">
-      <label for="trim-select">Trim size</label>
-      <select name="trim_select" id="trim-select" required>
-        <option value="" disabled selected>Choose your book's trim size</option>
-        {% for w, h in trim_sizes %}
-          <option value="{{ w }}|{{ h }}">{{ w }}" x {{ h }}"</option>
-        {% endfor %}
-      </select>
-      <input type="hidden" name="trim_w" id="trim-w">
-      <input type="hidden" name="trim_h" id="trim-h">
-    </div>
-
-    <div class="field">
-      <label for="page-count">Interior page count</label>
-      <input type="number" name="page_count" id="page-count" min="1" step="1"
-             placeholder="e.g. 240" required>
-      <p class="hint">The final printed page count of your interior file.</p>
-    </div>
-
-    <div class="field field-full">
-      <label for="paper-type">Paper type</label>
-      <select name="paper_type" id="paper-type" required>
-        <option value="" disabled selected>Choose paper type</option>
-        <option value="white">White paper</option>
-        <option value="cream">Cream paper</option>
-        <option value="color">Premium color paper</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="dropzone" id="dropzone">
-    <span class="bracket-r" aria-hidden="true"></span>
-    <span class="scanline" aria-hidden="true"></span>
-
-    <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M12 3v12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-      <path d="M7 8l5-5 5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M5 16v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-    </svg>
-
-    <label for="file-input" class="instructions">
-      Drop your cover PDF here, or
-      <button type="button" class="browse" id="browse-btn">choose a file</button>
-    </label>
-    <p class="filehint">PDF only &middot; up to 200 MB</p>
-
-    <input type="file" name="cover" id="file-input" accept="application/pdf,.pdf">
-
-    <div class="filename-display" id="file-display">
-      <span id="file-name"></span>
-      <button type="button" class="remove" id="file-remove">Remove</button>
-    </div>
-  </div>
-
-  <div class="actions">
-    <button type="submit" class="primary" id="submit-btn" disabled>
-      <span class="label">Run press check</span>
-      <span class="spinner"><span class="spinner-dash" aria-hidden="true"></span> Checking cover&hellip;</span>
-    </button>
-    <p class="footnote">Usually takes a few seconds.</p>
-  </div>
-
-  <p id="form-status" role="status" aria-live="polite" style="position:absolute; left:-9999px;"></p>
-</form>
-
 <script>
-  document.getElementById("trim-select").addEventListener("change", function (e) {
-    var parts = e.target.value.split("|");
-    document.getElementById("trim-w").value = parts[0] || "";
-    document.getElementById("trim-h").value = parts[1] || "";
-  });
-</script>
+  var SPINE_PER_PAGE = { white: 0.002252, cream: 0.0025, color: 0.002252 };
+  var trimSel = document.getElementById("trim-select");
+  var trimW = document.getElementById("trim-w");
+  var trimH = document.getElementById("trim-h");
+  var pageCount = document.getElementById("page-count");
+  var paperType = document.getElementById("paper-type");
+  var spineEl = document.getElementById("spine-width");
+  var wrapEl = document.getElementById("wrap-size");
 
-<p class="footnote" style="margin-top:48px;">Spine width is calculated from KDP's published formula and is approximate — always confirm against KDP's own cover calculator before your final upload.</p>
+  function recompute() {
+    var parts = (trimSel.value || "").split("|");
+    var tw = parseFloat(parts[0]);
+    var th = parseFloat(parts[1]);
+    trimW.value = isNaN(tw) ? "" : tw;
+    trimH.value = isNaN(th) ? "" : th;
+
+    var pages = parseInt(pageCount.value, 10);
+    var perPage = SPINE_PER_PAGE[paperType.value] || SPINE_PER_PAGE.white;
+    if (!pages || pages < 1) {
+      spineEl.textContent = "—";
+      wrapEl.textContent = "Enter page count to calculate";
+      return;
+    }
+    var spine = pages * perPage;
+    spineEl.textContent = spine.toFixed(3) + " in";
+    if (!isNaN(tw) && !isNaN(th)) {
+      var totalW = (tw * 2) + spine + 0.25;
+      var totalH = th + 0.25;
+      wrapEl.textContent = "Full wrap incl. bleed: " + totalW.toFixed(2) + " x " + totalH.toFixed(2) + " in";
+    } else {
+      wrapEl.textContent = "Choose a trim size for full wrap size";
+    }
+  }
+
+  trimSel.addEventListener("change", recompute);
+  pageCount.addEventListener("input", recompute);
+  paperType.addEventListener("change", recompute);
+  recompute();
+</script>
 {% endblock %}
