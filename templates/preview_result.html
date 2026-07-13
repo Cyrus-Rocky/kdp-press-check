@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Preview — {{ interior_filename }} — KDP Press Check{% endblock %}
+{% block title %}Preview · {{ interior_filename }} · KDP Press Check{% endblock %}
 {% block content %}
 
 {# ── Header bar ── #}
@@ -46,7 +46,7 @@
     Content should stay inside the blue dashed line to avoid being cut off.
     {% if margin_report and margin_report.violations %}
       <strong style="color:var(--fail);">
-        {{ margin_report.violations | length }} page{{ 's' if margin_report.violations|length != 1 else '' }} flagged — scroll to Scan Report below.
+        {{ margin_report.violations | length }} page{{ 's' if margin_report.violations|length != 1 else '' }} flagged. Scroll to Scan Report below.
       </strong>
     {% endif %}
   </span>
@@ -207,7 +207,7 @@
           </svg>
         </div>
         <div class="scan-issue-body">
-          <p class="scan-issue-title">All clear — {{ margin_report.summary }}</p>
+          <p class="scan-issue-title">All clear. {{ margin_report.summary }}</p>
         </div>
       </div>
     {% endif %}

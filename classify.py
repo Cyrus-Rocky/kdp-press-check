@@ -2,7 +2,7 @@
 as opposed to a screenplay/script, a near-empty document, slides, or
 something else KDP's paperback interior rules were never meant to judge.
 
-This runs first and reports honestly either way — it does not block the
+This runs first and reports honestly either way, it does not block the
 rest of the checks from running, it just tells the user what it found.
 """
 import re
@@ -42,13 +42,13 @@ def classify(page_count: int, full_text: str, mono_font_page_ratio: float,
             )
         return {
             "kind": "screenplay",
-            "summary": "This reads like a screenplay or script, not a book interior — "
+            "summary": "This reads like a screenplay or script, not a book interior, "
                        + " and ".join(detail_bits) + ".",
             "fix": "Screenplays follow different formatting standards (and usually go to "
                    "different platforms, like KDP Print for a bound script, or a "
                    "screenwriting-specific service) than a novel or nonfiction interior. "
                    "The trim/margin/bleed rules below are built for book interiors, so "
-                   "they may not mean much here — if you did mean to upload a book "
+                   "they may not mean much here, if you did mean to upload a book "
                    "manuscript, double-check you picked the right file.",
         }
 
@@ -57,14 +57,14 @@ def classify(page_count: int, full_text: str, mono_font_page_ratio: float,
             "kind": "no_text",
             "summary": "No readable text was found anywhere in this file.",
             "fix": "If this is a scanned book, it needs to be a text-based PDF, not just "
-                   "page images — otherwise this just isn't a manuscript file. Double-check "
+                   "page images, otherwise this just isn't a manuscript file. Double-check "
                    "you uploaded the right document.",
         }
 
     if words_per_page < MIN_WORDS_PER_PAGE_FOR_BOOK:
         return {
             "kind": "sparse_text",
-            "summary": f"Only about {words_per_page:.0f} words per page on average — too "
+            "summary": f"Only about {words_per_page:.0f} words per page on average, too "
                        f"little body text for a typical book interior. This might be slides, "
                        f"a cover sheet, a form, or a mostly-blank file.",
             "fix": "If this was meant to be your book's interior, make sure you uploaded the "
@@ -76,18 +76,18 @@ def classify(page_count: int, full_text: str, mono_font_page_ratio: float,
         return {
             "kind": "landscape",
             "summary": f"Most pages ({landscape_page_ratio * 100:.0f}%) are landscape-oriented, "
-                       f"which is unusual for a paperback book interior — those are almost "
+                       f"which is unusual for a paperback book interior, those are almost "
                        f"always portrait.",
             "fix": "If this is meant to be a paperback interior, check that you exported it "
                    "in portrait orientation. Landscape can be correct for some children's "
-                   "books, comics, or photo books — if that's what this is, you can ignore "
+                   "books, comics, or photo books, if that's what this is, you can ignore "
                    "this note.",
         }
 
     page_word = "page" if page_count == 1 else "pages"
     return {
         "kind": "book",
-        "summary": f"Reads like a book interior — about {words_per_page:.0f} words per page "
+        "summary": f"Reads like a book interior, about {words_per_page:.0f} words per page "
                    f"across {page_count} {page_word}.",
         "fix": None,
     }

@@ -1,30 +1,16 @@
 {% extends "base.html" %}
-{% block title %}Genre-Based KDP Checklist — KDP Press Check{% endblock %}
+{% block title %}Genre-Based KDP Checklist · KDP Press Check{% endblock %}
 {% block content %}
 
-<div class="page-layout">
-  <div class="col-hero">
-    <section class="hero">
-      <h1>Genre-Based KDP Checklist</h1>
-      <p>KDP has different technical requirements depending on your book type. Select your genre and get an exact checklist of what you need before you upload.</p>
-    </section>
-    <div class="info-card">
-      <h3>Why genre matters</h3>
-      <ul>
-        <li>Children's picture books <em>require</em> full bleed — novels don't</li>
-        <li>Cookbooks almost always need premium color printing</li>
-        <li>Large-print books need specific font and margin minimums</li>
-        <li>Comics and graphic novels need different trim sizes than prose</li>
-        <li>Textbooks need the right trim to compete on Amazon with print versions</li>
-      </ul>
-    </div>
-  </div>
+<section class="hero-single">
+  <div class="eyebrow">Genre guide</div>
+  <h1 class="hero-display">Every genre has its rules.</h1>
+  <p class="hero-lead">The conventions readers expect, and the print pitfalls specific to your kind of book. Work through the list before you upload.</p>
 
-  <div class="col-form">
-    <div class="genre-selector">
-      <label class="form-label" for="genre-select">Select your book type</label>
-      <select id="genre-select" class="form-select genre-select-input">
-        <option value="">— choose a genre —</option>
+  <div class="genre-wrap">
+    <div class="genre-top">
+      <select id="genre-select">
+        <option value="">Choose a genre</option>
         <option value="novel">Novel / Fiction</option>
         <option value="nonfiction">Non-Fiction / Self-Help / Memoir</option>
         <option value="childrens">Children's Picture Book</option>
@@ -35,22 +21,17 @@
         <option value="comic">Comic Book / Graphic Novel</option>
         <option value="photo">Photography / Coffee Table Book</option>
       </select>
-    </div>
-
-    <div id="checklist-panel" style="display:none; margin-top:24px;">
-      <div class="genre-header" id="genre-header"></div>
-      <div id="checklist-items"></div>
-      <div class="genre-tools-bar">
-        <button class="genre-btn-secondary" id="btn-check-all">Mark all done</button>
-        <button class="genre-btn-secondary" id="btn-uncheck-all">Reset</button>
-        <a id="btn-upload-link" href="{{ url_for('index') }}" class="genre-btn-primary">
-          Run full check on my PDF →
-        </a>
+      <div class="genre-progress-wrap" id="genre-progress" style="display:none;">
+        <div class="genre-progress-head"><span>Progress</span><span id="genre-progress-label">0 / 0</span></div>
+        <div class="genre-bar"><div class="genre-bar-fill" id="genre-progress-fill"></div></div>
       </div>
     </div>
 
-    <div id="genre-empty" class="genre-empty-state">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" style="color:var(--ink-muted);opacity:0.4;">
+    <div id="checklist-items"></div>
+    <div id="genre-done" class="genre-done-box" style="display:none;">All checked. Run the <a href="{{ url_for('index') }}" class="pv-link">interior check</a> to verify the technical side.</div>
+
+    <div id="genre-empty" class="genre-empty">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" style="opacity:0.4;">
         <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
         <rect x="9" y="3" width="6" height="4" rx="1" stroke="currentColor" stroke-width="1.6"/>
         <path d="M9 12h6M9 16h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
@@ -58,13 +39,13 @@
       <p>Select a genre above to see its KDP requirements checklist.</p>
     </div>
   </div>
-</div>
+</section>
 
 <script>
 var GENRES = {
   novel: {
     label: "Novel / Fiction",
-    description: "Standard prose fiction — thrillers, romance, fantasy, literary fiction, etc.",
+    description: "Standard prose fiction, thrillers, romance, fantasy, literary fiction, etc.",
     items: [
       { text: "Trim size: 5×8, 5.5×8.5, or 6×9 are standard for fiction", critical: false, category: "Layout" },
       { text: "Interior must be Black & White (unless artwork requires color)", critical: true, category: "Printing" },
@@ -77,7 +58,7 @@ var GENRES = {
       { text: "Chapter headings must be consistent style throughout", critical: false, category: "Formatting" },
       { text: "No bleed required unless you have full-page illustrations", critical: false, category: "Bleed" },
       { text: "Page numbers in footer or header (excluding first pages of chapters)", critical: false, category: "Formatting" },
-      { text: "Widow/orphan control enabled — no single lines stranded at page tops/bottoms", critical: false, category: "Formatting" },
+      { text: "Widow/orphan control enabled, no single lines stranded at page tops/bottoms", critical: false, category: "Formatting" },
     ]
   },
   nonfiction: {
@@ -87,7 +68,7 @@ var GENRES = {
       { text: "Trim size: 6×9 most common; 5.5×8.5 or 7×10 also popular", critical: false, category: "Layout" },
       { text: "Black & White interior unless charts or photos require color", critical: true, category: "Printing" },
       { text: "Gutter margin: 0.875\" (for most non-fiction page counts)", critical: true, category: "Margins" },
-      { text: "Table of Contents with accurate page numbers — KDP may reject wrong page numbers", critical: true, category: "Content" },
+      { text: "Table of Contents with accurate page numbers, KDP may reject wrong page numbers", critical: true, category: "Content" },
       { text: "Front matter: title page, copyright page, dedication, TOC", critical: false, category: "Content" },
       { text: "All fonts embedded in the PDF", critical: true, category: "Fonts" },
       { text: "Chapter/section headings consistent style throughout", critical: false, category: "Formatting" },
@@ -111,8 +92,8 @@ var GENRES = {
       { text: "Total page count: minimum 24 pages including cover pages", critical: true, category: "Pages" },
       { text: "No text in the bleed area (0.125\" border around image)", critical: true, category: "Bleed" },
       { text: "Cover PDF submitted separately from interior", critical: true, category: "Cover" },
-      { text: "Font embedding required — no system fonts", critical: true, category: "Fonts" },
-      { text: "Left and right pages form spreads — lay out in facing-page view", critical: false, category: "Layout" },
+      { text: "Font embedding required, no system fonts", critical: true, category: "Fonts" },
+      { text: "Left and right pages form spreads, lay out in facing-page view", critical: false, category: "Layout" },
     ]
   },
   cookbook: {
@@ -154,7 +135,7 @@ var GENRES = {
     description: "Poetry collections, essay anthologies, literary journals, and mixed art/text books.",
     items: [
       { text: "Trim size: 5×8 or 5.5×8.5 typical for poetry; 7×10 or 8.5×11 for art books", critical: false, category: "Layout" },
-      { text: "Wide margins encouraged for poetry — 0.75\" inside minimum", critical: true, category: "Margins" },
+      { text: "Wide margins encouraged for poetry, 0.75\" inside minimum", critical: true, category: "Margins" },
       { text: "All fonts embedded", critical: true, category: "Fonts" },
       { text: "Consistent line-break treatment throughout", critical: false, category: "Formatting" },
       { text: "If illustrations/artwork included: 300 DPI minimum", critical: true, category: "Images" },
@@ -166,19 +147,19 @@ var GENRES = {
   },
   largeprint: {
     label: "Large-Print Edition",
-    description: "Editions formatted for readers with visual impairments — must meet accessibility standards.",
+    description: "Editions formatted for readers with visual impairments, must meet accessibility standards.",
     items: [
       { text: "Body font size: 16pt minimum (18pt preferred)", critical: true, category: "Fonts" },
       { text: "Line spacing: 1.5 or double-spaced minimum", critical: true, category: "Formatting" },
-      { text: "Avoid serif fonts with thin strokes — use Georgia, Palatino, or a clear serif", critical: false, category: "Fonts" },
+      { text: "Avoid serif fonts with thin strokes, use Georgia, Palatino, or a clear serif", critical: false, category: "Fonts" },
       { text: "All fonts embedded in the PDF", critical: true, category: "Fonts" },
       { text: "Trim size: 6×9 or larger to accommodate larger type without tiny lines", critical: false, category: "Layout" },
-      { text: "Gutter margin: minimum 0.875\" — large-print books are often thicker", critical: true, category: "Margins" },
+      { text: "Gutter margin: minimum 0.875\", large-print books are often thicker", critical: true, category: "Margins" },
       { text: "Black & White interior unless art requires color", critical: false, category: "Printing" },
-      { text: "No justified text with tight word spacing — ragged-right preferred", critical: false, category: "Formatting" },
+      { text: "No justified text with tight word spacing, ragged-right preferred", critical: false, category: "Formatting" },
       { text: "\"Large Print\" must appear on the cover and title page", critical: true, category: "Content" },
       { text: "Page count between 24 and 828 pages", critical: true, category: "Pages" },
-      { text: "High contrast text — avoid grey text on white; use pure black (#000000)", critical: true, category: "Formatting" },
+      { text: "High contrast text, avoid grey text on white; use pure black (#000000)", critical: true, category: "Formatting" },
     ]
   },
   comic: {
@@ -201,16 +182,16 @@ var GENRES = {
     label: "Photography / Coffee Table Book",
     description: "Photo books, portfolios, and image-led coffee table books.",
     items: [
-      { text: "Premium Color printing required — this is a full-color product", critical: true, category: "Printing" },
+      { text: "Premium Color printing required, this is a full-color product", critical: true, category: "Printing" },
       { text: "All photos at 300 DPI minimum at final print size", critical: true, category: "Images" },
       { text: "Trim size: 8×10, 8.5×11, or 10×8 landscape for coffee table format", critical: false, category: "Layout" },
       { text: "Full-bleed photos: add 0.125\" bleed on all sides", critical: true, category: "Bleed" },
       { text: "Keep captions and important content 0.25\" inside trim edge", critical: true, category: "Bleed" },
-      { text: "Color profile: sRGB (KDP converts to CMYK for printing — sRGB converts best)", critical: true, category: "Images" },
+      { text: "Color profile: sRGB (KDP converts to CMYK for printing, sRGB converts best)", critical: true, category: "Images" },
       { text: "Page count: minimum 24 pages, maximum 828 pages", critical: true, category: "Pages" },
-      { text: "Minimal fonts — ensure any text overlaid on photos is embedded", critical: true, category: "Fonts" },
-      { text: "Avoid pure white backgrounds on facing pages — they can show as slightly different whites after printing", critical: false, category: "Printing" },
-      { text: "Review the KDP print preview carefully — color reproduction varies between home screen and print", critical: true, category: "Printing" },
+      { text: "Minimal fonts, ensure any text overlaid on photos is embedded", critical: true, category: "Fonts" },
+      { text: "Avoid pure white backgrounds on facing pages, they can show as slightly different whites after printing", critical: false, category: "Printing" },
+      { text: "Review the KDP print preview carefully, color reproduction varies between home screen and print", critical: true, category: "Printing" },
       { text: "Table of contents optional; captions consistent in style", critical: false, category: "Content" },
     ]
   }
@@ -223,44 +204,28 @@ var CATEGORY_COLORS = {
   "Cover": "#06b6d4"
 };
 
+function escapeHtml(s) {
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
 function renderChecklist(genreKey) {
   var genre = GENRES[genreKey];
   if (!genre) return;
 
   document.getElementById("genre-empty").style.display = "none";
-  document.getElementById("checklist-panel").style.display = "block";
-
-  // Header
-  document.getElementById("genre-header").innerHTML =
-    '<h2 class="genre-title">' + genre.label + '</h2>' +
-    '<p class="genre-desc">' + genre.description + '</p>';
-
-  // Group by category
-  var byCategory = {};
-  genre.items.forEach(function(item) {
-    if (!byCategory[item.category]) byCategory[item.category] = [];
-    byCategory[item.category].push(item);
-  });
+  document.getElementById("genre-progress").style.display = "block";
 
   var html = "";
-  Object.keys(byCategory).forEach(function(cat) {
-    var color = CATEGORY_COLORS[cat] || "#6b7280";
-    html += '<div class="genre-category">';
-    html += '<div class="genre-cat-label" style="color:' + color + ';">' + cat + '</div>';
-    byCategory[cat].forEach(function(item, i) {
-      var id = "item-" + cat.replace(/\s/g,"-") + "-" + i;
-      html += '<label class="genre-item' + (item.critical ? ' genre-item-critical' : '') + '" for="' + id + '">';
-      html += '<input type="checkbox" id="' + id + '" class="genre-checkbox">';
-      html += '<span class="genre-check-box"></span>';
-      html += '<span class="genre-item-text">' + item.text + '</span>';
-      if (item.critical) html += '<span class="genre-badge-required">Required</span>';
-      html += '</label>';
-    });
-    html += '</div>';
+  genre.items.forEach(function(item, i) {
+    var id = "gi-" + i;
+    html += '<label class="genre-item" for="' + id + '">';
+    html += '<input type="checkbox" id="' + id + '" class="genre-checkbox">';
+    html += '<span class="genre-item-text">' + escapeHtml(item.text) + '</span>';
+    html += '<span class="genre-chip' + (item.critical ? ' is-critical' : '') + '">' + item.category + '</span>';
+    html += '</label>';
   });
   document.getElementById("checklist-items").innerHTML = html;
 
-  // Progress tracking
   document.querySelectorAll(".genre-checkbox").forEach(function(cb) {
     cb.addEventListener("change", updateProgress);
   });
@@ -271,34 +236,20 @@ function updateProgress() {
   var all = document.querySelectorAll(".genre-checkbox");
   var checked = document.querySelectorAll(".genre-checkbox:checked");
   var pct = all.length ? Math.round(checked.length / all.length * 100) : 0;
-  var existing = document.getElementById("genre-progress");
-  if (!existing) {
-    var bar = document.createElement("div");
-    bar.id = "genre-progress";
-    bar.className = "genre-progress";
-    bar.innerHTML = '<div class="genre-progress-bar" id="genre-progress-fill"></div>' +
-                    '<span class="genre-progress-label" id="genre-progress-label"></span>';
-    document.getElementById("checklist-panel").insertBefore(bar, document.getElementById("checklist-items"));
-  }
   document.getElementById("genre-progress-fill").style.width = pct + "%";
-  document.getElementById("genre-progress-label").textContent = checked.length + " / " + all.length + " complete";
+  document.getElementById("genre-progress-label").textContent = checked.length + " / " + all.length;
+  document.getElementById("genre-done").style.display =
+    (all.length && checked.length === all.length) ? "block" : "none";
 }
 
 document.getElementById("genre-select").addEventListener("change", function() {
   if (this.value) renderChecklist(this.value);
   else {
     document.getElementById("genre-empty").style.display = "flex";
-    document.getElementById("checklist-panel").style.display = "none";
+    document.getElementById("genre-progress").style.display = "none";
+    document.getElementById("checklist-items").innerHTML = "";
+    document.getElementById("genre-done").style.display = "none";
   }
-});
-
-document.getElementById("btn-check-all").addEventListener("click", function() {
-  document.querySelectorAll(".genre-checkbox").forEach(function(cb) { cb.checked = true; });
-  updateProgress();
-});
-document.getElementById("btn-uncheck-all").addEventListener("click", function() {
-  document.querySelectorAll(".genre-checkbox").forEach(function(cb) { cb.checked = false; });
-  updateProgress();
 });
 </script>
 {% endblock %}

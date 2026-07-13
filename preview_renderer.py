@@ -1,7 +1,7 @@
 """Renders PDF pages to individual JPEG files for the in-browser book previewer.
 
 Pages are saved to a job directory on disk and served on-demand by the Flask
-app — the browser fetches only the two pages currently visible, so total page
+app, the browser fetches only the two pages currently visible, so total page
 count is no longer limited by HTML payload size.
 
 Job dirs live under UPLOAD_DIR/preview_<job_id>/ and are deleted automatically
@@ -164,7 +164,7 @@ def check_page_margins(pdf_path: str) -> dict:
     doc.close()
 
     if not violations:
-        summary = "All pages clear — no content found inside the 0.25\" safety margin."
+        summary = "All pages clear, no content found inside the 0.25\" safety margin."
     else:
         pages_hit = len(violations)
         summary = (f"{pages_hit} page{'s' if pages_hit != 1 else ''} have content "

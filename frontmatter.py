@@ -1,7 +1,7 @@
 """Front-matter checks: does the manuscript have a copyright page and a
 title page? Missing front matter doesn't get a book rejected by KDP, but
 it's the kind of thing an author misses on every read-through because
-their eye is on the story, not the boilerplate — exactly the blind-spot
+their eye is on the story, not the boilerplate, exactly the blind-spot
 class of problem this tool exists to catch.
 
 These are heuristics, not hard rules, so every result here is phrased as
@@ -33,12 +33,12 @@ def check_copyright_page(full_text: str, scan_words: int = 1500) -> dict:
     return {
         "title": "Copyright Page", "ok": False, "warning_only": True,
         "summary": "No copyright page was detected near the front of the manuscript.",
-        "fix": "This is easy to forget since it's boilerplate, not story — add a copyright "
+        "fix": "This is easy to forget since it's boilerplate, not story, add a copyright "
                "page near the front with at minimum \"Copyright © [year] [your name]. All "
                "rights reserved.\" KDP doesn't require it, but readers and reviewers expect "
                "it, and it's your basic proof of authorship.",
         "detail": "No copyright/rights language found in the scanned portion of the document. "
-                  "This is a heuristic — unusual copyright wording could be missed.",
+                  "This is a heuristic, unusual copyright wording could be missed.",
     }
 
 
@@ -52,7 +52,7 @@ def check_title_page(first_page_text: str, doc_title: str = None) -> dict:
         if title_match:
             return {
                 "title": "Title Page", "ok": True, "warning_only": True,
-                "summary": f"The first page is short and includes the book's title — looks "
+                "summary": f"The first page is short and includes the book's title, looks "
                            f"like a title page.",
                 "detail": f"First page word count: {word_count}. Matches document title "
                           f"\"{doc_title}\".",
@@ -68,9 +68,9 @@ def check_title_page(first_page_text: str, doc_title: str = None) -> dict:
 
     return {
         "title": "Title Page", "ok": False, "warning_only": True,
-        "summary": "The first page has a lot of text on it — it may go straight into the "
+        "summary": "The first page has a lot of text on it, it may go straight into the "
                    "story without a dedicated title page.",
-        "fix": "This is a guess, not a certainty — skip it if your book intentionally opens "
+        "fix": "This is a guess, not a certainty, skip it if your book intentionally opens "
                "this way (some do). Otherwise, add a simple page at the front with just the "
                "title and your name before the story starts.",
         "detail": f"First page word count: {word_count} (a typical title page has well under "

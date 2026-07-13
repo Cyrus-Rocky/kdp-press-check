@@ -23,13 +23,13 @@
 {% set note_count = report.note_count %}
 {% set ok_count = report.ok_count %}
 {% set src_label = 'Cover check' if active_mode == 'cover' else ('Kindle check' if active_mode == 'kindle' else 'Interior check') %}
-{% set g_label = 'EPUB structure' if active_mode == 'kindle' else 'Print geometry — blocking' %}
-{% set c_label = 'Content & delivery' if active_mode == 'kindle' else 'Content & proofreading — advisory' %}
+{% set g_label = 'EPUB structure' if active_mode == 'kindle' else 'Print geometry (blocking)' %}
+{% set c_label = 'Content & delivery' if active_mode == 'kindle' else 'Content & proofreading (advisory)' %}
 
 {% macro group_sub(rows) %}
   {% set passed = rows | selectattr('ok') | list | length %}
   {% set flagged = rows | length - passed %}
-  {{ passed }} of {{ rows | length }} passed{% if flagged %} — {{ flagged }} flagged{% endif %}
+  {{ passed }} of {{ rows | length }} passed{% if flagged %} · {{ flagged }} flagged{% endif %}
 {% endmacro %}
 
 {% macro render_row(r) %}
@@ -91,9 +91,9 @@
       <div class="result-title">{{ 'Ready for KDP.' if report.overall_ok else 'Needs fixes before upload.' }}</div>
       <p class="result-sub">
         {% if not report.overall_ok %}
-          {{ fail_count }} blocking issue{{ 's' if fail_count != 1 else '' }} would stop KDP from accepting this file. They're listed first, each with a fix you can do today — or hand off.
+          {{ fail_count }} blocking issue{{ 's' if fail_count != 1 else '' }} would stop KDP from accepting this file. They're listed first, each with a fix you can do today, or hand off.
         {% elif issue_count %}
-          Nothing here blocks KDP acceptance. {{ issue_count }} advisory finding{{ 's' if issue_count != 1 else '' }} below {{ 'are' if issue_count != 1 else 'is' }} worth a look — none will stop your upload.
+          Nothing here blocks KDP acceptance. {{ issue_count }} advisory finding{{ 's' if issue_count != 1 else '' }} below {{ 'are' if issue_count != 1 else 'is' }} worth a look, though none will stop your upload.
         {% else %}
           Nothing blocks KDP acceptance. Upload when you're ready.
         {% endif %}
@@ -140,7 +140,7 @@
   <div class="help-band-copy">
     <div class="help-band-eyebrow">If you'd rather not do this yourself</div>
     <div class="help-band-title">{{ ns.help_count }} issue{{ 's' if ns.help_count != 1 else '' }} below match a specialist in our directory.</div>
-    <p class="help-band-sub">Formatting, cover and editing freelancers who work on KDP books every week. We link out — no markup, no middleman.</p>
+    <p class="help-band-sub">Formatting, cover and editing freelancers who work on KDP books every week. We link out, no markup, no middleman.</p>
   </div>
   <a href="{{ url_for('problem_solvers') }}" class="cta-pill invert">See who can fix this →</a>
 </div>
@@ -150,5 +150,5 @@
   <a class="button" href="{{ url_for('cover_index') if active_mode == 'cover' else url_for('index') }}">Check another file</a>
 </div>
 
-<p class="disclaimer">This checks the rules we currently model — always confirm in KDP's own previewer before publishing.</p>
+<p class="disclaimer">This checks the rules we currently model. Always confirm in KDP's own previewer before publishing.</p>
 {% endblock %}

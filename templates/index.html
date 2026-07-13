@@ -4,7 +4,7 @@
 <section class="hero-single">
   <div class="eyebrow">Interior check · Paperback</div>
   <h1 class="hero-display">Catch it before KDP&nbsp;does.</h1>
-  <p class="hero-lead">Upload your paperback interior and get the full report KDP won't give you — margins, fonts, bleed, image resolution, and everything else it checks at submission — before you risk a rejected upload.</p>
+  <p class="hero-lead">Upload your paperback interior and get the full report KDP won't give you: margins, fonts, bleed, image resolution, and everything else it checks at submission, before you risk a rejected upload.</p>
 
   <form id="upload-form" action="{{ url_for('check') }}" method="post"
         enctype="multipart/form-data" novalidate data-accept=".pdf,.docx,.txt,.rtf,.odt" class="upload-form-lg">
@@ -31,7 +31,7 @@
         <span class="label">Run press check →</span>
         <span class="spinner"><span class="spinner-dash" aria-hidden="true"></span> Checking manuscript&hellip;</span>
       </button>
-      <span class="footnote-inline">Nothing is stored — your file is deleted the moment the check is done.</span>
+      <span class="footnote-inline">Nothing is stored. Your file is deleted the moment the check is done.</span>
     </div>
 
     <p id="form-status" role="status" aria-live="polite"
@@ -42,12 +42,12 @@
 <div class="tool-grid">
   <a class="tool-card" href="{{ url_for('cover_index') }}">
     <span class="tool-card-title">Cover check</span>
-    <p>Validate your full-wrap cover — spine width, bleed, barcode zone.</p>
+    <p>Validate your full-wrap cover: spine width, bleed, barcode zone.</p>
     <span class="tool-card-link">Open →</span>
   </a>
   <a class="tool-card" href="{{ url_for('kindle_index') }}">
     <span class="tool-card-title">Kindle check</span>
-    <p>Validate your EPUB — nav, cover image, fonts, delivery-fee weight.</p>
+    <p>Validate your EPUB: nav, cover image, fonts, delivery-fee weight.</p>
     <span class="tool-card-link">Open →</span>
   </a>
   <a class="tool-card" href="{{ url_for('preview_index') }}">

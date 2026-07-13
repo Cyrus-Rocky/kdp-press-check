@@ -1,6 +1,6 @@
 """KDP paperback interior rules, sourced from Amazon KDP's published print
 specifications (trim sizes, margins, bleed, fonts, image resolution).
-All checks here are deterministic — no AI involved.
+All checks here are deterministic, no AI involved.
 """
 
 POINTS_PER_INCH = 72
@@ -60,7 +60,7 @@ def closest_trim_size(width_in: float, height_in: float):
 # A paperback cover is one full-wrap PDF: back cover + spine + front cover,
 # with bleed on all four outer edges. KDP calculates spine width from page
 # count and paper stock; these per-page constants are from KDP's published
-# cover calculator formulas (approximate — KDP's own calculator is the source
+# cover calculator formulas (approximate, KDP's own calculator is the source
 # of truth and may be adjusted by Amazon over time).
 COVER_BLEED_IN = 0.125
 SPINE_WIDTH_PER_PAGE_IN = {
@@ -73,7 +73,7 @@ PAPER_TYPE_LABELS = {
     "cream": "cream paper",
     "color": "premium color paper",
 }
-# Below this many pages, KDP advises against printing anything on the spine —
+# Below this many pages, KDP advises against printing anything on the spine , 
 # it physically isn't wide enough to stay legible.
 MIN_PAGES_FOR_SPINE_TEXT = 130
 # Minimum spine width for any text to plausibly be legible at all.
@@ -109,12 +109,12 @@ KINDLE_COVER_MIN_ASPECT_RATIO = 1.4   # height / width
 KINDLE_COVER_MAX_ASPECT_RATIO = 1.8
 
 # A single embedded image larger than this is almost always wasted file size
-# on an e-reader screen — e-ink/LCD displays don't benefit from print-grade
+# on an e-reader screen, e-ink/LCD displays don't benefit from print-grade
 # resolution the way a physical page does.
 KINDLE_IMAGE_MAX_REASONABLE_PX = 4000
 
 # KDP's international delivery fee (70% royalty plan) is calculated per MB
-# above this size — large files quietly cost the author money per sale.
+# above this size, large files quietly cost the author money per sale.
 KINDLE_DELIVERY_FEE_THRESHOLD_MB = 3.0
 # Amazon's hard ceiling on EPUB file size.
 KINDLE_MAX_FILE_SIZE_MB = 650.0

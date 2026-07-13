@@ -1,6 +1,6 @@
 """Deterministic KDP paperback-interior compliance checks using PyMuPDF.
 
-No network calls, no AI — every finding here is computed directly from
+No network calls, no AI, every finding here is computed directly from
 the PDF's own geometry, embedded fonts, and embedded images.
 
 Each check returns:
@@ -72,13 +72,13 @@ def check_trim_size(doc) -> dict:
     ok = dist is not None and dist <= 0.1
 
     if ok:
-        summary = f"Your pages are {w_in:.2f}\" x {h_in:.2f}\" — a standard KDP trim size."
+        summary = f"Your pages are {w_in:.2f}\" x {h_in:.2f}\", a standard KDP trim size."
         return {"title": "Trim Size", "ok": True, "summary": summary,
                 "detail": f"Matches KDP's {match[0]}\" x {match[1]}\" trim size exactly."}
 
     summary = f"Your pages are {w_in:.2f}\" x {h_in:.2f}\", which isn't one of KDP's trim sizes."
     fix = (
-        f"Resize every page to a standard size — the closest is {match[0]}\" x {match[1]}\". "
+        f"Resize every page to a standard size, the closest is {match[0]}\" x {match[1]}\". "
         f"In your word processor or design software, change the page/document size before "
         f"re-exporting the PDF, then upload it again."
     )
@@ -98,7 +98,7 @@ def check_page_size_consistency(doc) -> dict:
                 "detail": "All pages are the same size."}
     return {
         "title": "Page Size Consistency", "ok": False,
-        "summary": f"Found {len(sizes)} different page sizes — every page needs to match.",
+        "summary": f"Found {len(sizes)} different page sizes, every page needs to match.",
         "fix": "Check your export settings for any page that was resized, rotated, or "
                "pasted in from a different document, and make it match the rest of the book.",
         "detail": f"Found {len(sizes)} distinct page sizes in this document.",
@@ -174,7 +174,7 @@ def check_margins(doc) -> dict:
             "title": "Margins", "ok": True,
             "summary": f"All {checked_pages} pages meet KDP's minimum margins.",
             "detail": f"Inside margin minimum {required_inside:.2f}\", outside/top/bottom "
-                      f"minimum {required_outer:.2f}\" — every page clears both.",
+                      f"minimum {required_outer:.2f}\", every page clears both.",
         }
 
     _, margin_val, required_val, page_num, side = tightest
@@ -253,14 +253,14 @@ def check_bleed(doc) -> dict:
             "title": "Bleed", "ok": True, "warning_only": True,
             "summary": "Page size is set up for bleed, but no image actually reaches the edge.",
             "fix": f"If nothing in your book is meant to bleed off the page, you can switch "
-                   f"back to the plain trim size ({plain_match[0]}\" x {plain_match[1]}\") — "
+                   f"back to the plain trim size ({plain_match[0]}\" x {plain_match[1]}\"), "
                    f"not required, just simpler.",
             "detail": f"Page size {w_in:.2f}\" x {h_in:.2f}\" matches a bleed size, "
                       f"but no images touch the page edge.",
         }
     return {
         "title": "Bleed", "ok": True, "warning_only": False,
-        "summary": "No bleed in use — page size and image placement are consistent with that.",
+        "summary": "No bleed in use, page size and image placement are consistent with that.",
         "detail": "No images extend to the page edge, and the page matches the plain trim size.",
     }
 
@@ -339,7 +339,7 @@ def check_image_resolution(doc) -> dict:
     worst_dpi, worst_page = worst
     summary = (
         f"{len(low_res_lines)} image(s) across {_page_range_label(low_res_pages)} will print "
-        f"blurry — the lowest is {worst_dpi:.0f} DPI on page {worst_page} (needs "
+        f"blurry, the lowest is {worst_dpi:.0f} DPI on page {worst_page} (needs "
         f"{rules.MIN_IMAGE_DPI}+)."
     )
     fix = (
@@ -377,7 +377,7 @@ def check_metadata(doc) -> dict:
     if not missing:
         return {
             "title": "PDF Metadata", "ok": True, "warning_only": True,
-            "summary": f"Title, Author, and Subject fields are all set — KDP can read them.",
+            "summary": f"Title, Author, and Subject fields are all set, KDP can read them.",
             "detail": detail,
         }
     summary = f"PDF metadata is missing: {', '.join(missing)}. KDP reads these for discoverability."
@@ -394,7 +394,7 @@ def check_metadata(doc) -> dict:
 
 
 def check_color_pages(doc) -> dict:
-    """Detect pages with color content — important because KDP charges much more for color printing."""
+    """Detect pages with color content, important because KDP charges much more for color printing."""
     color_pages = []
 
     for i, page in enumerate(doc):
@@ -407,7 +407,7 @@ def check_color_pages(doc) -> dict:
                 pix = fitz.Pixmap(doc, xref)
                 cs = pix.colorspace
                 if cs and cs.n >= 3:
-                    # Has 3+ channels — but check it's not all neutral
+                    # Has 3+ channels, but check it's not all neutral
                     # Sample a few pixels for an actual color cast
                     if not pix.is_monochrome:
                         is_color = True
@@ -440,7 +440,7 @@ def check_color_pages(doc) -> dict:
     if not color_pages:
         return {
             "title": "Color Content", "ok": True,
-            "summary": f"All {total} pages appear to be black & white — you can use B&W printing.",
+            "summary": f"All {total} pages appear to be black & white, you can use B&W printing.",
             "detail": "No color images or colored vector drawings detected on any page.",
         }
 
@@ -452,11 +452,11 @@ def check_color_pages(doc) -> dict:
     summary = (
         f"{len(color_pages)} page(s) contain color content. "
         f"KDP charges ${col_cost_ex:.2f} to print this book in color vs ${bw_cost_ex:.2f} "
-        f"for B&W — a ${extra:.2f} difference per copy."
+        f"for B&W, a ${extra:.2f} difference per copy."
     )
     fix = (
         "If you intend to sell a B&W paperback, convert all color images to grayscale in your "
-        "image editor before placing them in your document. Check your cover too — the interior "
+        "image editor before placing them in your document. Check your cover too, the interior "
         "file should contain no color if you're using B&W printing. If color is intentional, "
         "make sure you select 'Premium Color' when uploading to KDP."
     )
@@ -471,7 +471,7 @@ def check_color_pages(doc) -> dict:
 
 
 def check_orphans_widows(doc) -> dict:
-    """Detect orphan and widow lines — single lines stranded at the top or bottom of a page."""
+    """Detect orphan and widow lines, single lines stranded at the top or bottom of a page."""
     issues = []  # list of (page_num, kind)
 
     def _is_heading(block) -> bool:
@@ -609,7 +609,7 @@ def check_toc_accuracy(doc) -> dict:
         return {
             "title": "TOC Accuracy", "ok": True,
             "summary": f"All {checked} TOC entries point to the correct page.",
-            "detail": f"Verified {checked} entries from the Table of Contents — all match.",
+            "detail": f"Verified {checked} entries from the Table of Contents, all match.",
         }
 
     parts = []
@@ -618,7 +618,7 @@ def check_toc_accuracy(doc) -> dict:
     if not_found:
         parts.append(f"{len(not_found)} chapter(s) not found")
 
-    detail_lines = [f'"{t}" — TOC says p.{l}, actually p.{a}' for t, l, a in mismatches[:8]]
+    detail_lines = [f'"{t}", TOC says p.{l}, actually p.{a}' for t, l, a in mismatches[:8]]
     if not_found:
         detail_lines += [f'Could not locate: "{t}"' for t in not_found[:4]]
 

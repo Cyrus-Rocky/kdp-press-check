@@ -1,7 +1,7 @@
 """KDP paperback cover compliance checks using PyMuPDF.
 
 Unlike the interior checker, a cover file can't tell us its own page count or
-paper stock — those come from the interior file and the author's printing
+paper stock, those come from the interior file and the author's printing
 choice, so the cover-check form collects trim size, page count, and paper
 type up front and we calculate the expected cover geometry from KDP's
 published spine-width formula.
@@ -29,7 +29,7 @@ def check_cover_dimensions(doc, trim_w_in, trim_h_in, page_count, paper_type) ->
     if ok:
         return {
             "title": "Cover Dimensions", "ok": True,
-            "summary": f"Cover is {w_in:.2f}\" x {h_in:.2f}\" — correct for a "
+            "summary": f"Cover is {w_in:.2f}\" x {h_in:.2f}\", correct for a "
                        f"{trim_w_in}\" x {trim_h_in}\" book, {page_count} pages on "
                        f"{paper_label} (spine {spine_w:.3f}\").",
             "detail": f"Measured {w_in:.2f}\" x {h_in:.2f}\". Expected {exp_w:.2f}\" x "
@@ -77,7 +77,7 @@ def check_spine_text_safety(doc, trim_w_in, trim_h_in, page_count, paper_type) -
     if spine_w_in >= rules.MIN_SPINE_WIDTH_FOR_TEXT_IN:
         return {
             "title": "Spine Text", "ok": True,
-            "summary": f"Spine is {spine_w_in:.3f}\" wide — wide enough for readable "
+            "summary": f"Spine is {spine_w_in:.3f}\" wide, wide enough for readable "
                        f"title/author text.",
             "detail": f"Spine width {spine_w_in:.3f}\" >= the "
                       f"{rules.MIN_SPINE_WIDTH_FOR_TEXT_IN}\" usually needed for legible text.",
@@ -96,8 +96,8 @@ def check_spine_text_safety(doc, trim_w_in, trim_h_in, page_count, paper_type) -
     if text_on_spine:
         return {
             "title": "Spine Text", "ok": False, "warning_only": True,
-            "summary": f"The spine is only {spine_w_in:.3f}\" wide — too narrow for text "
-                       f"to print legibly — but text was found positioned there.",
+            "summary": f"The spine is only {spine_w_in:.3f}\" wide, too narrow for text "
+                       f"to print legibly, but text was found positioned there.",
             "fix": f"Books need roughly {rules.MIN_PAGES_FOR_SPINE_TEXT}+ pages before the "
                    f"spine is wide enough for readable text. At {page_count} pages, remove "
                    f"any title or author text from the spine area, or it likely won't be "
@@ -108,7 +108,7 @@ def check_spine_text_safety(doc, trim_w_in, trim_h_in, page_count, paper_type) -
     return {
         "title": "Spine Text", "ok": True,
         "summary": f"Spine is {spine_w_in:.3f}\" wide (too narrow for legible text), and "
-                   f"none was placed there — fine.",
+                   f"none was placed there, fine.",
         "detail": f"Spine width {spine_w_in:.3f}\". No text found in the spine x-range.",
     }
 
@@ -140,11 +140,11 @@ def check_barcode_zone(doc, trim_w_in, trim_h_in, page_count, paper_type) -> dic
         return {
             "title": "Barcode Area", "ok": False,
             "summary": "Text was found in the bottom-right area of the back cover where "
-                       "KDP places the barcode — it will be covered up.",
+                       "KDP places the barcode, it will be covered up.",
             "fix": f"Move any text out of the bottom-right "
                    f"{rules.BARCODE_WIDTH_IN}\" x {rules.BARCODE_HEIGHT_IN}\" corner of "
                    f"the back cover (inset {rules.BARCODE_MARGIN_IN}\" from the trim edges). "
-                   f"Background art can run underneath the barcode safely — only text or "
+                   f"Background art can run underneath the barcode safely, only text or "
                    f"essential graphics there are a problem.",
             "detail": f"Barcode zone approx {rules.BARCODE_WIDTH_IN}\" x "
                       f"{rules.BARCODE_HEIGHT_IN}\", inset {rules.BARCODE_MARGIN_IN}\" "

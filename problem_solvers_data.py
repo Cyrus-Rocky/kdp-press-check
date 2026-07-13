@@ -1,15 +1,15 @@
 """Static curated directory of freelancers who specialise in KDP publishing.
 
 Each solver has:
-  - name, initials, color  (avatar — no image upload needed for V1)
+  - name, initials, color  (avatar, no image upload needed for V1)
   - specialty               (display title)
-  - categories              (list — used for filter tabs)
+  - categories              (list, used for filter tabs)
   - bio                     (one-sentence pitch)
   - turnaround              (e.g. "3–5 days")
-  - platforms               (list of {name, url, icon} — links to their profiles)
+  - platforms               (list of {name, url, icon}, links to their profiles)
   - tags                    (skill chips)
-  - featured                (optional bool — shown with a badge)
-  - gig_url                 (optional — direct link to their specific gig listing)
+  - featured                (optional bool, shown with a badge)
+  - gig_url                 (optional, direct link to their specific gig listing)
 
 V1: manually curated. V2: self-serve sign-up with a database.
 """
@@ -48,7 +48,7 @@ SOLVERS = [
         "color": "#A8580F",
         "specialty": "KDP Interior Formatter",
         "categories": ["formatting"],
-        "bio": "Specialises in KDP paperback interior layout — trim sizes, margins, bleed-ready PDFs, and front matter. 500+ books formatted since 2016.",
+        "bio": "Specialises in KDP paperback interior layout, trim sizes, margins, bleed-ready PDFs, and front matter. 500+ books formatted since 2016.",
         "turnaround": "2–4 days",
         "tags": ["Trim & Margins", "Bleed Setup", "Front Matter", "Word → PDF"],
         "platforms": [
@@ -93,7 +93,7 @@ SOLVERS = [
         "color": "#1565C0",
         "specialty": "Kindle & EPUB Formatter",
         "categories": ["kindle"],
-        "bio": "EPUB3 formatting for Kindle Direct Publishing — clean reflow, working TOC, cover embedding, and file-size optimisation to minimise delivery fees.",
+        "bio": "EPUB3 formatting for Kindle Direct Publishing, clean reflow, working TOC, cover embedding, and file-size optimisation to minimise delivery fees.",
         "turnaround": "2–3 days",
         "tags": ["EPUB3", "Kindle Create", "TOC / Nav", "File Size"],
         "platforms": [
@@ -153,7 +153,7 @@ SOLVERS = [
         "color": "#E65100",
         "specialty": "All-in-One KDP Publishing Assistant",
         "categories": ["formatting", "kindle", "cover"],
-        "bio": "End-to-end KDP setup: interior formatting, EPUB conversion, cover design, and metadata optimisation — one person, one deadline.",
+        "bio": "End-to-end KDP setup: interior formatting, EPUB conversion, cover design, and metadata optimisation, one person, one deadline.",
         "turnaround": "7–10 days",
         "tags": ["Interior + EPUB", "Cover", "Metadata", "KDP Upload"],
         "platforms": [

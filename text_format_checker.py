@@ -1,7 +1,7 @@
 """Checks for manuscript formats with no fixed print page (.txt, .rtf, .odt):
 document-type classification + content-quality checks only. Trim/margin/
 bleed/font/image checks are skipped because these formats don't carry that
-information — we say so explicitly instead of guessing.
+information, we say so explicitly instead of guessing.
 """
 import classify
 import content_quality

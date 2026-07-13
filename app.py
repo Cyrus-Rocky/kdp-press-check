@@ -72,7 +72,7 @@ def check():
         logger.exception("Failed to analyze upload %s (%s)", safe_name, file.filename)
         flash(
             "We couldn't read that file. It may be corrupted, password-protected, "
-            "or not a valid file of its type — try re-exporting it and upload again."
+            "or not a valid file of its type, try re-exporting it and upload again."
         )
         return redirect(url_for("index"))
     finally:
@@ -139,7 +139,7 @@ def check_cover():
         logger.exception("Failed to analyze cover upload %s (%s)", safe_name, file.filename)
         flash(
             "We couldn't read that file. It may be corrupted, password-protected, "
-            "or not a valid PDF — try re-exporting it and upload again."
+            "or not a valid PDF, try re-exporting it and upload again."
         )
         return redirect(url_for("cover_index"))
     finally:
@@ -232,7 +232,7 @@ def estimate_pages():
         }
     except Exception:
         logger.exception("Page estimation failed for %s", safe_name)
-        flash("We couldn't read that Word file — try saving it as .docx again.")
+        flash("We couldn't read that Word file, try saving it as .docx again.")
         return redirect(url_for("estimate_pages_index"))
     finally:
         if os.path.exists(path):
@@ -273,7 +273,7 @@ def check_kindle():
     except Exception:
         logger.exception("Failed to analyze kindle upload %s (%s)", safe_name, file.filename)
         flash(
-            "We couldn't read that file. It may be corrupted or not a valid EPUB — "
+            "We couldn't read that file. It may be corrupted or not a valid EPUB, "
             "try re-exporting it and upload again."
         )
         return redirect(url_for("kindle_index"))
@@ -363,7 +363,7 @@ def check_preview():
 def preview_img(job_id, kind, page_num):
     if kind not in ("interior", "cover"):
         abort(404)
-    # Sanitise job_id — must be a 32-char hex string
+    # Sanitise job_id, must be a 32-char hex string
     if not job_id.isalnum() or len(job_id) != 32:
         abort(404)
     path = preview_renderer.page_file(UPLOAD_DIR, job_id, kind, page_num)

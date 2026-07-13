@@ -1,10 +1,10 @@
 """KDP/Kindle EPUB checks: structural validity, table of contents, cover
 image dimensions, oversized images, font-embedding licensing flag, and
-delivery file size — the things that get Kindle books rejected or quietly
+delivery file size, the things that get Kindle books rejected or quietly
 cost authors money on delivery fees. Parsed by hand (zipfile + XML), the
 same approach used for .odt, so no extra dependencies are needed.
 
-EPUB has no fixed printed page, so trim/margin/bleed checks don't apply —
+EPUB has no fixed printed page, so trim/margin/bleed checks don't apply , 
 that's covered by the Interior and Cover checkers instead.
 """
 import io
@@ -119,7 +119,7 @@ def check_navigation(zf: zipfile.ZipFile, opf_root, opf_dir: str, items: dict) -
         return {
             "title": "Table of Contents", "ok": False,
             "summary": "No table of contents (EPUB3 nav or EPUB2 NCX) was found.",
-            "fix": "Add a table of contents in whatever tool created this EPUB — Kindle "
+            "fix": "Add a table of contents in whatever tool created this EPUB, Kindle "
                    "readers rely on it for chapter navigation, and Amazon rejects books "
                    "without one.",
             "detail": "No manifest item has nav properties or the NCX media type.",
@@ -140,7 +140,7 @@ def check_navigation(zf: zipfile.ZipFile, opf_root, opf_dir: str, items: dict) -
         return {
             "title": "Table of Contents", "ok": False,
             "summary": f"Found a {source} file, but it couldn't be read.",
-            "fix": "The table of contents file is referenced but missing or corrupted — "
+            "fix": "The table of contents file is referenced but missing or corrupted, "
                    "re-export the EPUB.",
             "detail": f"Expected to read the {source} document but it failed to parse.",
         }
@@ -149,7 +149,7 @@ def check_navigation(zf: zipfile.ZipFile, opf_root, opf_dir: str, items: dict) -
         return {
             "title": "Table of Contents", "ok": False,
             "summary": f"Found a {source} file, but it has no entries.",
-            "fix": "Add chapter entries to your table of contents — an empty TOC isn't "
+            "fix": "Add chapter entries to your table of contents, an empty TOC isn't "
                    "useful to readers and Kindle Create/KDP may reject it.",
             "detail": f"{source} parsed but contained 0 navigation entries.",
         }
@@ -197,7 +197,7 @@ def check_cover_image(zf: zipfile.ZipFile, opf_root, opf_dir: str, items: dict) 
         return {
             "title": "Cover Image", "ok": False,
             "summary": f"The declared cover image (\"{cover_path}\") couldn't be opened.",
-            "fix": "The cover file is referenced but missing or corrupted inside the EPUB — "
+            "fix": "The cover file is referenced but missing or corrupted inside the EPUB, "
                    "re-export it.",
             "detail": f"Failed to open {cover_path} as an image.",
         }
@@ -216,7 +216,7 @@ def check_cover_image(zf: zipfile.ZipFile, opf_root, opf_dir: str, items: dict) 
     if not problems:
         return {
             "title": "Cover Image", "ok": True,
-            "summary": f"Cover image is {w}x{h}px — meets Kindle's size and shape guidelines.",
+            "summary": f"Cover image is {w}x{h}px, meets Kindle's size and shape guidelines.",
             "detail": f"File: {cover_path}. Dimensions: {w}x{h}px.",
         }
     return {
@@ -262,7 +262,7 @@ def check_image_sizes(zf: zipfile.ZipFile, opf_dir: str, items: dict) -> dict:
         "summary": f"{len(oversized)} of {checked} image(s) are larger than an e-reader "
                    f"screen needs.",
         "fix": f"Resize images over {rules.KINDLE_IMAGE_MAX_REASONABLE_PX}px on the long "
-               f"side — e-ink and tablet screens don't show the extra detail, and large "
+               f"side, e-ink and tablet screens don't show the extra detail, and large "
                f"images just bloat the file (which can cost you more in delivery fees).",
         "detail": "\n".join(oversized[:10]),
     }
@@ -278,7 +278,7 @@ def check_font_licensing(items: dict) -> dict:
     return {
         "title": "Embedded Fonts", "ok": True, "warning_only": True,
         "summary": f"{len(font_files)} font file(s) are embedded in this EPUB.",
-        "fix": "We can't check font licenses automatically — make sure each embedded font's "
+        "fix": "We can't check font licenses automatically, make sure each embedded font's "
                "license allows redistribution/embedding in a sold ebook. Many free fonts "
                "don't, even if they're free to use in a design.",
         "detail": "\n".join(font_files),
@@ -291,7 +291,7 @@ def check_file_size(file_size_bytes: int) -> dict:
         return {
             "title": "File Size", "ok": False,
             "summary": f"This file is {mb:.1f} MB, over Amazon's {rules.KINDLE_MAX_FILE_SIZE_MB:.0f} MB limit.",
-            "fix": "Compress images inside the EPUB or remove unnecessary embedded assets — "
+            "fix": "Compress images inside the EPUB or remove unnecessary embedded assets, "
                    "files over the limit are rejected outright.",
             "detail": f"File size: {mb:.2f} MB.",
         }
@@ -301,13 +301,13 @@ def check_file_size(file_size_bytes: int) -> dict:
             "summary": f"This file is {mb:.1f} MB. On KDP's 70% royalty plan, delivery fees "
                        f"are charged per MB over {rules.KINDLE_DELIVERY_FEE_THRESHOLD_MB:.0f} MB.",
             "fix": "Not a rejection risk, but it quietly reduces your royalty per sale. If "
-                   "this size comes from images, consider compressing them — Kindle screens "
+                   "this size comes from images, consider compressing them, Kindle screens "
                    "don't need print-resolution images anyway (see Image Sizes above).",
             "detail": f"File size: {mb:.2f} MB. Delivery fee threshold: "
                       f"{rules.KINDLE_DELIVERY_FEE_THRESHOLD_MB:.0f} MB.",
         }
     return {"title": "File Size", "ok": True,
-            "summary": f"This file is {mb:.1f} MB — well under any size concern.",
+            "summary": f"This file is {mb:.1f} MB, well under any size concern.",
             "detail": f"File size: {mb:.2f} MB."}
 
 

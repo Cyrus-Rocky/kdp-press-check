@@ -1,5 +1,5 @@
 """Writing/content quality checks that apply to any manuscript regardless of
-file format — repeated words, stray formatting artifacts, mixed punctuation
+file format, repeated words, stray formatting artifacts, mixed punctuation
 styles, and possible typos. These are heuristics, not a full grammar engine:
 they're tuned to flag real problems without drowning the author in false
 positives from character names or stylistic choices.
@@ -30,14 +30,14 @@ def _check_repeated_words(text: str) -> dict:
     if not matches:
         return {"title": "Repeated Words", "ok": True,
                 "summary": "No accidentally doubled words found.",
-                "detail": "Scanned for patterns like \"the the\" — none found."}
+                "detail": "Scanned for patterns like \"the the\", none found."}
     counts = Counter(w.lower() for w in matches)
     examples = ", ".join(f"\"{w} {w}\"" for w, _ in counts.most_common(5))
     return {
         "title": "Repeated Words", "ok": False, "warning_only": True,
         "summary": f"Found {len(matches)} place(s) where a word repeats back-to-back, "
                    f"like {examples}.",
-        "fix": "Search your manuscript for these doubled words and remove the extra one — "
+        "fix": "Search your manuscript for these doubled words and remove the extra one, "
                "this usually happens from editing/pasting.",
         "detail": ", ".join(f"\"{w} {w}\" x{n}" for w, n in counts.most_common(15)),
     }
@@ -59,7 +59,7 @@ def _check_spacing(text: str) -> dict:
         "title": "Spacing", "ok": False, "warning_only": True,
         "summary": "Found " + " and ".join(bits) + ".",
         "fix": "Use Find & Replace for double spaces (search for two spaces, replace with "
-               "one). Large gaps between paragraphs are often leftover from editing — check "
+               "one). Large gaps between paragraphs are often leftover from editing, check "
                "those spots render as you intend.",
         "detail": f"Double/extra spaces: {double_spaces}. Oversized paragraph gaps: {multi_blank}.",
     }
@@ -77,9 +77,9 @@ def _check_quote_consistency(text: str) -> dict:
     return {
         "title": "Quote Style", "ok": False, "warning_only": True,
         "summary": f"This manuscript mixes straight quotes (\"like this\") and curly quotes "
-                   f"(“like this”) — {minority} marks are the minority style.",
+                   f"(“like this”), {minority} marks are the minority style.",
         "fix": "Pick one style and apply it throughout. Most word processors auto-convert to "
-               "curly (\"smart\") quotes by default — if you see straight quotes mixed in, "
+               "curly (\"smart\") quotes by default, if you see straight quotes mixed in, "
                "they were likely typed somewhere autocorrect was off, or pasted from another source.",
         "detail": f"Straight quotes: {straight}. Curly/smart quotes: {curly}.",
     }
@@ -114,7 +114,7 @@ def _check_heading_consistency(headings: list) -> dict:
     dominant_style, dominant_count = counts.most_common(1)[0]
     return {
         "title": "Heading Style", "ok": False, "warning_only": True,
-        "summary": f"Headings mix capitalization styles — most ({dominant_count} of "
+        "summary": f"Headings mix capitalization styles, most ({dominant_count} of "
                    f"{len(styles)}) use {dominant_style} case, but not all.",
         "fix": "Pick one heading style (Title Case, Sentence case, or ALL CAPS) and make "
                "every chapter/section heading match it.",
@@ -127,7 +127,7 @@ _SCENE_BREAK_REPEAT_SYMBOLS = set("*#~•§×◆✦∞○")
 
 def _check_scene_break_consistency(text: str) -> dict:
     """Scene breaks (a blank line with a symbol marking a jump in time/POV)
-    should use one marker throughout — mixing *** in one place and # in
+    should use one marker throughout, mixing *** in one place and # in
     another reads as an accident, not a stylistic choice."""
     candidates = []
     for line in text.split("\n"):
@@ -189,7 +189,7 @@ def _check_spelling(text: str) -> dict:
         return {
             "title": "Possible Typos", "ok": True, "warning_only": True,
             "summary": f"{len(counts)} word(s) aren't in our dictionary, but each appears "
-                       f"{_TYPO_REPEAT_THRESHOLD}+ times — almost certainly character names or "
+                       f"{_TYPO_REPEAT_THRESHOLD}+ times, almost certainly character names or "
                        f"invented terms rather than typos.",
             "detail": ", ".join(f"\"{w}\" x{n}" for w, n in Counter(repeated).most_common(15)),
         }
@@ -197,7 +197,7 @@ def _check_spelling(text: str) -> dict:
     top_one_offs = Counter(one_offs).most_common(15)
     examples = ", ".join(f"\"{w}\"" for w, _ in top_one_offs[:6])
     summary = (f"{len(one_offs)} word(s) that appear only once or twice aren't in our "
-               f"dictionary, e.g. {examples} — these are more likely to be real typos than "
+               f"dictionary, e.g. {examples}, these are more likely to be real typos than "
                f"recurring names.")
     if repeated:
         summary += (f" ({len(repeated)} other word(s) recur {_TYPO_REPEAT_THRESHOLD}+ times and "
@@ -205,7 +205,7 @@ def _check_spelling(text: str) -> dict:
     return {
         "title": "Possible Typos", "ok": False, "warning_only": True,
         "summary": summary,
-        "fix": "These are still guesses, not confirmed errors — but words appearing only once "
+        "fix": "These are still guesses, not confirmed errors, but words appearing only once "
                "or twice are worth a look first, since recurring character names and invented "
                "words have already been filtered out of this list.",
         "detail": ", ".join(f"\"{w}\" x{n}" for w, n in top_one_offs),

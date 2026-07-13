@@ -1,6 +1,6 @@
 """KDP paperback-interior checks for Word (.docx) manuscripts.
 
-Word doesn't store fixed page geometry the way a print-ready PDF does — there's
+Word doesn't store fixed page geometry the way a print-ready PDF does, there's
 no rendered page count without actually paginating the text, and "bleed" only
 exists once a file is exported to PDF. Where that matters, the checks here say
 so explicitly rather than guessing a number and presenting it as exact. KDP can
@@ -28,7 +28,7 @@ def _emu_to_in(emu) -> float:
 
 def _first_page_text_docx(doc, max_fallback_paragraphs: int = 5) -> str:
     """Text up to the first explicit (manual) page break, or the first few
-    non-empty paragraphs if no manual break is found — Word doesn't expose
+    non-empty paragraphs if no manual break is found, Word doesn't expose
     rendered page boundaries without actually paginating the document."""
     ns = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
     collected = []
@@ -54,7 +54,7 @@ def check_content_type_docx(doc) -> dict:
     word_count = len(full_text.split())
     # Word has no fixed page count without rendering; estimate from character
     # volume against a typical paperback's ~280 words/page so the classifier
-    # has a denominator. This estimate is for classification only — it is
+    # has a denominator. This estimate is for classification only, it is
     # never used to size margins.
     estimated_pages = max(1, round(word_count / 280)) if word_count else 1
 
@@ -84,7 +84,7 @@ def check_trim_size_docx(doc) -> dict:
     if ok:
         return {
             "title": "Trim Size", "ok": True,
-            "summary": f"Your page size is set to {w_in:.2f}\" x {h_in:.2f}\" — a standard KDP trim size.",
+            "summary": f"Your page size is set to {w_in:.2f}\" x {h_in:.2f}\", a standard KDP trim size.",
             "detail": f"Matches KDP's {match[0]}\" x {match[1]}\" trim size exactly.",
         }
     return {
@@ -120,7 +120,7 @@ def check_margins_docx(doc) -> dict:
     top_in = _emu_to_in(section.top_margin)
     bottom_in = _emu_to_in(section.bottom_margin)
     outer_min = rules.MIN_OUTSIDE_TOP_BOTTOM_MARGIN_IN
-    inside_floor = rules.inside_margin_in(1)  # loosest tier, 0.375" — the absolute floor
+    inside_floor = rules.inside_margin_in(1)  # loosest tier, 0.375", the absolute floor
 
     problems = []
     if left_in < inside_floor - rules.TOLERANCE_IN:
@@ -140,7 +140,7 @@ def check_margins_docx(doc) -> dict:
             "fix": "In Word: Layout > Margins > Custom Margins, and increase the margins "
                    f"listed above. Note: KDP's exact inside-margin requirement depends on "
                    f"your final printed page count ({inside_floor:.2f}\"-0.875\", longer "
-                   f"books need more) — Word can't tell us that page count without "
+                   f"books need more), Word can't tell us that page count without "
                    f"rendering. Export to PDF and run it through Press Check for the precise "
                    f"number once your manuscript is final.",
             "detail": f"Left+gutter {left_in:.2f}\", right {right_in:.2f}\", top {top_in:.2f}\", "
@@ -173,7 +173,7 @@ def check_fonts_embedded_docx(doc) -> dict:
         "title": "Font Embedding", "ok": False, "warning_only": True,
         "summary": "Fonts aren't set to embed in this Word file (Word's default).",
         "fix": "In Word: File > Options > Save > check \"Embed fonts in the file\" before "
-               "your final export. This mostly matters if you used a non-standard font — "
+               "your final export. This mostly matters if you used a non-standard font, "
                "if you only used common fonts like Times New Roman or Calibri, KDP's "
                "converter will likely substitute correctly anyway.",
         "detail": "embedTrueTypeFonts not found in document settings.",
@@ -207,14 +207,14 @@ def check_image_resolution_docx(doc) -> dict:
                 "summary": "No inline images found to check.",
                 "fix": None,
                 "detail": "No inline images found. Note: images anchored as floating/"
-                          "wrapped objects aren't checked in Word files — convert to PDF "
+                          "wrapped objects aren't checked in Word files, convert to PDF "
                           "for a complete image check."}
     if not low_res:
         return {
             "title": "Image Resolution", "ok": True,
             "summary": f"All {checked} inline image(s) meet the {rules.MIN_IMAGE_DPI} DPI minimum.",
             "detail": f"Checked {checked} inline image(s); all sharp enough to print. "
-                      f"Floating/wrapped images aren't checked here — convert to PDF for "
+                      f"Floating/wrapped images aren't checked here, convert to PDF for "
                       f"a complete check.",
         }
     return {
@@ -224,13 +224,13 @@ def check_image_resolution_docx(doc) -> dict:
                f"re-scan it at {rules.MIN_IMAGE_DPI} DPI or higher at the size you're "
                f"displaying it.",
         "detail": "\n".join(low_res[:10])
-                  + ("\nNote: floating/wrapped images aren't checked here — convert to "
+                  + ("\nNote: floating/wrapped images aren't checked here, convert to "
                      "PDF for a complete image check."),
     }
 
 
 def check_font_consistency_docx(doc) -> dict:
-    """Flag mixed font families/sizes in body text — a common artifact of
+    """Flag mixed font families/sizes in body text, a common artifact of
     pasting in text from another document or a web page, which brings its
     own formatting along and looks unprofessional once printed."""
     font_counts = Counter()
@@ -247,7 +247,7 @@ def check_font_consistency_docx(doc) -> dict:
             if run.font.size:
                 size_counts[run.font.size.pt] += 1
 
-    # A handful of stray runs (e.g. one italicized word) isn't worth flagging —
+    # A handful of stray runs (e.g. one italicized word) isn't worth flagging , 
     # only surface it once a real second font/size shows up repeatedly.
     minority_threshold = 3
     problems = []
@@ -286,7 +286,7 @@ def _run_has_page_break(run) -> bool:
 
 def check_chapter_page_breaks_docx(doc) -> dict:
     """Chapter (Heading 1) titles should start on a fresh page in a print
-    interior — otherwise the previous chapter's last lines run straight into
+    interior, otherwise the previous chapter's last lines run straight into
     the new heading, which reads as a mistake rather than a stylistic choice."""
     paragraphs = doc.paragraphs
     heading_indices = [
@@ -329,14 +329,14 @@ def check_chapter_page_breaks_docx(doc) -> dict:
                    f"new page, e.g. {examples}.",
         "fix": "Click just before each chapter heading and insert a page break (Ctrl+Enter in "
                "Word). For something that survives future edits, instead select the heading and "
-               "turn on Layout/Paragraph > Line and Page Breaks > \"Page break before\" — Word "
+               "turn on Layout/Paragraph > Line and Page Breaks > \"Page break before\", Word "
                "then keeps every chapter starting on its own page automatically.",
         "detail": ", ".join(f"\"{m}\"" for m in missing),
     }
 
 
 def _effective_first_line_indent(p):
-    """A paragraph's first-line indent as Word will actually render it —
+    """A paragraph's first-line indent as Word will actually render it , 
     direct paragraph formatting if set, otherwise whatever its style defines."""
     direct = p.paragraph_format.first_line_indent
     if direct is not None:
@@ -348,7 +348,7 @@ def _effective_first_line_indent(p):
 
 
 def check_paragraph_indent_docx(doc) -> dict:
-    """First-line paragraph indents should be applied one consistent way —
+    """First-line paragraph indents should be applied one consistent way , 
     a literal tab character, Word's paragraph-level "first line indent"
     setting, or leading spaces. Mixing methods looks fine in Word but reads
     as inconsistent once the interior is typeset for print."""
@@ -395,9 +395,9 @@ def check_paragraph_indent_docx(doc) -> dict:
     return {
         "title": "Paragraph Indentation", "ok": False, "warning_only": True,
         "summary": f"Paragraphs are indented {len(counts)} different ways: {breakdown}.",
-        "fix": "Pick one method — either Word's paragraph indent setting (Layout > Paragraph > "
+        "fix": "Pick one method, either Word's paragraph indent setting (Layout > Paragraph > "
                "Indentation > Special > First line) applied through your body text style, or a "
-               "single literal tab at the start of every paragraph — and make every body "
+               "single literal tab at the start of every paragraph, and make every body "
                "paragraph match. Mixing tabs, spaces, and Word's indent setting is invisible on "
                "screen but shows up once KDP typesets the interior.",
         "detail": breakdown,
