@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+{% block title %}KDP Error Decoder · KDP Press Check{% endblock %}
+{% block content %}
+
+<section class="hero-single">
+  <div class="eyebrow">Error decoder</div>
+  <h1 class="hero-display">What is KDP actually telling you?</h1>
+  <p class="hero-lead">Amazon's rejection messages are famously vague. Paste the error you got and we'll tell you what it really means, and exactly how to fix it.</p>
+
+  <div class="decoder-wrap">
+    <textarea id="decoder-input" class="decoder-input" placeholder="Paste the error message KDP showed you here, e.g. &quot;We found some issues with your interior file&quot;"></textarea>
+
+    <div class="decoder-examples" aria-label="Common errors">
+      <button type="button" class="decoder-example" data-fill="Error processing your interior. We found some issues with your file.">Error processing interior</button>
+      <button type="button" class="decoder-example" data-fill="Your file could not be processed. Please try again.">File could not be processed</button>
+      <button type="button" class="decoder-example" data-fill="The fonts in your file are not embedded.">Fonts not embedded</button>
+      <button type="button" class="decoder-example" data-fill="Your cover file does not meet our requirements.">Cover doesn't meet requirements</button>
+      <button type="button" class="decoder-example" data-fill="Publishing guidelines not met.">Publishing guidelines not met</button>
+      <button type="button" class="decoder-example" data-fill="Your book has been in Publishing / Under Review for several days.">Stuck in review</button>
+    </div>
+
+    <div class="actions-inline" style="margin-top:20px;">
+      <button type="button" class="primary" id="decode-btn"><span class="label">Decode this error →</span></button>
+    </div>
+
+    <div class="decoder-results" id="decoder-results"></div>
+  </div>
+</section>
+
+<script>
+// Each entry: keywords to match (lowercase), a plain-English cause, a fix (HTML),
+// and an optional link to the checker that catches this problem.
+var ERRORS = [
+  {
+    kw: ["error processing interior","processing your interior","issues with your file","issues with your interior","interior and pdf","error processing"],
+    title: "Error processing your interior file",
+    cause: "Almost always one of three things: your PDF's page size doesn't match the trim size you picked in KDP, a font isn't embedded, or the export is slightly corrupt.",
+    fix: "<ol><li>Confirm your page size matches your chosen trim exactly (e.g. 6″ × 9″).</li><li>Re-export as PDF with “embed all fonts” turned on.</li><li>Run the file through Interior Check below — it flags trim, fonts, and image issues before KDP does.</li></ol>",
+    link: {href: "/", label: "Check my interior file"}
+  },
+  {
+    kw: ["could not be processed","cannot be processed","could not convert","couldn't convert","conversion failed","failed to convert","file contains errors","unable to process"],
+    title: "Your file could not be processed / converted",
+    cause: "KDP couldn't open the file at all. Usually it's corrupt, was exported oddly, or still contains things KDP rejects (crop marks, comments, tracked changes, layers).",
+    fix: "<ol><li>Open your source document and re-export a fresh PDF (or clean .docx).</li><li>Remove crop/printer marks, comments, and tracked changes before exporting.</li><li>Flatten any transparency or layers.</li><li>Re-run it through Interior Check.</li></ol>",
+    link: {href: "/", label: "Check my interior file"}
+  },
+  {
+    kw: ["font","fonts","not embedded","embed your fonts","embedding"],
+    title: "Fonts are not embedded",
+    cause: "Your PDF references fonts by name instead of including them, so KDP's printer can't guarantee they'll look right.",
+    fix: "Re-export your PDF with font embedding enabled. In Word: File → Save As → PDF → Options → tick “ISO 19005-1 compliant (PDF/A)”, or in your layout app choose “embed all fonts.”",
+    link: {href: "/", label: "Check font embedding"}
+  },
+  {
+    kw: ["resolution","dpi","300 dpi","low resolution","low-res","blurry","image quality","images are low"],
+    title: "Image resolution too low",
+    cause: "One or more images are under 300 DPI at print size, so they'll look pixelated in print.",
+    fix: "Replace low-resolution images with versions that are at least 300 DPI at the size they appear. Interior Check lists exactly which images are too small.",
+    link: {href: "/", label: "Check image resolution"}
+  },
+  {
+    kw: ["trim size","trim","page size","dimensions do not match","size mismatch","doesn't match the trim","does not match the trim","wrong size"],
+    title: "Page size / trim size mismatch",
+    cause: "The physical size of your PDF pages doesn't match the trim size you selected in KDP's setup.",
+    fix: "Either change the trim size in KDP to match your file, or re-export your interior at the exact trim you want. Interior Check tells you the precise page size it detects.",
+    link: {href: "/", label: "Check my trim size"}
+  },
+  {
+    kw: ["margin","margins","gutter","too close to the edge","inside the margin","content in the margin","text in margin","safe area","safety"],
+    title: "Content too close to the edge / margins too small",
+    cause: "Text or images sit inside KDP's required margins. The inside (gutter) margin is the usual culprit, and it grows with page count: 0.375″ under 150 pages, up to 0.875″ over 700 pages.",
+    fix: "Widen your margins, especially the inside/gutter, to match your final page count. Book Preview draws KDP's safety zone over every page so you can see exactly what's crossing the line.",
+    link: {href: "/preview", label: "Preview my margins"}
+  },
+  {
+    kw: ["bleed","full bleed","bleed area","extends to the edge","no bleed"],
+    title: "Bleed problem",
+    cause: "If any image is meant to run to the very edge of the page, KDP needs a 0.125″ bleed on all outer sides. Either the bleed is missing, or you added bleed on a book that doesn't need it.",
+    fix: "For full-bleed art, add 0.125″ bleed on the outer edges and export with bleed. For normal text books, no bleed is needed. Interior Check and Cover Check both flag bleed mismatches.",
+    link: {href: "/", label: "Check my interior"}
+  },
+  {
+    kw: ["page count","even number","odd number of pages","number of pages","blank page","must be even"],
+    title: "Page count must be even",
+    cause: "Printed books need an even number of pages (every sheet has a front and back). Your interior has an odd count.",
+    fix: "Add one blank page at the end of your interior so the total is even, then re-export and re-upload.",
+    link: {href: "/", label: "Check my interior"}
+  },
+  {
+    kw: ["cover","cover file","cover does not meet","cover dimensions","cover size","cover requirements","cover was rejected"],
+    title: "Cover file doesn't meet requirements",
+    cause: "The full-wrap cover's size is off. Usually the spine width (which depends on page count and paper) or the bleed is wrong, so back + spine + front don't add up to KDP's template.",
+    fix: "Recalculate the cover size from your final page count and paper type. Cover Check computes the exact spine width and full-wrap dimensions and compares them to your file.",
+    link: {href: "/cover", label: "Check my cover"}
+  },
+  {
+    kw: ["spine","spine width","spine text","text on the spine"],
+    title: "Spine width or spine text problem",
+    cause: "Spine width is calculated from page count × paper thickness. If your file's spine doesn't match, or you put text on a spine that's too thin (under ~130 pages), KDP flags it.",
+    fix: "Use Cover Check to get the exact spine width for your page count and paper, and rebuild the cover around it. Skip spine text on books under ~130 pages.",
+    link: {href: "/cover", label: "Check my cover"}
+  },
+  {
+    kw: ["barcode","barcode area","barcode zone"],
+    title: "Barcode area obstructed",
+    cause: "KDP prints a barcode near the bottom-right of the back cover. Essential text or key art in that zone will be covered.",
+    fix: "Keep the bottom-right ~2″ × 1.2″ of your back cover clear of important content (background art can run underneath). Cover Check maps the barcode zone for you.",
+    link: {href: "/cover", label: "Check my cover"}
+  },
+  {
+    kw: ["metadata","title does not match","cover title","author name","doesn't match the metadata","does not match the metadata","subtitle","title on your cover"],
+    title: "Metadata doesn't match your cover",
+    cause: "The title, subtitle, or author name printed on your cover must match what you typed into KDP's fields exactly. Even small differences trigger a review.",
+    fix: "Make the text on your cover and your KDP title/subtitle/author fields identical, word for word, including punctuation and capitalization. Fix whichever one is wrong.",
+    link: null
+  },
+  {
+    kw: ["guidelines not met","publishing guidelines","content guidelines","did not meet our content","quality issues"],
+    title: "“Publishing guidelines not met”",
+    cause: "This is KDP's catch-all. It usually means a metadata problem (mismatched title/author), a content-quality issue (typos, formatting), or a policy flag, but they rarely say which.",
+    fix: "<ol><li>Check your metadata matches your cover exactly.</li><li>Run your manuscript through Interior Check for formatting and proofing issues.</li><li>If it still fails, reply to the KDP email and ask specifically which guideline was not met.</li></ol>",
+    link: {href: "/", label: "Check my manuscript"}
+  },
+  {
+    kw: ["under review","in review","publishing status","stuck","still publishing","content review","taking long","been in review","several days"],
+    title: "Stuck in “Publishing” / “Under Review”",
+    cause: "Review normally takes 24–72 hours, but brand-new accounts and flagged content take longer. Being “in review” is not a rejection.",
+    fix: "Wait the full 72 hours before worrying, and do NOT resubmit — that resets the queue. If it passes 5 days, contact KDP support with your title and ASIN.",
+    link: null
+  },
+  {
+    kw: ["duplicate","already published","already exists","similar to another","duplicate content"],
+    title: "Duplicate / already-published content",
+    cause: "KDP thinks this book (or very similar content) is already in their catalog, sometimes from a previous upload of your own.",
+    fix: "If it's your own earlier attempt, edit that existing title instead of creating a new one. If it's public-domain or common content, add substantial unique value and explain it. Otherwise contact support.",
+    link: null
+  },
+  {
+    kw: ["transparency","transparent","flatten","layers","flattened"],
+    title: "Transparency / layers not flattened",
+    cause: "KDP's printer needs a single flat layer. Transparent objects or live layers can drop out or print wrong.",
+    fix: "In your design app, flatten the artwork (merge all layers, rasterize transparency) before exporting the PDF, then re-upload.",
+    link: {href: "/", label: "Check my file"}
+  },
+  {
+    kw: ["crop marks","printer marks","trim marks","registration marks","bookmarks","annotations","comments"],
+    title: "Crop marks / comments / extra marks in the file",
+    cause: "Your PDF still contains printer/crop marks, comments, bookmarks, or annotations. KDP wants a clean file with none of these.",
+    fix: "Re-export without crop or printer marks, and remove comments, tracked changes, and bookmarks first. Export at actual trim size with no extra marks.",
+    link: {href: "/", label: "Check my file"}
+  },
+  {
+    kw: ["file size","too large","650","exceeds","file is too big","large file","delivery fee"],
+    title: "File too large",
+    cause: "Print files must be under 650 MB. For Kindle, large files also cost you a per-MB delivery fee on the 70% plan, quietly eating your royalty.",
+    fix: "Compress or downsample oversized images (300 DPI at print size is plenty). Kindle Check reports your file size and flags images that are needlessly huge.",
+    link: {href: "/kindle", label: "Check my ebook"}
+  },
+  {
+    kw: ["table of contents","toc","ncx","navigation","logical toc","nav document","clickable contents"],
+    title: "Table of contents / navigation problem (ebook)",
+    cause: "Your EPUB's table of contents isn't linked properly, so readers can't jump between chapters and Kindle's navigation feels broken.",
+    fix: "Build a proper linked/logical TOC (a NAV or NCX), not just a typed list of chapter names. Kindle Check verifies your ebook's navigation.",
+    link: {href: "/kindle", label: "Check my ebook"}
+  },
+  {
+    kw: ["isbn","isbn-13","isbn is invalid","invalid isbn"],
+    title: "ISBN question or error",
+    cause: "Either your ISBN is invalid, or you're unsure whether to use KDP's free one. KDP gives a free ISBN for paperbacks; you only need your own if you want to be listed as the publisher across stores.",
+    fix: "For most authors, take KDP's free ISBN during setup. Don't reuse an ISBN across formats (each format needs its own). If KDP says yours is invalid, re-check the 13 digits for a typo.",
+    link: null
+  },
+  {
+    kw: ["description","book description","html","description contains","description is too long"],
+    title: "Book description formatting error",
+    cause: "KDP's book description only accepts a small set of HTML tags. Unsupported tags, broken tags, or going over 4,000 characters causes errors or ugly output.",
+    fix: "Stick to simple supported tags (bold, italic, headings, lists, line breaks), close every tag, and keep it under 4,000 characters.",
+    link: null
+  }
+];
+
+var GENERAL = {
+  title: "We couldn't match that exact message",
+  cause: "KDP's wording changes often, but the fix path is usually the same.",
+  fix: "<ol><li>If it mentions your <strong>interior/manuscript</strong>, run Interior Check.</li><li>If it mentions your <strong>cover</strong>, run Cover Check.</li><li>If it mentions <strong>margins or content near the edge</strong>, use Book Preview.</li><li>If it's about <strong>an ebook/EPUB</strong>, run Kindle Check.</li><li>Still stuck? Reply to KDP's email and ask which specific requirement failed.</li></ol>",
+  link: {href: "/", label: "Start with Interior Check"}
+};
+
+function normalize(s) { return (s || "").toLowerCase(); }
+
+function scoreEntry(entry, text) {
+  var score = 0;
+  entry.kw.forEach(function(k) {
+    if (text.indexOf(k) !== -1) score += k.length; // longer, more-specific matches win
+  });
+  return score;
+}
+
+function cardHtml(entry, isGeneral) {
+  var linkHtml = "";
+  if (entry.link) {
+    linkHtml = '<a class="decoder-link" href="' + entry.link.href + '">' + entry.link.label + ' →</a>';
+  }
+  return '<div class="decoder-card' + (isGeneral ? ' is-general' : '') + '">' +
+    '<h3 class="decoder-card-title">' + entry.title + '</h3>' +
+    '<p class="decoder-label">What it means</p>' +
+    '<p class="decoder-cause">' + entry.cause + '</p>' +
+    '<p class="decoder-label">How to fix it</p>' +
+    '<div class="decoder-fix">' + entry.fix + '</div>' +
+    linkHtml +
+    '</div>';
+}
+
+function decode() {
+  var text = normalize(document.getElementById("decoder-input").value);
+  var out = document.getElementById("decoder-results");
+  if (!text.trim()) {
+    out.innerHTML = '<div class="decoder-empty">Paste an error message above, or tap one of the examples, then press Decode.</div>';
+    return;
+  }
+  var scored = ERRORS.map(function(e) { return {e: e, s: scoreEntry(e, text)}; })
+                     .filter(function(x) { return x.s > 0; })
+                     .sort(function(a, b) { return b.s - a.s; });
+
+  if (!scored.length) {
+    out.innerHTML = cardHtml(GENERAL, true);
+    return;
+  }
+  out.innerHTML = scored.slice(0, 3).map(function(x, i) { return cardHtml(x.e, false); }).join("");
+}
+
+document.getElementById("decode-btn").addEventListener("click", decode);
+document.getElementById("decoder-input").addEventListener("keydown", function(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") decode();
+});
+document.querySelectorAll(".decoder-example").forEach(function(btn) {
+  btn.addEventListener("click", function() {
+    document.getElementById("decoder-input").value = this.getAttribute("data-fill");
+    decode();
+  });
+});
+</script>
+{% endblock %}

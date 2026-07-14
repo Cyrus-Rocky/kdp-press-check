@@ -244,6 +244,11 @@ def estimate_pages():
                            result=result, filename=file.filename)
 
 
+@app.route("/error-decoder", methods=["GET"])
+def error_decoder():
+    return render_template("error_decoder.html", active_mode="decoder")
+
+
 @app.route("/genre-checklist", methods=["GET"])
 def genre_checklist():
     return render_template("genre_checklist.html", active_mode="genre")

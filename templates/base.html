@@ -51,6 +51,7 @@
           <a href="{{ url_for('cover_index') }}"  class="{{ 'is-active' if active_mode == 'cover'    else '' }}">Cover Check</a>
           <a href="{{ url_for('kindle_index') }}" class="{{ 'is-active' if active_mode == 'kindle'   else '' }}">Kindle Check</a>
           <a href="{{ url_for('preview_index') }}" class="{{ 'is-active' if active_mode == 'preview' else '' }}">Book Preview</a>
+          <a href="{{ url_for('error_decoder') }}" class="{{ 'is-active' if active_mode == 'decoder' else '' }}">Error Decoder</a>
           <a href="{{ url_for('royalty_calculator') }}"   class="{{ 'is-active' if active_mode == 'royalty'  else '' }}">Royalty Calc</a>
           <a href="{{ url_for('estimate_pages_index') }}" class="{{ 'is-active' if active_mode == 'estimate' else '' }}">Page Estimator</a>
           <a href="{{ url_for('genre_checklist') }}"      class="{{ 'is-active' if active_mode == 'genre'    else '' }}">Genre Guide</a>

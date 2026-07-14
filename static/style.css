@@ -725,6 +725,62 @@ a { color: var(--accent-ink); }
   padding-top: 16px;
 }
 
+/* ---------- Error decoder ---------- */
+.decoder-wrap { max-width: 760px; }
+.decoder-input {
+  width: 100%;
+  min-height: 120px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--pc-ink);
+  background: var(--pc-card);
+  border: 1px solid var(--pc-rule);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  box-sizing: border-box;
+  resize: vertical;
+}
+.decoder-input:focus-visible { outline: 2px solid var(--pc-focus); outline-offset: 1px; }
+.decoder-examples {
+  display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0 4px;
+}
+.decoder-example {
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.4px;
+  border: 1px solid var(--pc-rule); border-radius: 20px;
+  padding: 6px 12px; cursor: pointer; background: var(--pc-card); color: var(--pc-muted);
+}
+.decoder-example:hover { border-color: var(--pc-strong); color: var(--pc-ink); }
+.decoder-results { margin-top: 32px; display: flex; flex-direction: column; gap: 18px; }
+.decoder-card {
+  border: 1px solid var(--pc-rule-soft); border-radius: 16px;
+  padding: 24px; background: var(--pc-card);
+  border-left: 3px solid var(--pc-coral);
+}
+.decoder-card.is-general { border-left-color: var(--pc-note); }
+.decoder-card-title {
+  font-family: var(--font-display); font-size: 19px; letter-spacing: -0.3px;
+  color: var(--pc-strong); margin: 0 0 14px;
+}
+.decoder-label {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.4px;
+  text-transform: uppercase; color: var(--pc-muted); margin: 0 0 6px;
+}
+.decoder-cause { font-size: 15px; line-height: 1.55; color: var(--pc-ink); margin: 0 0 16px; }
+.decoder-fix { font-size: 15px; line-height: 1.6; color: var(--pc-ink); margin: 0 0 16px; }
+.decoder-fix ol { margin: 6px 0 0; padding-left: 20px; }
+.decoder-fix li { margin-bottom: 6px; }
+.decoder-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 14px; font-weight: 500; color: var(--pc-cta-text);
+  background: var(--pc-cta); border-radius: 32px; padding: 9px 18px; text-decoration: none;
+}
+.decoder-link:hover { text-decoration: none; opacity: 0.9; }
+.decoder-empty {
+  border: 1px dashed var(--pc-rule-soft); border-radius: 16px;
+  padding: 28px; color: var(--pc-faint); font-size: 14px; line-height: 1.6;
+}
+
 /* ---------- Genre guide ---------- */
 .genre-wrap { max-width: 760px; }
 .genre-top {
