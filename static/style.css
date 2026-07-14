@@ -275,19 +275,20 @@ a { color: var(--accent-ink); }
   .footer-inner { padding: 48px 16px 32px; }
 }
 
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--pc-canvas);
+  margin-bottom: 40px;
+}
 .masthead {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  padding: 16px 0;
-  border-bottom: 1px solid var(--pc-rule-soft);
-  margin-bottom: 40px;
+  padding: 16px 0 12px;
   flex-wrap: wrap;
-  position: sticky;
-  top: 0;
-  background: var(--pc-canvas);
-  z-index: 50;
 }
 .masthead .mark {
   font-family: var(--font-display);
@@ -306,17 +307,11 @@ a { color: var(--accent-ink); }
   flex-shrink: 0;
 }
 
-.masthead-right {
-  display: flex;
-  align-items: center;
-  gap: 22px;
-  flex-wrap: wrap;
-}
-
 .masthead-actions {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .mode-nav {
@@ -326,36 +321,29 @@ a { color: var(--accent-ink); }
   flex-wrap: wrap;
   font-family: var(--font-body);
   font-size: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--pc-rule-soft);
 }
 
 .theme-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
   background: none;
   border: 1px solid var(--pc-rule);
-  border-radius: var(--radius-pill);
-  padding: 7px 16px;
+  border-radius: 50%;
+  padding: 0;
   cursor: pointer;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 1px;
   color: var(--pc-muted);
   flex-shrink: 0;
 }
 .theme-toggle:hover { border-color: var(--pc-strong); color: var(--pc-strong); }
-.theme-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--pc-muted);
-  display: inline-block;
-  flex-shrink: 0;
-}
-:root[data-theme="dark"] .theme-dot { background: var(--pc-coral); }
-.theme-label-dark { display: none; }
-:root[data-theme="dark"] .theme-label-light { display: none; }
-:root[data-theme="dark"] .theme-label-dark { display: inline; }
+.theme-toggle svg { display: block; }
+.theme-icon-sun { display: none; }
+:root[data-theme="dark"] .theme-icon-moon { display: none; }
+:root[data-theme="dark"] .theme-icon-sun { display: block; }
 
 .cta-pill {
   display: inline-flex;

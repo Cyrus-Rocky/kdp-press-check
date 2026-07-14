@@ -40,33 +40,37 @@
   <div class="announce-bar">Free press check · Catch KDP rejections before you upload</div>
 
   <div class="wrap">
-    <header class="masthead">
-      <a href="{{ url_for('index') }}" class="mark" style="text-decoration:none; color:inherit;">
-        <span class="mark-dot" aria-hidden="true"></span>
-        kdp press check
-      </a>
-      <div class="masthead-right">
-        <nav class="mode-nav">
-          <a href="{{ url_for('index') }}"        class="{{ 'is-active' if active_mode == 'interior' else '' }}">Interior Check</a>
-          <a href="{{ url_for('cover_index') }}"  class="{{ 'is-active' if active_mode == 'cover'    else '' }}">Cover Check</a>
-          <a href="{{ url_for('kindle_index') }}" class="{{ 'is-active' if active_mode == 'kindle'   else '' }}">Kindle Check</a>
-          <a href="{{ url_for('preview_index') }}" class="{{ 'is-active' if active_mode == 'preview' else '' }}">Book Preview</a>
-          <a href="{{ url_for('error_decoder') }}" class="{{ 'is-active' if active_mode == 'decoder' else '' }}">Error Decoder</a>
-          <a href="{{ url_for('keyword_linter') }}" class="{{ 'is-active' if active_mode == 'keywords' else '' }}">Keyword Linter</a>
-          <a href="{{ url_for('royalty_calculator') }}"   class="{{ 'is-active' if active_mode == 'royalty'  else '' }}">Royalty Calc</a>
-          <a href="{{ url_for('estimate_pages_index') }}" class="{{ 'is-active' if active_mode == 'estimate' else '' }}">Page Estimator</a>
-          <a href="{{ url_for('genre_checklist') }}"      class="{{ 'is-active' if active_mode == 'genre'    else '' }}">Genre Guide</a>
-        </nav>
+    <div class="topbar">
+      <header class="masthead">
+        <a href="{{ url_for('index') }}" class="mark" style="text-decoration:none; color:inherit;">
+          <span class="mark-dot" aria-hidden="true"></span>
+          kdp press check
+        </a>
         <div class="masthead-actions">
-          <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Switch to dark mode" aria-pressed="false">
-            <span class="theme-dot" aria-hidden="true"></span>
-            <span class="theme-label-light">Light</span>
-            <span class="theme-label-dark">Dark</span>
+          <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Switch to dark mode" aria-pressed="false" title="Toggle light / dark">
+            <svg class="theme-icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <svg class="theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.7"/>
+              <path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            </svg>
           </button>
           <a href="{{ url_for('problem_solvers') }}" class="cta-pill {{ 'is-active' if active_mode == 'solvers' else '' }}">Find help</a>
         </div>
-      </div>
-    </header>
+      </header>
+      <nav class="mode-nav">
+        <a href="{{ url_for('index') }}"        class="{{ 'is-active' if active_mode == 'interior' else '' }}">Interior Check</a>
+        <a href="{{ url_for('cover_index') }}"  class="{{ 'is-active' if active_mode == 'cover'    else '' }}">Cover Check</a>
+        <a href="{{ url_for('kindle_index') }}" class="{{ 'is-active' if active_mode == 'kindle'   else '' }}">Kindle Check</a>
+        <a href="{{ url_for('preview_index') }}" class="{{ 'is-active' if active_mode == 'preview' else '' }}">Book Preview</a>
+        <a href="{{ url_for('error_decoder') }}" class="{{ 'is-active' if active_mode == 'decoder' else '' }}">Error Decoder</a>
+        <a href="{{ url_for('keyword_linter') }}" class="{{ 'is-active' if active_mode == 'keywords' else '' }}">Keyword Linter</a>
+        <a href="{{ url_for('royalty_calculator') }}"   class="{{ 'is-active' if active_mode == 'royalty'  else '' }}">Royalty Calc</a>
+        <a href="{{ url_for('estimate_pages_index') }}" class="{{ 'is-active' if active_mode == 'estimate' else '' }}">Page Estimator</a>
+        <a href="{{ url_for('genre_checklist') }}"      class="{{ 'is-active' if active_mode == 'genre'    else '' }}">Genre Guide</a>
+      </nav>
+    </div>
 
     {% with messages = get_flashed_messages() %}
       {% if messages %}

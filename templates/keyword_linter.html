@@ -191,12 +191,23 @@ function render(findings, filled) {
   out.innerHTML = summary + '<div class="lint-findings">' + rows + '</div>';
 }
 
-// live slot counter
+// live slot counter (kept snappy; full analysis is debounced)
 function updateCount() {
   var filled = [].filter.call(document.querySelectorAll(".ln-kw"), function(i){ return i.value.trim(); }).length;
   document.getElementById("ln-kw-count").textContent = filled + " / 7 filled";
 }
-document.querySelectorAll(".ln-kw").forEach(function(i){ i.addEventListener("input", updateCount); });
+
+// Real-time analysis: re-check on every keystroke across all fields, debounced.
+var lintTimer = null;
+function liveAnalyze() {
+  updateCount();
+  clearTimeout(lintTimer);
+  lintTimer = setTimeout(analyze, 180);
+}
+
+var allInputs = [document.getElementById("ln-title"), document.getElementById("ln-subtitle"), document.getElementById("ln-author")]
+  .concat([].slice.call(document.querySelectorAll(".ln-kw")));
+allInputs.forEach(function(i){ i.addEventListener("input", liveAnalyze); });
 
 document.getElementById("ln-check").addEventListener("click", analyze);
 
