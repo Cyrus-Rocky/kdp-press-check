@@ -9,9 +9,12 @@ until after you submit it, so checking before export still catches the things
 that would otherwise surprise you.
 """
 import io
+import re
+import zipfile
 from collections import Counter
 
 from docx import Document
+from docx.oxml.ns import qn
 from PIL import Image
 
 import classify
@@ -419,6 +422,100 @@ def check_metadata_docx(doc) -> dict:
     }
 
 
+def check_editing_marks_docx(doc) -> dict:
+    """Tracked changes and comments left in a manuscript are a common cause of
+    KDP trouble: when KDP auto-converts a .docx they can render into the printed
+    book, and reviewers flag them. This is blocking because it visibly damages
+    the finished book if missed."""
+    root = doc.element
+    ins = root.xpath(".//w:ins")
+    dele = root.xpath(".//w:del")
+    comments = root.xpath(".//w:commentReference")
+    n_changes = len(ins) + len(dele)
+    n_comments = len(comments)
+
+    if n_changes == 0 and n_comments == 0:
+        return {
+            "title": "Editing Marks", "ok": True,
+            "summary": "No tracked changes or comments left in the document.",
+            "detail": "Scanned for tracked insertions/deletions and comment references.",
+        }
+    bits = []
+    if n_changes:
+        bits.append(f"{n_changes} tracked change{'s' if n_changes != 1 else ''}")
+    if n_comments:
+        bits.append(f"{n_comments} comment{'s' if n_comments != 1 else ''}")
+    return {
+        "title": "Editing Marks", "ok": False,
+        "summary": "This file still contains " + " and ".join(bits) + ".",
+        "fix": "Accept or reject every tracked change (in Word: Review, then Accept, then Accept "
+               "All Changes) and delete all comments before you export. KDP expects a clean file, "
+               "and leftover edits or comments can print inside your book.",
+        "detail": f"Tracked insertions: {len(ins)}, deletions: {len(dele)}, "
+                  f"comment references: {n_comments}.",
+    }
+
+
+def check_hidden_content_docx(doc) -> dict:
+    """Text marked with Word's hidden-text effect won't print, but it's usually
+    forgotten notes or scrapped passages worth reviewing. Advisory only."""
+    vanish = doc.element.xpath(".//w:rPr/w:vanish")
+    hidden = [v for v in vanish
+              if (v.get(qn("w:val")) or "true").lower() not in ("false", "0", "off")]
+    if not hidden:
+        return {
+            "title": "Hidden Text", "ok": True, "warning_only": True,
+            "summary": "No hidden text found.",
+            "detail": "Scanned for runs using Word's hidden-text effect.",
+        }
+    return {
+        "title": "Hidden Text", "ok": False, "warning_only": True,
+        "summary": f"Found {len(hidden)} run(s) of hidden text.",
+        "fix": "Hidden text won't print, but it's often leftover notes or cut passages. In Word, "
+               "turn on Show/Hide (the ¶ button) to reveal it, then delete anything you don't "
+               "want carried into the file.",
+        "detail": f"Runs with the hidden font effect: {len(hidden)}.",
+    }
+
+
+def _saved_page_count_docx(docx_path: str):
+    """Word records its last-computed page count in docProps/app.xml. Returns
+    None when the file carries no usable saved count."""
+    try:
+        with zipfile.ZipFile(docx_path) as z:
+            app_xml = z.read("docProps/app.xml").decode("utf-8", "ignore")
+    except (KeyError, zipfile.BadZipFile, OSError):
+        return None
+    m = re.search(r"<Pages>(\d+)</Pages>", app_xml)
+    if not m:
+        return None
+    pages = int(m.group(1))
+    return pages if pages > 0 else None
+
+
+def check_even_page_count_docx(docx_path: str):
+    """KDP print books must have an even page count. A .docx has no fixed
+    pagination, so this uses Word's saved count and stays advisory. Returns None
+    (skipped) when no saved count is available."""
+    pages = _saved_page_count_docx(docx_path)
+    if pages is None:
+        return None
+    if pages % 2 == 0:
+        return {
+            "title": "Page Count Parity", "ok": True, "warning_only": True,
+            "summary": f"Word's saved page count ({pages}) is even, as KDP print requires.",
+            "detail": "Read from the file's saved page count.",
+        }
+    return {
+        "title": "Page Count Parity", "ok": False, "warning_only": True,
+        "summary": f"Word's last saved page count is {pages}, an odd number. KDP print books "
+                   f"need an even page count.",
+        "fix": "Add one blank page at the end so the total is even. This reflects Word's last "
+               "save; your final exported PDF's page count is what KDP actually uses.",
+        "detail": f"Saved page count: {pages}.",
+    }
+
+
 def run_all_checks_docx(docx_path: str) -> dict:
     doc = Document(docx_path)
     results = [
@@ -430,9 +527,14 @@ def run_all_checks_docx(docx_path: str) -> dict:
         check_font_consistency_docx(doc),
         check_chapter_page_breaks_docx(doc),
         check_paragraph_indent_docx(doc),
+        check_editing_marks_docx(doc),
+        check_hidden_content_docx(doc),
         check_image_resolution_docx(doc),
         check_metadata_docx(doc),
     ]
+    even_check = check_even_page_count_docx(docx_path)
+    if even_check is not None:
+        results.append(even_check)
     full_text = "\n".join(p.text for p in doc.paragraphs)
     headings = [p.text for p in doc.paragraphs
                 if p.style and p.style.name and p.style.name.startswith("Heading") and p.text.strip()]

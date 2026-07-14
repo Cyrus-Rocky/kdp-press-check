@@ -186,6 +186,9 @@ CHECK_TO_CATEGORY = {
     "EPUB Structure":         "kindle",
     "Color Content":          "formatting",
     "Orphans & Widows":       "formatting",
+    "Editing Marks":          "editing",
+    "Hidden Text":            "editing",
+    "Page Count Parity":      "formatting",
     "PDF Metadata":           "formatting",
     "TOC Accuracy":           "formatting",
 }
