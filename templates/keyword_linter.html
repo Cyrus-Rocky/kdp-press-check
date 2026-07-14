@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+{% block title %}Keyword & Metadata Linter · KDP Press Check{% endblock %}
+{% block content %}
+
+<section class="hero-single">
+  <div class="eyebrow">Keyword &amp; metadata linter</div>
+  <h1 class="hero-display">Stop wasting your 7 keywords.</h1>
+  <p class="hero-lead">Enter your title and the 7 keywords you plan to use on KDP. We check them against Amazon's actual keyword and metadata rules, so you don't burn slots or trip a rejection.</p>
+
+  <div class="lint-grid">
+    <div class="lint-inputs">
+      <div class="field">
+        <label for="ln-title">Book title</label>
+        <input type="text" id="ln-title" placeholder="e.g. The Silent Harbor">
+      </div>
+      <div class="field">
+        <label for="ln-subtitle">Subtitle (optional)</label>
+        <input type="text" id="ln-subtitle" placeholder="e.g. A Cornish Mystery">
+      </div>
+      <div class="field">
+        <label for="ln-author">Author name (optional)</label>
+        <input type="text" id="ln-author" placeholder="e.g. Jane Marlowe">
+      </div>
+
+      <div class="lint-kw-head"><span>Your 7 keywords</span><span class="lint-kw-count" id="ln-kw-count">0 / 7 filled</span></div>
+      <div class="lint-kw-row"><span class="lint-kw-num">1</span><input type="text" class="ln-kw" maxlength="80" placeholder="keyword or short phrase"></div>
+      <div class="lint-kw-row"><span class="lint-kw-num">2</span><input type="text" class="ln-kw" maxlength="80" placeholder="keyword or short phrase"></div>
+      <div class="lint-kw-row"><span class="lint-kw-num">3</span><input type="text" class="ln-kw" maxlength="80" placeholder="keyword or short phrase"></div>
+      <div class="lint-kw-row"><span class="lint-kw-num">4</span><input type="text" class="ln-kw" maxlength="80" placeholder="keyword or short phrase"></div>
+      <div class="lint-kw-row"><span class="lint-kw-num">5</span><input type="text" class="ln-kw" maxlength="80" placeholder="keyword or short phrase"></div>
+      <div class="lint-kw-row"><span class="lint-kw-num">6</span><input type="text" class="ln-kw" maxlength="80" placeholder="keyword or short phrase"></div>
+      <div class="lint-kw-row"><span class="lint-kw-num">7</span><input type="text" class="ln-kw" maxlength="80" placeholder="keyword or short phrase"></div>
+
+      <div class="actions-inline" style="margin-top:12px; gap:14px;">
+        <button type="button" class="primary" id="ln-check"><span class="label">Check my keywords →</span></button>
+        <button type="button" class="pv-link" id="ln-example">Load a messy example</button>
+      </div>
+    </div>
+
+    <div>
+      <div id="ln-results">
+        <div class="lint-placeholder">Your results will appear here: which keywords are strong, which waste a slot, and anything that could trip KDP's rules.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// ── KDP rule data (grounded in KDP's published keyword & metadata guidelines) ──
+var GENERIC_STRONG = ["book","books","ebook","kindle","paperback","hardcover","hardback","audiobook"];
+var GENERIC_WEAK   = ["novel","story","stories","read","reading","author","writing","text"];
+var SUBJECTIVE_WORDS = ["best","bestseller","bestselling","greatest","amazing","acclaimed","incredible","ultimate","perfect","phenomenal"];
+var SUBJECTIVE_PHRASES = ["best selling","best-selling","best seller","must read","must-read","must have","must-have","award winning","award-winning","top rated","top-rated","number one","#1"];
+var TIME_WORDS = ["new","latest","today"];
+var TIME_PHRASES = ["on sale","available now","limited time","limited-time","coming soon","brand new","brand-new","just released","newly released"];
+var PROGRAM_PHRASES = ["kindle unlimited","kdp select"];
+var TITLE_PROMO = ["bestselling","best-selling","best seller","bestseller","#1","on sale","new release","free"];
+var PLACEHOLDERS = ["unknown","n/a","na","null","blank","tbd","test","asdf","xxx"];
+var STOP = {"a":1,"an":1,"the":1,"of":1,"and":1,"or":1,"to":1,"in":1,"on":1,"for":1,"with":1,"by":1,"at":1,"from":1,"as":1};
+
+function words(s) {
+  return (s.toLowerCase().match(/[a-z0-9]+/g) || []);
+}
+function contentWords(s) {
+  return words(s).filter(function(w){ return !STOP[w] && w.length > 2; });
+}
+function hasPhrase(low, phrase) {
+  return (" " + low + " ").indexOf(" " + phrase + " ") !== -1;
+}
+
+function analyze() {
+  var title = document.getElementById("ln-title").value.trim();
+  var subtitle = document.getElementById("ln-subtitle").value.trim();
+  var author = document.getElementById("ln-author").value.trim();
+  var kws = [].map.call(document.querySelectorAll(".ln-kw"), function(i){ return i.value.trim(); });
+
+  var findings = [];
+  function add(sev, field, msg) { findings.push({sev: sev, field: field, msg: msg}); }
+
+  // Words already covered by title/subtitle/author (Amazon indexes these already)
+  var metaSet = {};
+  contentWords(title + " " + subtitle + " " + author).forEach(function(w){ metaSet[w] = true; });
+
+  // ── Title / subtitle metadata ──
+  if (!title) {
+    add("issue", "Title", "No title entered. The title is your most-searched field, add it so we can check keyword overlap too.");
+  } else {
+    var combined = (title + " " + subtitle).trim();
+    if (combined.length >= 200) {
+      add("issue", "Title + subtitle", "Combined title and subtitle is " + combined.length + " characters. KDP's limit is under 200.");
+    }
+    var tlow = (title + " " + subtitle).toLowerCase();
+    TITLE_PROMO.forEach(function(p){
+      if (hasPhrase(tlow, p)) add("issue", "Title", "\"" + p + "\" isn't allowed in the title/subtitle (KDP bans sales-rank and promo terms like \"bestselling\" and \"free\").");
+    });
+    if (title && !/[a-z0-9]/i.test(title)) add("issue", "Title", "Title is only punctuation. KDP rejects titles with no real words.");
+    words(title).forEach(function(w){ if (PLACEHOLDERS.indexOf(w) !== -1) add("issue", "Title", "\"" + w + "\" looks like placeholder text; KDP rejects placeholders (unknown, n/a, null, etc.)."); });
+    if (/<[^>]+>/.test(title + subtitle)) add("issue", "Title", "Remove HTML tags from the title/subtitle.");
+  }
+
+  // ── Keywords ──
+  var filled = 0;
+  var wordFieldMap = {}; // word -> [field numbers] for cross-field duplicate detection
+  kws.forEach(function(v, idx) {
+    var n = idx + 1;
+    var field = "Keyword " + n;
+    if (!v) return;
+    filled++;
+    var low = v.toLowerCase();
+
+    if (v.length > 50) add("issue", field, "This is " + v.length + " characters. KDP keyword fields hold 50, trim it or split it.");
+    if (v.indexOf('"') !== -1 || v.indexOf("“") !== -1 || v.indexOf("”") !== -1) add("issue", field, "Remove the quotation marks. KDP says enter terms without quotes.");
+    if (/<[^>]+>/.test(v)) add("issue", field, "Remove HTML tags from this keyword.");
+    if (v.indexOf(",") !== -1) add("note", field, "Commas inside one field are treated as literal characters, not separators. Put each phrase in its own keyword slot.");
+
+    // Prohibited phrases
+    SUBJECTIVE_PHRASES.forEach(function(p){ if (hasPhrase(low, p) || low.indexOf(p) !== -1 && p === "#1") add("issue", field, "\"" + p + "\" is a subjective/ranking claim; KDP prohibits it in keywords."); });
+    TIME_PHRASES.forEach(function(p){ if (hasPhrase(low, p)) add("issue", field, "\"" + p + "\" is time-sensitive; KDP prohibits it in keywords."); });
+    PROGRAM_PHRASES.forEach(function(p){ if (hasPhrase(low, p)) add("issue", field, "\"" + p + "\" (a program name) isn't allowed as a keyword."); });
+
+    // Word-level checks
+    var ws = words(v);
+    var redundant = [];
+    ws.forEach(function(w){
+      if (GENERIC_STRONG.indexOf(w) !== -1) add("issue", field, "\"" + w + "\" is on nearly every book, so it won't help you rank. Use a specific word instead.");
+      else if (GENERIC_WEAK.indexOf(w) !== -1) add("note", field, "\"" + w + "\" is weak and generic. A more specific term (setting, character type, theme, tone) works harder.");
+      if (SUBJECTIVE_WORDS.indexOf(w) !== -1) add("issue", field, "\"" + w + "\" is a subjective quality claim; KDP prohibits these in keywords.");
+      if (w === "free") add("issue", field, "\"free\" isn't allowed as a keyword.");
+      if (TIME_WORDS.indexOf(w) !== -1) add("note", field, "\"" + w + "\" reads as time-sensitive, which KDP discourages. Ignore this if it's part of a place or name (e.g. \"New York\").");
+      if (/^(19|20)\d\d$/.test(w)) add("note", field, "\"" + w + "\" is a year, which dates your book. Consider dropping it.");
+      if (metaSet[w] && !STOP[w]) redundant.push(w);
+      if (!STOP[w] && w.length > 2) { (wordFieldMap[w] = wordFieldMap[w] || []).push(n); }
+    });
+    if (redundant.length) {
+      add("note", field, "\"" + redundant.join("\", \"") + "\" already appear in your title/subtitle/author, which Amazon indexes automatically. Repeating them here wastes the slot.");
+    }
+    if (ws.length >= 4) add("note", field, "This is a " + ws.length + "-word phrase. Long phrases only match when a reader types every word; shorter, specific terms reach more searches.");
+  });
+
+  // Cross-field duplicate words
+  Object.keys(wordFieldMap).forEach(function(w){
+    if (wordFieldMap[w].length > 1) {
+      add("note", "Keywords " + wordFieldMap[w].join(" & "), "\"" + w + "\" is repeated across slots. Repeating a word doesn't add reach, spend that space on a new term.");
+    }
+  });
+
+  render(findings, filled);
+}
+
+function sevRank(s) { return s === "issue" ? 0 : (s === "note" ? 1 : 2); }
+
+function render(findings, filled) {
+  var out = document.getElementById("ln-results");
+  document.getElementById("ln-kw-count").textContent = filled + " / 7 filled";
+
+  var issues = findings.filter(function(f){ return f.sev === "issue"; }).length;
+  var notes = findings.filter(function(f){ return f.sev === "note"; }).length;
+
+  var summary = '<div class="lint-summary">';
+  if (issues === 0 && notes === 0 && filled > 0) {
+    summary += '<div class="lint-summary-big">Looks clean</div>' +
+               '<div class="lint-summary-sub">No rule problems found. You\'re using ' + filled + ' of 7 keyword slots.</div>';
+  } else {
+    summary += '<div class="lint-summary-big">' + issues + ' issue' + (issues===1?'':'s') + ' · ' + notes + ' suggestion' + (notes===1?'':'s') + '</div>' +
+               '<div class="lint-summary-sub">Using ' + filled + ' of 7 keyword slots' +
+               (filled < 7 ? '. Each empty slot is free discoverability left on the table.' : '. All slots filled.') + '</div>';
+  }
+  summary += '</div>';
+
+  findings.sort(function(a,b){ return sevRank(a.sev) - sevRank(b.sev); });
+
+  if (filled === 0) {
+    out.innerHTML = '<div class="lint-placeholder">Enter at least one keyword, then press Check.</div>';
+    return;
+  }
+
+  var rows = findings.map(function(f){
+    var label = f.sev === "issue" ? "ISSUE" : (f.sev === "note" ? "TIP" : "OK");
+    return '<div class="lint-finding">' +
+      '<span class="lint-sev ' + f.sev + '">' + label + '</span>' +
+      '<div class="lint-finding-body">' +
+        '<div class="lint-finding-field">' + f.field + '</div>' +
+        '<div class="lint-finding-msg">' + f.msg + '</div>' +
+      '</div></div>';
+  }).join("");
+
+  if (!findings.length) {
+    rows = '<div class="lint-finding"><span class="lint-sev ok">OK</span><div class="lint-finding-body">' +
+           '<div class="lint-finding-msg">Every keyword you entered passes KDP\'s rules and pulls its weight.</div></div></div>';
+  }
+  out.innerHTML = summary + '<div class="lint-findings">' + rows + '</div>';
+}
+
+// live slot counter
+function updateCount() {
+  var filled = [].filter.call(document.querySelectorAll(".ln-kw"), function(i){ return i.value.trim(); }).length;
+  document.getElementById("ln-kw-count").textContent = filled + " / 7 filled";
+}
+document.querySelectorAll(".ln-kw").forEach(function(i){ i.addEventListener("input", updateCount); });
+
+document.getElementById("ln-check").addEventListener("click", analyze);
+
+document.getElementById("ln-example").addEventListener("click", function() {
+  document.getElementById("ln-title").value = "The Silent Harbor";
+  document.getElementById("ln-subtitle").value = "A Gripping Cornish Mystery Novel";
+  document.getElementById("ln-author").value = "Jane Marlowe";
+  var ex = ["mystery book", "best selling thriller", "The Silent Harbor", "cozy british mystery detective novel", "new 2025 suspense", "kindle unlimited", "gripping"];
+  document.querySelectorAll(".ln-kw").forEach(function(inp, i){ inp.value = ex[i] || ""; });
+  updateCount();
+  analyze();
+});
+</script>
+{% endblock %}

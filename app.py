@@ -249,6 +249,11 @@ def error_decoder():
     return render_template("error_decoder.html", active_mode="decoder")
 
 
+@app.route("/keyword-linter", methods=["GET"])
+def keyword_linter():
+    return render_template("keyword_linter.html", active_mode="keywords")
+
+
 @app.route("/genre-checklist", methods=["GET"])
 def genre_checklist():
     return render_template("genre_checklist.html", active_mode="genre")

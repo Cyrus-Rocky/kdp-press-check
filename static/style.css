@@ -781,6 +781,67 @@ a { color: var(--accent-ink); }
   padding: 28px; color: var(--pc-faint); font-size: 14px; line-height: 1.6;
 }
 
+/* ---------- Keyword & metadata linter ---------- */
+.lint-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 400px) minmax(300px, 1fr);
+  gap: 44px;
+  align-items: start;
+}
+@media (max-width: 820px) { .lint-grid { grid-template-columns: 1fr; gap: 32px; } }
+.lint-inputs { display: flex; flex-direction: column; gap: 16px; }
+.lint-kw-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.4px;
+  text-transform: uppercase; color: var(--pc-muted); margin: 8px 0 2px;
+}
+.lint-kw-count { color: var(--pc-faint); }
+.lint-kw-row { display: flex; align-items: center; gap: 10px; }
+.lint-kw-num {
+  font-family: var(--font-mono); font-size: 12px; color: var(--pc-faint);
+  width: 16px; flex: none; text-align: right;
+}
+.lint-kw-row input {
+  flex: 1; width: 100%;
+  font-family: var(--font-body); font-size: 15px; color: var(--pc-ink);
+  background: var(--pc-card); border: 1px solid var(--pc-rule);
+  border-radius: var(--radius-sm); padding: 10px 12px; box-sizing: border-box;
+}
+.lint-kw-row input:focus-visible { outline: 2px solid var(--pc-focus); outline-offset: 1px; }
+
+.lint-summary {
+  border: 1px solid var(--pc-rule-soft); border-radius: 16px;
+  padding: 20px 22px; background: var(--pc-raise); margin-bottom: 20px;
+}
+.lint-summary-big {
+  font-family: var(--font-display); font-size: 28px; letter-spacing: -0.5px;
+  color: var(--pc-strong);
+}
+.lint-summary-sub { font-size: 14px; color: var(--pc-muted); margin-top: 4px; }
+.lint-findings { display: flex; flex-direction: column; gap: 12px; }
+.lint-finding {
+  display: flex; gap: 12px; align-items: flex-start;
+  border: 1px solid var(--pc-rule-soft); border-radius: 12px; padding: 14px 16px;
+  background: var(--pc-card);
+}
+.lint-sev {
+  flex: none; font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px;
+  text-transform: uppercase; padding: 4px 9px; border-radius: 20px; margin-top: 1px;
+}
+.lint-sev.issue { background: var(--pc-issue-bg); color: var(--pc-issue); }
+.lint-sev.note  { background: var(--pc-note-bg);  color: var(--pc-note); }
+.lint-sev.ok    { background: var(--pc-ok-bg);    color: var(--pc-ok); }
+.lint-finding-body { flex: 1; }
+.lint-finding-field {
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.4px;
+  color: var(--pc-faint); margin-bottom: 3px;
+}
+.lint-finding-msg { font-size: 14px; line-height: 1.5; color: var(--pc-ink); }
+.lint-placeholder {
+  border: 1px dashed var(--pc-rule-soft); border-radius: 16px;
+  padding: 28px; color: var(--pc-faint); font-size: 14px; line-height: 1.6;
+}
+
 /* ---------- Genre guide ---------- */
 .genre-wrap { max-width: 760px; }
 .genre-top {
