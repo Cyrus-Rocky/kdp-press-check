@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Page Count Estimator · KDP Press Check{% endblock %}
+{% block title %}Document Details · KDP Press Check{% endblock %}
 {% block content %}
 
 <section class="hero-single">
-  <div class="eyebrow">Page estimator</div>
-  <h1 class="hero-display">How thick will your book be?</h1>
-  <p class="hero-lead">Upload your Word manuscript and we estimate the printed page count, and what each copy will cost, at any trim size and font size.</p>
+  <div class="eyebrow">Document details</div>
+  <h1 class="hero-display">Everything in your manuscript, at a glance.</h1>
+  <p class="hero-lead">Upload your Word file and see its real page count, word count, character count, and file size. No setup, no guessing.</p>
 
   <form method="post" enctype="multipart/form-data" action="{{ url_for('estimate_pages') }}">
     <div class="est-grid">
@@ -20,58 +20,39 @@
                  style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;">
         </div>
 
-        <div class="est-selects">
-          <div class="field">
-            <label for="trim_size_select">Trim size</label>
-            <select id="trim_size_select">
-              <option value="5.0|8.0">5" × 8"</option>
-              <option value="5.5|8.5">5.5" × 8.5"</option>
-              <option value="6.0|9.0" selected>6" × 9" (most common)</option>
-              <option value="6.14|9.21">6.14" × 9.21"</option>
-              <option value="7.0|10.0">7" × 10"</option>
-              <option value="8.0|10.0">8" × 10"</option>
-              <option value="8.5|11.0">8.5" × 11"</option>
-            </select>
-            <input type="hidden" name="trim_w" id="trim_w" value="6.0">
-            <input type="hidden" name="trim_h" id="trim_h" value="9.0">
-          </div>
-          <div class="field">
-            <label for="font_size">Font size</label>
-            <select name="font_size" id="font_size">
-              <option value="10">10 pt</option>
-              <option value="11">11 pt</option>
-              <option value="12" selected>12 pt (standard)</option>
-              <option value="13">13 pt</option>
-              <option value="14">14 pt (large print)</option>
-            </select>
-          </div>
-        </div>
-
         <div class="actions-inline" style="margin-top:20px;">
           <button type="submit" class="primary">
-            <span class="label">Estimate page count →</span>
-            <span class="spinner"><span class="spinner-dash" aria-hidden="true"></span> Estimating&hellip;</span>
+            <span class="label">Show document details →</span>
+            <span class="spinner"><span class="spinner-dash" aria-hidden="true"></span> Reading&hellip;</span>
           </button>
         </div>
       </div>
 
       {% if result %}
       <div class="est-card">
-        <div class="est-card-label">Estimate</div>
-        <div class="est-big">{{ result.estimated_pages }}</div>
-        <div class="est-big-cap">printed pages at {{ result.trim }}, {{ result.font_size }} pt</div>
+        <div class="est-card-label">Document details</div>
+        {% if result.pages %}
+          <div class="est-big">{{ "{:,}".format(result.pages) }}</div>
+          <div class="est-big-cap">{{ 'page' if result.pages == 1 else 'pages' }} (as last saved in Word)</div>
+        {% else %}
+          <div class="est-big">{{ "{:,}".format(result.word_count) }}</div>
+          <div class="est-big-cap">words</div>
+        {% endif %}
         <div class="est-rows">
+          {% if result.pages %}
           <div class="est-row ruled"><span class="est-k">Word count</span><span class="est-v">{{ "{:,}".format(result.word_count) }}</span></div>
-          <div class="est-row ruled"><span class="est-k">Words per page</span><span class="est-v">{{ result.words_per_page }}</span></div>
-          <div class="est-row ruled"><span class="est-k">Printing cost (B&amp;W)</span><span class="est-v">${{ "%.2f"|format(result.cost_bw) }}</span></div>
-          <div class="est-row"><span class="est-k">Printing cost (color)</span><span class="est-v">${{ "%.2f"|format(result.cost_color) }}</span></div>
+          {% endif %}
+          <div class="est-row ruled"><span class="est-k">Characters (with spaces)</span><span class="est-v">{{ "{:,}".format(result.char_count) }}</span></div>
+          <div class="est-row ruled"><span class="est-k">Characters (no spaces)</span><span class="est-v">{{ "{:,}".format(result.char_count_no_spaces) }}</span></div>
+          <div class="est-row ruled"><span class="est-k">Paragraphs</span><span class="est-v">{{ "{:,}".format(result.para_count) }}</span></div>
+          <div class="est-row"><span class="est-k">File size</span><span class="est-v">{{ result.file_size }}</span></div>
         </div>
-        <div style="margin-top:24px;">
-          <a href="{{ url_for('royalty_calculator') }}" class="pv-link">Take these numbers to the royalty calculator →</a>
-        </div>
+        {% if not result.pages %}
+        <p class="est-note">This file doesn't have a saved page count. Open it in Word and save once so Word records the page count, then upload again. Word (.docx) files don't store a fixed page count on their own, the number depends on the reader's fonts and margins.</p>
+        {% endif %}
       </div>
       {% else %}
-      <div class="est-placeholder">Your estimate will appear here: page count, printing cost, and how it changes with trim size and font.</div>
+      <div class="est-placeholder">Your document's details will appear here: page count, word count, character count, and file size.</div>
       {% endif %}
     </div>
   </form>
@@ -104,12 +85,6 @@ zone.addEventListener("drop", function(e) {
   var dt = new DataTransfer(); dt.items.add(f);
   input.files = dt.files;
   input.dispatchEvent(new Event("change"));
-});
-
-document.getElementById("trim_size_select").addEventListener("change", function() {
-  var parts = this.value.split("|");
-  document.getElementById("trim_w").value = parts[0];
-  document.getElementById("trim_h").value = parts[1];
 });
 </script>
 {% endblock %}

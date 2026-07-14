@@ -716,6 +716,14 @@ a { color: var(--accent-ink); }
   font-size: 14px;
   line-height: 1.6;
 }
+.est-note {
+  margin: 20px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--pc-muted);
+  border-top: 1px solid var(--pc-rule-soft);
+  padding-top: 16px;
+}
 
 /* ---------- Genre guide ---------- */
 .genre-wrap { max-width: 760px; }
