@@ -34,6 +34,13 @@ def inject_globals():
     return {"ga_id": GA_ID}
 
 
+@app.route("/health", methods=["GET"])
+def health():
+    # Lightweight endpoint for uptime pingers (e.g. UptimeRobot) to keep the
+    # free-tier instance awake without rendering a full page. Returns instantly.
+    return "ok", 200
+
+
 @app.route("/", methods=["GET"])
 def index():
     return render_template("index.html", active_mode="interior")
