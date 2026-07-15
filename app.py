@@ -259,6 +259,11 @@ def margin_advisor():
     return render_template("margin_advisor.html", active_mode="margins")
 
 
+@app.route("/launch-checklist", methods=["GET"])
+def launch_checklist():
+    return render_template("launch_checklist.html", active_mode="launch")
+
+
 @app.route("/genre-checklist", methods=["GET"])
 def genre_checklist():
     return render_template("genre_checklist.html", active_mode="genre")

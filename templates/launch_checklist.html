@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% block title %}Launch Readiness Checklist · KDP Press Check{% endblock %}
+{% block content %}
+
+<section class="hero-single">
+  <div class="eyebrow">Launch readiness</div>
+  <h1 class="hero-display">Are you actually ready to publish?</h1>
+  <p class="hero-lead">Everything that should be true before you hit publish on KDP, in one place. Tick each item off and watch your readiness score climb. Your progress is saved on this device.</p>
+
+  <div class="seg-toggle" role="tablist" style="margin-bottom:28px;">
+    <button class="seg-btn is-active" data-format="print" id="lr-fmt-print">Paperback</button>
+    <button class="seg-btn" data-format="ebook" id="lr-fmt-ebook">Ebook</button>
+    <button class="seg-btn" data-format="both" id="lr-fmt-both">Both</button>
+  </div>
+
+  <div class="lr-top">
+    <div class="lr-ring-wrap">
+      <svg class="lr-ring" viewBox="0 0 120 120">
+        <circle class="lr-ring-bg" cx="60" cy="60" r="52"></circle>
+        <circle class="lr-ring-fg" id="lr-ring-fg" cx="60" cy="60" r="52"
+                stroke-dasharray="326.726" stroke-dashoffset="326.726"></circle>
+      </svg>
+      <div class="lr-ring-center">
+        <div class="lr-score-num" id="lr-score">0%</div>
+        <div class="lr-score-lbl">ready</div>
+      </div>
+    </div>
+    <div class="lr-top-text">
+      <p class="lr-top-head" id="lr-headline">Let's get you launch-ready.</p>
+      <p class="lr-top-sub" id="lr-subline">0 of 0 steps done.</p>
+      <button type="button" class="lr-reset" id="lr-reset">Reset all</button>
+    </div>
+  </div>
+
+  <div id="lr-sections"></div>
+
+  <div class="lr-done" id="lr-done" style="display:none;">
+    <p class="lr-done-head">🎉 You're launch-ready.</p>
+    <p class="lr-done-sub">Every box is ticked. Do one final pass in KDP's own previewer after you upload, then publish with confidence.</p>
+  </div>
+</section>
+
+<script>
+// Each item applies to print, ebook, or both. tool links to the on-site helper.
+var SECTIONS = [
+  {
+    title: "Manuscript & writing",
+    items: [
+      {id: "proofread", text: "Proofread the manuscript: typos, repeated words, mixed quote styles", tool: {href: "/", label: "Run Interior Check"}, formats: ["print","ebook"]},
+      {id: "editmarks", text: "Removed all tracked changes and comments from the file", tool: {href: "/", label: "Run Interior Check"}, formats: ["print","ebook"]},
+      {id: "consistent", text: "Consistent fonts, headings, and scene-break style throughout", tool: {href: "/", label: "Run Interior Check"}, formats: ["print","ebook"]}
+    ]
+  },
+  {
+    title: "Print interior",
+    items: [
+      {id: "trim", text: "Set a standard KDP trim size", tool: {href: "/", label: "Run Interior Check"}, formats: ["print"]},
+      {id: "gutter", text: "Inside/gutter margin matches the final page count", tool: {href: "/margin-advisor", label: "Open Margin Advisor"}, formats: ["print"]},
+      {id: "outside", text: "Outside, top, and bottom margins meet the minimum", tool: {href: "/margin-advisor", label: "Open Margin Advisor"}, formats: ["print"]},
+      {id: "fonts", text: "All fonts embedded in the PDF", tool: {href: "/", label: "Run Interior Check"}, formats: ["print"]},
+      {id: "dpi", text: "Every image is at least 300 DPI", tool: {href: "/", label: "Run Interior Check"}, formats: ["print"]},
+      {id: "even", text: "Page count is an even number", tool: {href: "/", label: "Run Interior Check"}, formats: ["print"]},
+      {id: "frontmatter", text: "Title page and copyright page included up front", tool: {href: "/", label: "Run Interior Check"}, formats: ["print"]},
+      {id: "previewed", text: "Previewed the book as printed two-page spreads", tool: {href: "/preview", label: "Open Book Preview"}, formats: ["print"]}
+    ]
+  },
+  {
+    title: "Cover (print)",
+    items: [
+      {id: "fullwrap", text: "Built a full-wrap cover PDF (back + spine + front)", tool: {href: "/cover", label: "Run Cover Check"}, formats: ["print"]},
+      {id: "spine", text: "Spine width matches the final page count and paper", tool: {href: "/cover", label: "Run Cover Check"}, formats: ["print"]},
+      {id: "barcode", text: "Nothing essential sits in the barcode zone", tool: {href: "/cover", label: "Run Cover Check"}, formats: ["print"]},
+      {id: "covermeta", text: "Cover title and author match your KDP fields exactly", tool: null, formats: ["print"]}
+    ]
+  },
+  {
+    title: "Ebook file",
+    items: [
+      {id: "epub", text: "Validated the EPUB: structure, cover image, file size", tool: {href: "/kindle", label: "Run Kindle Check"}, formats: ["ebook"]},
+      {id: "toc", text: "Working, clickable table of contents", tool: {href: "/kindle", label: "Run Kindle Check"}, formats: ["ebook"]},
+      {id: "fontlicense", text: "Any embedded fonts are licensed for embedding", tool: {href: "/kindle", label: "Run Kindle Check"}, formats: ["ebook"]}
+    ]
+  },
+  {
+    title: "Metadata & discoverability",
+    items: [
+      {id: "keywords", text: "Chose and linted your 7 keywords", tool: {href: "/keyword-linter", label: "Open Keyword Linter"}, formats: ["print","ebook"]},
+      {id: "titlepromo", text: "Title and subtitle free of banned promo terms", tool: {href: "/keyword-linter", label: "Open Keyword Linter"}, formats: ["print","ebook"]},
+      {id: "categories", text: "Picked your KDP categories", tool: null, formats: ["print","ebook"]},
+      {id: "description", text: "Wrote the book description (under 4,000 characters)", tool: null, formats: ["print","ebook"]},
+      {id: "isbn", text: "Sorted your ISBN (KDP's free one is fine for most)", tool: {href: "/error-decoder", label: "ISBN help in Error Decoder"}, formats: ["print"]}
+    ]
+  },
+  {
+    title: "Pricing & final checks",
+    items: [
+      {id: "price", text: "Set a list price above the minimum royalty threshold", tool: {href: "/royalty-calculator", label: "Open Royalty Calculator"}, formats: ["print","ebook"]},
+      {id: "kdppreview", text: "Will confirm everything in KDP's own previewer before publishing", tool: null, formats: ["print","ebook"]}
+    ]
+  }
+];
+
+var CIRC = 326.726;
+var format = "print";
+
+function storeKey(id) { return "kdp-launch-" + id; }
+function isChecked(id) { try { return localStorage.getItem(storeKey(id)) === "1"; } catch (e) { return false; } }
+function setChecked(id, v) { try { localStorage.setItem(storeKey(id), v ? "1" : "0"); } catch (e) {} }
+
+function visibleItems() {
+  var out = [];
+  SECTIONS.forEach(function(sec) {
+    sec.items.forEach(function(it) {
+      if (format === "both" || it.formats.indexOf(format) !== -1) out.push(it);
+    });
+  });
+  return out;
+}
+
+function render() {
+  var container = document.getElementById("lr-sections");
+  var html = "";
+  SECTIONS.forEach(function(sec) {
+    var items = sec.items.filter(function(it) {
+      return format === "both" || it.formats.indexOf(format) !== -1;
+    });
+    if (!items.length) return;
+    var doneInSec = items.filter(function(it) { return isChecked(it.id); }).length;
+    html += '<div class="lr-section">';
+    html += '<div class="lr-section-title">' + sec.title +
+            '<span class="lr-section-count">' + doneInSec + '/' + items.length + '</span></div>';
+    items.forEach(function(it) {
+      var checked = isChecked(it.id) ? " checked" : "";
+      var tool = it.tool ? '<a class="lr-item-tool" href="' + it.tool.href + '">' + it.tool.label + ' →</a>' : '';
+      html += '<label class="lr-item">' +
+        '<input type="checkbox" data-id="' + it.id + '"' + checked + '>' +
+        '<span class="lr-item-body"><span class="lr-item-text">' + it.text + '</span>' + (tool ? '<br>' + tool : '') + '</span>' +
+        '</label>';
+    });
+    html += '</div>';
+  });
+  container.innerHTML = html;
+
+  container.querySelectorAll('input[type="checkbox"]').forEach(function(cb) {
+    cb.addEventListener("change", function() {
+      setChecked(this.getAttribute("data-id"), this.checked);
+      render();      // refresh section counts
+      updateScore();
+    });
+  });
+  updateScore();
+}
+
+function updateScore() {
+  var items = visibleItems();
+  var total = items.length;
+  var done = items.filter(function(it) { return isChecked(it.id); }).length;
+  var pct = total ? Math.round(done / total * 100) : 0;
+
+  document.getElementById("lr-score").textContent = pct + "%";
+  document.getElementById("lr-subline").textContent = done + " of " + total + " steps done.";
+  var ring = document.getElementById("lr-ring-fg");
+  ring.setAttribute("stroke-dashoffset", (CIRC * (1 - pct / 100)).toFixed(2));
+  ring.style.stroke = pct < 50 ? "var(--pc-coral)" : "var(--pc-ok)";
+
+  var head = document.getElementById("lr-headline");
+  if (pct === 0) head.textContent = "Let's get you launch-ready.";
+  else if (pct < 50) head.textContent = "Good start, keep going.";
+  else if (pct < 100) head.textContent = "Almost there.";
+  else head.textContent = "Ready to publish.";
+
+  document.getElementById("lr-done").style.display = (total && done === total) ? "block" : "none";
+}
+
+function setFormat(f) {
+  format = f;
+  ["print","ebook","both"].forEach(function(x) {
+    document.getElementById("lr-fmt-" + x).classList.toggle("is-active", x === f);
+  });
+  try { localStorage.setItem("kdp-launch-format", f); } catch (e) {}
+  render();
+}
+
+document.getElementById("lr-fmt-print").addEventListener("click", function(){ setFormat("print"); });
+document.getElementById("lr-fmt-ebook").addEventListener("click", function(){ setFormat("ebook"); });
+document.getElementById("lr-fmt-both").addEventListener("click", function(){ setFormat("both"); });
+
+document.getElementById("lr-reset").addEventListener("click", function() {
+  SECTIONS.forEach(function(sec) { sec.items.forEach(function(it) { setChecked(it.id, false); }); });
+  render();
+});
+
+// restore saved format
+var savedFmt = "print";
+try { savedFmt = localStorage.getItem("kdp-launch-format") || "print"; } catch (e) {}
+setFormat(savedFmt);
+</script>
+{% endblock %}

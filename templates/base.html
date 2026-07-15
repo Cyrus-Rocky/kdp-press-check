@@ -60,6 +60,7 @@
         </div>
       </header>
       <nav class="mode-nav">
+        <a href="{{ url_for('launch_checklist') }}" class="{{ 'is-active' if active_mode == 'launch' else '' }}">Launch Checklist</a>
         <a href="{{ url_for('index') }}"        class="{{ 'is-active' if active_mode == 'interior' else '' }}">Interior Check</a>
         <a href="{{ url_for('cover_index') }}"  class="{{ 'is-active' if active_mode == 'cover'    else '' }}">Cover Check</a>
         <a href="{{ url_for('kindle_index') }}" class="{{ 'is-active' if active_mode == 'kindle'   else '' }}">Kindle Check</a>
