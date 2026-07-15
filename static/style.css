@@ -896,6 +896,72 @@ a { color: var(--accent-ink); }
   padding: 28px; color: var(--pc-faint); font-size: 14px; line-height: 1.6;
 }
 
+/* ---------- Margin advisor ---------- */
+.margin-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 360px) minmax(300px, 1fr);
+  gap: 44px;
+  align-items: start;
+}
+@media (max-width: 820px) { .margin-grid { grid-template-columns: 1fr; gap: 32px; } }
+.margin-inputs { display: flex; flex-direction: column; gap: 18px; }
+
+/* page diagram */
+.page-diagram {
+  position: relative;
+  width: 190px;
+  aspect-ratio: 2 / 3;
+  background: var(--pc-card);
+  border: 1px solid var(--pc-rule);
+  border-radius: 2px 8px 8px 2px;
+  box-shadow: var(--shadow-soft);
+  margin: 4px 0 8px;
+  transition: box-shadow 0.25s ease;
+}
+.page-spine {
+  position: absolute; top: 0; bottom: 0; left: 0;
+  background: repeating-linear-gradient(45deg, var(--pc-rule-soft) 0 4px, transparent 4px 8px);
+  border-right: 1px solid var(--pc-rule);
+}
+.page-textblock {
+  position: absolute;
+  border: 1.5px dashed var(--pc-coral);
+  background: var(--pc-issue-bg);
+  transition: inset 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.page-diagram-cap {
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.4px;
+  color: var(--pc-faint);
+}
+
+.margin-note {
+  border: 1px solid var(--pc-issue); border-radius: 10px;
+  padding: 12px 16px; background: var(--pc-issue-bg);
+  font-size: 14px; color: var(--pc-ink); margin-top: 4px;
+}
+
+/* tier table */
+.tier-table { margin-top: 28px; }
+.tier-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 14px; border: 1px solid var(--pc-rule-soft);
+  border-radius: 10px; margin-bottom: 8px; font-size: 15px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.tier-row.is-active {
+  border-color: var(--pc-coral);
+  background: var(--pc-issue-bg);
+}
+.tier-range { color: var(--pc-muted); }
+.tier-row.is-active .tier-range { color: var(--pc-ink); }
+.tier-val { font-family: var(--font-mono); color: var(--pc-strong); }
+.tier-badge {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--pc-issue);
+  background: var(--pc-card); border: 1px solid var(--pc-coral);
+  border-radius: 20px; padding: 2px 8px; margin-left: 10px;
+}
+
 /* ---------- Genre guide ---------- */
 .genre-wrap { max-width: 760px; }
 .genre-top {

@@ -254,6 +254,11 @@ def keyword_linter():
     return render_template("keyword_linter.html", active_mode="keywords")
 
 
+@app.route("/margin-advisor", methods=["GET"])
+def margin_advisor():
+    return render_template("margin_advisor.html", active_mode="margins")
+
+
 @app.route("/genre-checklist", methods=["GET"])
 def genre_checklist():
     return render_template("genre_checklist.html", active_mode="genre")

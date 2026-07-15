@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}Margin & Gutter Advisor · KDP Press Check{% endblock %}
+{% block content %}
+
+<section class="hero-single">
+  <div class="eyebrow">Margin &amp; gutter advisor</div>
+  <h1 class="hero-display">The exact margins KDP wants.</h1>
+  <p class="hero-lead">Your inside (gutter) margin grows with page count, and getting it wrong is the most common reason KDP rejects an interior. Enter your page count and set your margins right the first time.</p>
+
+  <div class="margin-grid">
+    <div class="margin-inputs">
+      <div class="field">
+        <label for="ma-pages">Final page count</label>
+        <input type="number" id="ma-pages" min="24" max="828" value="200">
+      </div>
+      <div class="field">
+        <label>Does your book bleed to the edge?</label>
+        <div class="ink-toggle">
+          <button type="button" id="ma-nobleed" class="is-active" data-bleed="no">No bleed</button>
+          <button type="button" id="ma-bleed" data-bleed="yes">Full bleed</button>
+        </div>
+      </div>
+
+      <div class="page-diagram" id="ma-diagram" aria-hidden="true">
+        <div class="page-spine" id="ma-spine"></div>
+        <div class="page-textblock" id="ma-textblock"></div>
+      </div>
+      <p class="page-diagram-cap">Coral = your text area. The striped left edge is the spine (gutter) side.</p>
+    </div>
+
+    <div>
+      <div class="est-card">
+        <div class="est-card-label">Minimum inside (gutter) margin</div>
+        <div class="est-big" id="ma-gutter">—</div>
+        <div class="est-big-cap" id="ma-gutter-cap">at your page count</div>
+        <div class="est-rows">
+          <div class="est-row ruled"><span class="est-k">Outside margin (top, bottom, outer)</span><span class="est-v" id="ma-outside">—</span></div>
+          <div class="est-row ruled"><span class="est-k">Bleed on outer edges</span><span class="est-v" id="ma-bleedval">—</span></div>
+          <div class="est-row"><span class="est-k">Your page count</span><span class="est-v" id="ma-pagecount">—</span></div>
+        </div>
+        <div class="margin-note" id="ma-warn" style="display:none;"></div>
+      </div>
+
+      <div class="tier-table" id="ma-tiers"></div>
+    </div>
+  </div>
+</section>
+
+<script>
+// KDP inside/gutter margin tiers by page count (mirrors kdp_rules.inside_margin_in).
+var TIERS = [
+  {lo: 24,  hi: 150, val: 0.375, label: "24–150 pages"},
+  {lo: 151, hi: 300, val: 0.5,   label: "151–300 pages"},
+  {lo: 301, hi: 500, val: 0.625, label: "301–500 pages"},
+  {lo: 501, hi: 700, val: 0.75,  label: "501–700 pages"},
+  {lo: 701, hi: 828, val: 0.875, label: "701–828 pages"}
+];
+
+function insideMargin(pages) {
+  if (pages <= 150) return 0.375;
+  if (pages <= 300) return 0.5;
+  if (pages <= 500) return 0.625;
+  if (pages <= 700) return 0.75;
+  return 0.875;
+}
+
+function activeTierIndex(pages) {
+  for (var i = 0; i < TIERS.length; i++) {
+    if (pages >= TIERS[i].lo && pages <= TIERS[i].hi) return i;
+  }
+  return pages < 24 ? 0 : TIERS.length - 1;
+}
+
+var bleed = false;
+
+function update() {
+  var raw = parseInt(document.getElementById("ma-pages").value, 10);
+  var pages = isNaN(raw) ? 0 : raw;
+  var outside = bleed ? 0.375 : 0.25;
+
+  var warn = document.getElementById("ma-warn");
+  warn.style.display = "none";
+  if (pages && pages < 24) {
+    warn.style.display = "block";
+    warn.textContent = "KDP paperbacks need at least 24 pages. Add content or a few blank pages.";
+  } else if (pages > 828) {
+    warn.style.display = "block";
+    warn.textContent = "KDP's maximum is 828 pages. A longer book must be split into volumes.";
+  }
+
+  var effective = Math.min(Math.max(pages || 24, 24), 828);
+  var gutter = insideMargin(effective);
+
+  document.getElementById("ma-gutter").textContent = gutter.toFixed(3).replace(/0+$/, "").replace(/\.$/, "") + "\"";
+  document.getElementById("ma-gutter-cap").textContent = pages ? "minimum, at " + pages + " pages" : "enter a page count";
+  document.getElementById("ma-outside").textContent = outside.toFixed(3).replace(/0+$/, "") + "\"";
+  document.getElementById("ma-bleedval").textContent = bleed ? "0.125\" added beyond trim" : "none needed";
+  document.getElementById("ma-pagecount").textContent = pages ? pages.toLocaleString() : "—";
+
+  // tier table
+  var active = activeTierIndex(effective);
+  document.getElementById("ma-tiers").innerHTML = TIERS.map(function(t, i) {
+    var badge = i === active ? '<span class="tier-badge">Your book</span>' : '';
+    return '<div class="tier-row' + (i === active ? ' is-active' : '') + '">' +
+      '<span class="tier-range">' + t.label + badge + '</span>' +
+      '<span class="tier-val">' + t.val.toFixed(3).replace(/0+$/, "").replace(/\.$/, "") + '" gutter</span>' +
+      '</div>';
+  }).join("");
+
+  // page diagram: scale margins to the 190px-wide page mock (page ~6" wide reference)
+  var pageWidthIn = 6, pageHeightIn = 9;
+  var gPct = (gutter / pageWidthIn * 100);
+  var oPct = (outside / pageWidthIn * 100);
+  var oPctV = (outside / pageHeightIn * 100);
+  document.getElementById("ma-textblock").style.inset =
+    oPctV + "% " + oPct + "% " + oPctV + "% " + gPct + "%";
+  document.getElementById("ma-spine").style.width = gPct + "%";
+}
+
+document.getElementById("ma-pages").addEventListener("input", update);
+document.getElementById("ma-nobleed").addEventListener("click", function() {
+  bleed = false; this.classList.add("is-active");
+  document.getElementById("ma-bleed").classList.remove("is-active"); update();
+});
+document.getElementById("ma-bleed").addEventListener("click", function() {
+  bleed = true; this.classList.add("is-active");
+  document.getElementById("ma-nobleed").classList.remove("is-active"); update();
+});
+update();
+</script>
+{% endblock %}
