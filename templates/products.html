@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Templates & Guides · KDP Press Check{% endblock %}
+{% block content %}
+
+<section class="hero-single">
+  <div class="eyebrow">Templates &amp; guides</div>
+  <h1 class="hero-display">Skip the setup. Start ready.</h1>
+  <p class="hero-lead">Done-for-you templates and guides that already pass the checks on this site, so you spend your time writing, not fighting formatting.</p>
+
+  <div class="product-grid">
+    {% for p in products %}
+    <div class="product-card">
+      {% if p.badge %}<span class="product-badge">{{ p.badge }}</span>{% endif %}
+      <div class="product-price">{{ p.price }}</div>
+      <h3 class="product-name">{{ p.name }}</h3>
+      <p class="product-blurb">{{ p.blurb }}</p>
+      <ul class="product-includes">
+        {% for item in p.includes %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+      <div class="product-cta">
+        {% if p.buy_url %}
+          <a href="{{ p.buy_url }}" target="_blank" rel="noopener noreferrer" class="product-buy">Get it for {{ p.price }} →</a>
+        {% else %}
+          <span class="product-soon">Coming soon</span>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <p class="footnote-inline" style="display:block; margin-top:32px;">Payment and instant download are handled securely by our store. Files work with Microsoft Word and standard design apps.</p>
+</section>
+{% endblock %}

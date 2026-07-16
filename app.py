@@ -268,6 +268,12 @@ def launch_checklist():
     return render_template("launch_checklist.html", active_mode="launch")
 
 
+@app.route("/templates", methods=["GET"])
+def templates_page():
+    from products_data import PRODUCTS
+    return render_template("products.html", active_mode="products", products=PRODUCTS)
+
+
 @app.route("/genre-checklist", methods=["GET"])
 def genre_checklist():
     return render_template("genre_checklist.html", active_mode="genre")

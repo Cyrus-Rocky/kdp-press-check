@@ -1067,6 +1067,62 @@ a { color: var(--accent-ink); }
 .lr-done-sub { font-size: 14px; color: var(--pc-muted); margin: 0; }
 @keyframes pcIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
+/* ---------- Digital products / templates ---------- */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+.product-card {
+  position: relative;
+  display: flex; flex-direction: column;
+  border: 1px solid var(--pc-rule-soft); border-radius: 18px;
+  padding: 26px; background: var(--pc-card);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.product-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-soft); border-color: var(--pc-rule); }
+.product-badge {
+  position: absolute; top: 18px; right: 18px;
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 1.2px;
+  text-transform: uppercase; background: var(--pc-coral); color: #17171c;
+  padding: 4px 10px; border-radius: 20px;
+}
+.product-price {
+  font-family: var(--font-display); font-size: 34px; letter-spacing: -0.6px;
+  color: var(--pc-strong); margin-bottom: 6px;
+}
+.product-name {
+  font-family: var(--font-display); font-size: 19px; letter-spacing: -0.3px;
+  color: var(--pc-strong); margin: 0 0 10px;
+}
+.product-blurb { font-size: 14px; line-height: 1.55; color: var(--pc-muted); margin: 0 0 16px; }
+.product-includes { list-style: none; padding: 0; margin: 0 0 22px; }
+.product-includes li {
+  position: relative; padding-left: 22px; margin-bottom: 8px;
+  font-size: 14px; line-height: 1.45; color: var(--pc-ink);
+}
+.product-includes li::before {
+  content: ""; position: absolute; left: 0; top: 6px;
+  width: 12px; height: 7px; border-left: 2px solid var(--pc-ok);
+  border-bottom: 2px solid var(--pc-ok); transform: rotate(-45deg);
+}
+.product-cta { margin-top: auto; }
+.product-buy {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 100%; box-sizing: border-box;
+  background: var(--pc-cta); color: var(--pc-cta-text);
+  border: none; border-radius: var(--radius-pill); padding: 12px 20px;
+  font-size: 15px; font-weight: 500; text-decoration: none; cursor: pointer;
+}
+.product-buy:hover { opacity: 0.9; text-decoration: none; }
+.product-soon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 100%; box-sizing: border-box;
+  background: none; color: var(--pc-faint);
+  border: 1px dashed var(--pc-rule); border-radius: var(--radius-pill);
+  padding: 12px 20px; font-size: 14px;
+}
+
 /* ---------- Genre guide ---------- */
 .genre-wrap { max-width: 760px; }
 .genre-top {
