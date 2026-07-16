@@ -31,10 +31,10 @@
         <div class="solver-turnaround">Turnaround: {{ s.turnaround }}</div>
         <div class="solver-plats">
           {% if s.gig_url %}
-            <a href="{{ s.gig_url }}" target="_blank" rel="noopener noreferrer" class="solver-plat">View gig ↗</a>
+            <a href="{{ s.gig_url | affiliate }}" target="_blank" rel="sponsored noopener noreferrer" class="solver-plat">View gig ↗</a>
           {% endif %}
           {% for p in s.platforms %}
-            <a href="{{ p.url }}" target="_blank" rel="noopener noreferrer" class="solver-plat">{{ p.name }} ↗</a>
+            <a href="{{ p.url | affiliate }}" target="_blank" rel="sponsored noopener noreferrer" class="solver-plat">{{ p.name }} ↗</a>
           {% endfor %}
         </div>
       </div>
@@ -42,6 +42,10 @@
     {% endfor %}
   </div>
 
-  <p class="footnote-inline" style="display:block; margin-top:32px;">Platform links open the freelancer's profile on Fiverr, Upwork, or Kwork. KDP Press Check is not affiliated with any platform and earns nothing from referrals.</p>
+  {% if affiliate_enabled %}
+  <p class="footnote-inline" style="display:block; margin-top:32px;">Some links here are affiliate links. If you hire through them we may earn a small commission, at no extra cost to you. It never affects who we list or how we rank them.</p>
+  {% else %}
+  <p class="footnote-inline" style="display:block; margin-top:32px;">Platform links open the freelancer's profile on Fiverr, Upwork, or Kwork. We link out and you deal with them directly.</p>
+  {% endif %}
 </section>
 {% endblock %}

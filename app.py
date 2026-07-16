@@ -10,6 +10,7 @@ from cover_checker import run_all_cover_checks
 from docx_checker import run_all_checks_docx
 from epub_checker import run_all_checks_epub
 from text_format_checker import run_all_checks_text_format
+import affiliate
 import kdp_rules as rules
 import preview_renderer
 from problem_solvers_data import CHECK_TO_CATEGORY
@@ -29,9 +30,12 @@ logger = logging.getLogger("kdp-checker")
 
 GA_ID = os.environ.get("GA_MEASUREMENT_ID", "")
 
+app.jinja_env.filters["affiliate"] = affiliate.apply
+
+
 @app.context_processor
 def inject_globals():
-    return {"ga_id": GA_ID}
+    return {"ga_id": GA_ID, "affiliate_enabled": affiliate.enabled()}
 
 
 @app.route("/health", methods=["GET"])
