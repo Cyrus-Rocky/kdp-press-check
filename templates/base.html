@@ -95,8 +95,27 @@
 
   <footer class="site-footer">
     <div class="footer-inner">
-      <p class="footer-eyebrow">KDP requirements change often</p>
-      <p class="footer-display">Check every version before you upload.</p>
+      <div class="footer-signup">
+        <div class="footer-signup-text">
+          <p class="footer-eyebrow">KDP requirements change often</p>
+          <p class="footer-display">Check every version before you upload.</p>
+        </div>
+        <div class="footer-signup-form">
+          <p class="footer-signup-label">Get KDP tips and new tools in your inbox</p>
+          {% if newsletter_enabled %}
+          <form action="{{ newsletter_action }}" method="post" target="_blank" class="signup-row">
+            <input type="email" name="{{ newsletter_field }}" required placeholder="you@email.com" class="signup-input" aria-label="Email address">
+            <button type="submit" class="signup-btn">Subscribe</button>
+          </form>
+          <p class="footer-signup-note">No spam. Unsubscribe anytime.</p>
+          {% else %}
+          <div class="signup-row">
+            <input type="email" placeholder="you@email.com" class="signup-input" disabled aria-label="Email address">
+            <span class="signup-soon">Coming soon</span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
       <hr class="footer-rule">
       <div class="footer-bar">
         <span>KDP Press Check is free. Files are analyzed in your session and never stored.</span>

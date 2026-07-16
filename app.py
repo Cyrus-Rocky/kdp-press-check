@@ -11,6 +11,7 @@ from docx_checker import run_all_checks_docx
 from epub_checker import run_all_checks_epub
 from text_format_checker import run_all_checks_text_format
 import affiliate
+import newsletter
 import kdp_rules as rules
 import preview_renderer
 from problem_solvers_data import CHECK_TO_CATEGORY
@@ -35,7 +36,13 @@ app.jinja_env.filters["affiliate"] = affiliate.apply
 
 @app.context_processor
 def inject_globals():
-    return {"ga_id": GA_ID, "affiliate_enabled": affiliate.enabled()}
+    return {
+        "ga_id": GA_ID,
+        "affiliate_enabled": affiliate.enabled(),
+        "newsletter_enabled": newsletter.enabled(),
+        "newsletter_action": newsletter.FORM_ACTION,
+        "newsletter_field": newsletter.EMAIL_FIELD,
+    }
 
 
 @app.route("/health", methods=["GET"])
