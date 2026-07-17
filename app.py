@@ -19,7 +19,11 @@ from problem_solvers_data import CHECK_TO_CATEGORY
 UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "uploads")
 ALLOWED_EXT = {".pdf", ".docx", ".txt", ".rtf", ".odt"}
 LEGACY_DOC_EXT = {".doc"}
-MAX_CONTENT_LENGTH = 200 * 1024 * 1024  # 200 MB
+# Cap uploads well below the free-tier's 512 MB RAM ceiling. Real KDP interiors
+# and covers are almost always under this; allowing huge files just invites the
+# out-of-memory crashes that take the whole instance down.
+MAX_UPLOAD_MB = int(os.environ.get("MAX_UPLOAD_MB", "40"))
+MAX_CONTENT_LENGTH = MAX_UPLOAD_MB * 1024 * 1024
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
@@ -368,6 +372,11 @@ def check_preview():
             logger.warning("Preview margin scan failed", exc_info=True)
 
         meta = preview_renderer.render_job(UPLOAD_DIR, job_id, interior_path, cover_path)
+    except preview_renderer.PreviewTooLargeError as exc:
+        flash(f"This PDF has {exc.page_count} pages, which is too long to preview here "
+              f"(limit is {preview_renderer.MAX_PREVIEW_PAGES}). The Interior Check still "
+              f"works on books this size, use that for the full report.")
+        return redirect(url_for("preview_index"))
     except Exception:
         logger.exception("Preview render failed")
         flash("We couldn't render that PDF. It may be corrupted or password-protected.")
@@ -422,7 +431,8 @@ def problem_solvers():
 
 @app.errorhandler(RequestEntityTooLarge)
 def handle_too_large(_exc):
-    flash("That file is larger than 200 MB. Choose a smaller file.")
+    flash(f"That file is larger than {MAX_UPLOAD_MB} MB. Export a lighter file "
+          f"(compress oversized images to 300 DPI) and try again.")
     if request.path == "/check-cover":
         destination = "cover_index"
     elif request.path == "/check-kindle":

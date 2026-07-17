@@ -18,6 +18,18 @@ RENDER_DPI = 72
 JPEG_QUALITY = 72
 PREVIEW_DIR_TTL = 1800  # 30 minutes
 
+# Rendering every page to an image is the most memory-hungry operation in the
+# app. On a small instance a very long book can exhaust RAM and crash the
+# worker, so refuse to render past this many pages and tell the user why.
+MAX_PREVIEW_PAGES = int(os.environ.get("MAX_PREVIEW_PAGES", "500"))
+
+
+class PreviewTooLargeError(Exception):
+    """Raised when a PDF has more pages than we'll render on this instance."""
+    def __init__(self, page_count: int):
+        self.page_count = page_count
+        super().__init__(f"{page_count} pages exceeds the {MAX_PREVIEW_PAGES}-page preview limit")
+
 
 # ── Directory helpers ─────────────────────────────────────────────────────────
 
@@ -49,6 +61,10 @@ def render_to_dir(pdf_path: str, out_dir: str, kind: str = "interior") -> dict:
     os.makedirs(dest, exist_ok=True)
 
     doc = fitz.open(pdf_path)
+    if doc.page_count > MAX_PREVIEW_PAGES:
+        pc = doc.page_count
+        doc.close()
+        raise PreviewTooLargeError(pc)
     mat = fitz.Matrix(RENDER_DPI / 72, RENDER_DPI / 72)
     first_w = first_h = 0
 
