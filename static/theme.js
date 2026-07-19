@@ -2,10 +2,12 @@
   var btn = document.getElementById("theme-toggle");
   if (!btn) return;
 
+  var label = document.getElementById("theme-text");
   function syncButton(theme) {
     var isDark = theme === "dark";
     btn.setAttribute("aria-pressed", isDark ? "true" : "false");
     btn.setAttribute("aria-label", isDark ? "Switch to light mode" : "Switch to dark mode");
+    if (label) label.textContent = isDark ? "Light mode" : "Dark mode";
   }
 
   syncButton(document.documentElement.getAttribute("data-theme") || "light");
