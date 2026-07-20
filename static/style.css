@@ -279,7 +279,7 @@ a { color: var(--accent-ink); }
   width: 100%; box-sizing: border-box; font-family: var(--font-body);
   transition: background 0.12s ease, color 0.12s ease;
 }
-.side-link svg { width: 20px; height: 20px; flex: none; }
+.side-link svg { width: 23px; height: 23px; flex: none; }
 .side-link:hover { background: var(--pc-warm); color: var(--pc-strong); text-decoration: none; }
 .side-link.is-active { background: var(--pc-issue-bg); color: var(--pc-strong); font-weight: 500; }
 .side-link.is-active svg { color: var(--pc-coral); }
@@ -304,6 +304,16 @@ a { color: var(--accent-ink); }
 .app-shell.is-collapsed .sidebar-group {
   height: 0; padding: 0; margin: 8px 12px;
   border-top: 1px solid var(--pc-rule-soft); overflow: hidden;
+}
+
+/* fixed light/dark toggle in the top-right corner */
+.theme-fab {
+  position: fixed;
+  top: 46px;
+  right: 24px;
+  z-index: 45;
+  background: var(--pc-canvas);
+  box-shadow: var(--shadow-soft);
 }
 
 .app-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
@@ -338,12 +348,14 @@ a { color: var(--accent-ink); }
   .sidebar-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 55; }
   .app-shell.is-open .sidebar-backdrop { display: block; }
   .app-main-inner { padding: 24px 16px 56px; }
+  .theme-fab { top: 8px; right: 14px; width: 36px; height: 36px; }
 }
 
-/* ---------- site footer (every page) ---------- */
+/* ---------- site footer (every page, theme-aware) ---------- */
 .site-footer {
-  background: var(--pc-band-dark);
-  color: #f0f0f3;
+  background: var(--pc-warm);
+  color: var(--pc-ink);
+  border-top: 1px solid var(--pc-rule-soft);
   position: relative;
   z-index: 2;
 }
@@ -366,7 +378,7 @@ a { color: var(--accent-ink); }
   font-size: clamp(32px, 5vw, 56px);
   line-height: 1.05;
   letter-spacing: -1px;
-  color: #ffffff;
+  color: var(--pc-strong);
   margin: 0 0 40px;
   max-width: 640px;
 }
@@ -377,19 +389,19 @@ a { color: var(--accent-ink); }
 .footer-signup-text { flex: 1; min-width: 260px; }
 .footer-signup-form { flex: 0 1 340px; min-width: 260px; }
 .footer-signup-label {
-  font-size: 14px; color: rgba(240,240,243,0.75); margin: 0 0 10px;
+  font-size: 14px; color: var(--pc-muted); margin: 0 0 10px;
 }
 .signup-row { display: flex; gap: 8px; }
 .signup-input {
   flex: 1; min-width: 0;
-  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18);
-  border-radius: var(--radius-pill); padding: 11px 16px; color: #f0f0f3;
+  background: var(--pc-card); border: 1px solid var(--pc-rule);
+  border-radius: var(--radius-pill); padding: 11px 16px; color: var(--pc-ink);
   font-family: var(--font-body); font-size: 14px;
 }
-.signup-input::placeholder { color: rgba(240,240,243,0.4); }
+.signup-input::placeholder { color: var(--pc-faint); }
 .signup-input:focus-visible { outline: 2px solid var(--pc-coral); outline-offset: 1px; }
 .signup-btn {
-  flex: none; background: #ffffff; color: #17171c; border: none;
+  flex: none; background: var(--pc-cta); color: var(--pc-cta-text); border: none;
   border-radius: var(--radius-pill); padding: 11px 20px; cursor: pointer;
   font-family: var(--font-body); font-size: 14px; font-weight: 500;
 }
@@ -397,15 +409,15 @@ a { color: var(--accent-ink); }
 .signup-soon {
   flex: none; display: inline-flex; align-items: center;
   font-family: var(--font-mono); font-size: 11px; letter-spacing: 1px;
-  text-transform: uppercase; color: rgba(240,240,243,0.55);
-  border: 1px dashed rgba(255,255,255,0.22); border-radius: var(--radius-pill);
+  text-transform: uppercase; color: var(--pc-faint);
+  border: 1px dashed var(--pc-rule); border-radius: var(--radius-pill);
   padding: 0 16px;
 }
-.footer-signup-note { font-size: 12px; color: rgba(240,240,243,0.45); margin: 8px 0 0; }
+.footer-signup-note { font-size: 12px; color: var(--pc-faint); margin: 8px 0 0; }
 
 .footer-rule {
   border: 0;
-  border-top: 1px solid rgba(255,255,255,0.14);
+  border-top: 1px solid var(--pc-rule);
   margin: 0 0 24px;
 }
 .footer-bar {
@@ -414,9 +426,9 @@ a { color: var(--accent-ink); }
   gap: 20px;
   flex-wrap: wrap;
   font-size: 14px;
-  color: rgba(240,240,243,0.6);
+  color: var(--pc-muted);
 }
-.footer-bar a { color: rgba(240,240,243,0.85); }
+.footer-bar a { color: var(--pc-ink); }
 @media (max-width: 620px) {
   .footer-inner { padding: 48px 16px 32px; }
 }

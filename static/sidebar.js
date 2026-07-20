@@ -5,6 +5,13 @@
   var backdrop = document.getElementById("sidebar-backdrop");
   if (!shell) return;
 
+  // Give every sidebar item a native tooltip from its label, so the collapsed
+  // icon-only rail stays usable (you can still tell the tools apart on hover).
+  shell.querySelectorAll(".side-link").forEach(function (a) {
+    var lbl = a.querySelector(".sidebar-label");
+    if (lbl && !a.getAttribute("title")) a.setAttribute("title", lbl.textContent.trim());
+  });
+
   // ── Desktop collapse/expand (persisted) ──
   try {
     if (localStorage.getItem("kdp-sidebar") === "collapsed") {
