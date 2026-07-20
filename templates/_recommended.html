@@ -1,0 +1,15 @@
+{% if recommended_tools %}
+<div class="rec-tools">
+  <p class="rec-tools-label">Recommended for authors</p>
+  <div class="rec-tools-grid">
+    {% for t in recommended_tools %}
+    <a class="rec-tool" href="{{ t.url }}" target="_blank" rel="sponsored noopener noreferrer">
+      <span class="rec-tool-name">{{ t.name }}</span>
+      <span class="rec-tool-blurb">{{ t.blurb }}</span>
+      <span class="rec-tool-cta">{{ t.cta }} ↗</span>
+    </a>
+    {% endfor %}
+  </div>
+  <p class="rec-tools-note">These are affiliate links. If you buy through them we may earn a commission, at no extra cost to you.</p>
+</div>
+{% endif %}

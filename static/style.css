@@ -177,7 +177,14 @@ a.button, .field select, .field input, .filename-display, .flash,
   }
 }
 
-html { -webkit-text-size-adjust: 100%; }
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable;
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
 
 body {
   margin: 0;
@@ -306,8 +313,10 @@ a { color: var(--accent-ink); }
   border-top: 1px solid var(--pc-rule-soft); overflow: hidden;
 }
 
-/* fixed light/dark toggle in the top-right corner */
-.theme-fab {
+/* fixed light/dark toggle in the top-right corner.
+   Uses .theme-toggle.theme-fab (higher specificity) so it beats the base
+   .theme-toggle { position: relative } rule defined later in this file. */
+.theme-toggle.theme-fab {
   position: fixed;
   top: 46px;
   right: 24px;
@@ -348,7 +357,7 @@ a { color: var(--accent-ink); }
   .sidebar-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 55; }
   .app-shell.is-open .sidebar-backdrop { display: block; }
   .app-main-inner { padding: 24px 16px 56px; }
-  .theme-fab { top: 8px; right: 14px; width: 36px; height: 36px; }
+  .theme-toggle.theme-fab { top: 8px; right: 14px; width: 36px; height: 36px; }
 }
 
 /* ---------- site footer (every page, theme-aware) ---------- */
@@ -1280,6 +1289,25 @@ a { color: var(--accent-ink); }
   border: 1px dashed var(--pc-rule); border-radius: var(--radius-pill);
   padding: 12px 20px; font-size: 14px;
 }
+
+/* ---------- recommended tools (affiliate box) ---------- */
+.rec-tools { margin: 48px 0 8px; }
+.rec-tools-label {
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.4px;
+  text-transform: uppercase; color: var(--pc-muted); margin: 0 0 14px;
+}
+.rec-tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.rec-tool {
+  display: flex; flex-direction: column; gap: 6px;
+  border: 1px solid var(--pc-rule-soft); border-radius: 14px;
+  padding: 20px; background: var(--pc-card); text-decoration: none;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.rec-tool:hover { transform: translateY(-2px); border-color: var(--pc-rule); box-shadow: var(--shadow-soft); text-decoration: none; }
+.rec-tool-name { font-family: var(--font-display); font-size: 17px; color: var(--pc-strong); }
+.rec-tool-blurb { font-size: 13.5px; line-height: 1.5; color: var(--pc-muted); }
+.rec-tool-cta { margin-top: 6px; font-size: 13px; font-weight: 500; color: var(--pc-blue); }
+.rec-tools-note { font-size: 12px; color: var(--pc-faint); margin: 14px 0 0; }
 
 /* ---------- Genre guide ---------- */
 .genre-wrap { max-width: 760px; }

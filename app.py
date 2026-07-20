@@ -12,6 +12,7 @@ from epub_checker import run_all_checks_epub
 from text_format_checker import run_all_checks_text_format
 import affiliate
 import newsletter
+import recommended_tools
 import kdp_rules as rules
 import preview_renderer
 from problem_solvers_data import CHECK_TO_CATEGORY
@@ -46,6 +47,7 @@ def inject_globals():
         "newsletter_enabled": newsletter.enabled(),
         "newsletter_action": newsletter.FORM_ACTION,
         "newsletter_field": newsletter.EMAIL_FIELD,
+        "recommended_tools": recommended_tools.visible(),
     }
 
 
