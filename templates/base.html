@@ -3,8 +3,34 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}KDP Press Check{% endblock %}</title>
-  <meta name="description" content="Check a paperback manuscript PDF against Amazon KDP's print specifications before you upload it.">
+  <title>{% block title %}KDP Press Check — Check your book before you upload to Amazon KDP{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}Free tools to check your book against Amazon KDP's requirements before you upload: interior margins, cover, Kindle EPUB, keywords, page count, and more. Fix rejections before they happen.{% endblock %}">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="{{ site_url }}{{ request.path }}">
+
+  {# ── Open Graph / Twitter (nice previews when shared on FB, Threads, X) ── #}
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="KDP Press Check">
+  <meta property="og:title" content="{{ self.title() }}">
+  <meta property="og:description" content="{{ self.meta_description() }}">
+  <meta property="og:url" content="{{ site_url }}{{ request.path }}">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="{{ self.title() }}">
+  <meta name="twitter:description" content="{{ self.meta_description() }}">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "KDP Press Check",
+    "url": "{{ site_url }}",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "description": "Free tools to check a book against Amazon KDP's print and ebook requirements before uploading."
+  }
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">

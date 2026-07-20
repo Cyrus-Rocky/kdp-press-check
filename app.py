@@ -2,7 +2,7 @@ import logging
 import os
 import uuid
 
-from flask import Flask, render_template, request, redirect, url_for, flash, send_file, abort
+from flask import Flask, render_template, request, redirect, url_for, flash, send_file, abort, Response
 from werkzeug.exceptions import RequestEntityTooLarge
 
 from checker import run_all_checks
@@ -35,6 +35,17 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("kdp-checker")
 
 GA_ID = os.environ.get("GA_MEASUREMENT_ID", "")
+# Public base URL, used for canonical tags, Open Graph, and the sitemap. Set the
+# SITE_URL env var to your custom domain once you have one.
+SITE_URL = os.environ.get("SITE_URL", "https://kdp-press-check.onrender.com").rstrip("/")
+
+# Every GET page, for the sitemap.
+SITEMAP_ENDPOINTS = [
+    "index", "cover_index", "kindle_index", "preview_index", "error_decoder",
+    "keyword_linter", "margin_advisor", "royalty_calculator",
+    "estimate_pages_index", "genre_checklist", "launch_checklist",
+    "templates_page", "problem_solvers",
+]
 
 app.jinja_env.filters["affiliate"] = affiliate.apply
 
@@ -43,12 +54,36 @@ app.jinja_env.filters["affiliate"] = affiliate.apply
 def inject_globals():
     return {
         "ga_id": GA_ID,
+        "site_url": SITE_URL,
         "affiliate_enabled": affiliate.enabled(),
         "newsletter_enabled": newsletter.enabled(),
         "newsletter_action": newsletter.FORM_ACTION,
         "newsletter_field": newsletter.EMAIL_FIELD,
         "recommended_tools": recommended_tools.visible(),
     }
+
+
+@app.route("/robots.txt")
+def robots_txt():
+    body = "\n".join([
+        "User-agent: *",
+        "Allow: /",
+        "Disallow: /preview-img/",
+        f"Sitemap: {SITE_URL}/sitemap.xml",
+    ])
+    return Response(body, mimetype="text/plain")
+
+
+@app.route("/sitemap.xml")
+def sitemap_xml():
+    urls = "".join(
+        f"<url><loc>{SITE_URL}{url_for(ep)}</loc><changefreq>weekly</changefreq></url>"
+        for ep in SITEMAP_ENDPOINTS
+    )
+    xml = ('<?xml version="1.0" encoding="UTF-8"?>'
+           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+           + urls + "</urlset>")
+    return Response(xml, mimetype="application/xml")
 
 
 @app.route("/health", methods=["GET"])

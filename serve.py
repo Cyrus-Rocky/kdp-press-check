@@ -16,6 +16,14 @@ from waitress import serve
 
 from app import app
 
+# Warm the spell-checker dictionary at boot so the FIRST user's check isn't
+# slowed by loading it on demand.
+try:
+    import content_quality
+    content_quality._get_spell()
+except Exception:
+    pass
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     threads = int(os.environ.get("THREADS", 3))
