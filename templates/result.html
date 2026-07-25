@@ -150,5 +150,7 @@
   <a class="button" href="{{ url_for('cover_index') if active_mode == 'cover' else url_for('index') }}">Check another file</a>
 </div>
 
+{% include "_recommended.html" %}
+
 <p class="disclaimer">This checks the rules we currently model. Always confirm in KDP's own previewer before publishing.</p>
 {% endblock %}
