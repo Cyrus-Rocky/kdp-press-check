@@ -171,6 +171,13 @@
 
 <div class="results-actions">
   <a class="button" href="{{ url_for('cover_index') if active_mode == 'cover' else url_for('index') }}">Check another file</a>
+  {% if report_job_id %}
+    {% if is_pro %}
+      <a class="button" href="{{ url_for('download_report_pdf', job_id=report_job_id) }}">Download PDF report ↓</a>
+    {% elif pro_enabled %}
+      <a class="button pro-locked" href="{{ url_for('pro_landing') }}" title="KDP Press Check Pro">Download PDF report <span class="pro-badge">PRO</span></a>
+    {% endif %}
+  {% endif %}
 </div>
 
 {% include "_recommended.html" %}

@@ -308,6 +308,18 @@ a { color: var(--accent-ink); }
 .side-link:hover { background: var(--pc-warm); color: var(--pc-strong); text-decoration: none; }
 .side-link.is-active { background: var(--pc-issue-bg); color: var(--pc-strong); font-weight: 500; }
 .side-link.is-active svg { color: var(--pc-coral); }
+.side-pro { color: var(--pc-coral); font-weight: 500; }
+.side-pro svg { color: var(--pc-coral); }
+.side-pro:not(.is-active):hover { background: var(--pc-issue-bg); }
+
+.pro-badge {
+  display: inline-block; margin-left: 8px;
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px;
+  background: var(--pc-coral); color: #17171c;
+  border-radius: 20px; padding: 2px 8px; vertical-align: middle;
+}
+.button.pro-locked { opacity: 0.85; }
+.button.pro-locked:hover { opacity: 1; }
 
 .sidebar-foot {
   display: flex; flex-direction: column; gap: 2px;

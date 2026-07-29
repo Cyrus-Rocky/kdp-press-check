@@ -196,8 +196,10 @@ def check():
         if os.path.exists(path):
             os.remove(path)
 
+    report_job_id = _cache_report(report, file.filename, "interior")
     return render_template("result.html", report=report, filename=file.filename,
-                           active_mode="interior", CHECK_TO_CATEGORY=CHECK_TO_CATEGORY)
+                           active_mode="interior", CHECK_TO_CATEGORY=CHECK_TO_CATEGORY,
+                           report_job_id=report_job_id)
 
 
 @app.route("/cover", methods=["GET"])
@@ -263,9 +265,10 @@ def check_cover():
         if os.path.exists(path):
             os.remove(path)
 
+    report_job_id = _cache_report(report, file.filename, "cover")
     return render_template("result.html", report=report, filename=file.filename,
                            active_mode="cover", CHECK_TO_CATEGORY=CHECK_TO_CATEGORY,
-                           cover_thumbnail_b64=cover_thumbnail_b64)
+                           cover_thumbnail_b64=cover_thumbnail_b64, report_job_id=report_job_id)
 
 
 @app.route("/royalty-calculator", methods=["GET"])
@@ -485,6 +488,25 @@ def pro_required(view):
     return wrapped
 
 
+# In-memory cache so a Pro subscriber can download a branded PDF of the check
+# they just ran, without re-uploading. Small (titles/summaries only, no file
+# bytes) and short-lived, so a plain dict keyed by a random id is enough, no
+# database needed. Same pattern as preview_renderer's on-disk job cache.
+_REPORT_CACHE = {}
+_REPORT_CACHE_TTL = 30 * 60  # 30 minutes
+
+
+def _cache_report(report, filename, mode_label):
+    import time
+    job_id = uuid.uuid4().hex
+    now = time.time()
+    # opportunistic cleanup of expired entries
+    for k in [k for k, v in _REPORT_CACHE.items() if now - v["ts"] > _REPORT_CACHE_TTL]:
+        _REPORT_CACHE.pop(k, None)
+    _REPORT_CACHE[job_id] = {"report": report, "filename": filename, "mode": mode_label, "ts": now}
+    return job_id
+
+
 _MANUSCRIPT_TEXT_EXT = {".docx", ".txt", ".rtf", ".odt"}
 
 
@@ -575,6 +597,32 @@ def ads_sanity_check():
     return render_template("pro_ads_checker.html", active_mode="pro", ads_result=ads_result, form=inputs)
 
 
+def _readiness_pct(report: dict) -> int:
+    """Mirrors the readiness-% calc in result.html's Jinja: 100, minus 16 per
+    failed blocking check and 5 per failed advisory check, floored at 10."""
+    score = 100
+    for r in report.get("results", []):
+        if not r.get("ok"):
+            score -= 5 if r.get("warning_only") else 16
+    return max(score, 10)
+
+
+@app.route("/pro/report/<job_id>.pdf", methods=["GET"])
+@pro_required
+def download_report_pdf(job_id):
+    entry = _REPORT_CACHE.get(job_id)
+    if not entry:
+        flash("That report has expired. Run the check again to download a fresh copy.")
+        return redirect(url_for("index"))
+    import pdf_report
+    report = dict(entry["report"])
+    report["readiness_pct"] = _readiness_pct(report)
+    pdf_bytes = pdf_report.build_report_pdf(report, entry["filename"], entry["mode"], SITE_URL)
+    return Response(pdf_bytes, mimetype="application/pdf", headers={
+        "Content-Disposition": f'attachment; filename="kdp-press-check-report.pdf"'
+    })
+
+
 @app.route("/pro/category-finder", methods=["GET"])
 @pro_required
 def category_trap_finder():
@@ -634,8 +682,10 @@ def check_kindle():
         if os.path.exists(path):
             os.remove(path)
 
+    report_job_id = _cache_report(report, file.filename, "kindle")
     return render_template("result.html", report=report, filename=file.filename,
-                           active_mode="kindle", CHECK_TO_CATEGORY=CHECK_TO_CATEGORY)
+                           active_mode="kindle", CHECK_TO_CATEGORY=CHECK_TO_CATEGORY,
+                           report_job_id=report_job_id)
 
 
 @app.route("/preview", methods=["GET"])
