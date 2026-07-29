@@ -30,12 +30,12 @@
         <p class="solver-blurb">{{ s.bio }}</p>
         <div class="solver-turnaround">Turnaround: {{ s.turnaround }}</div>
         <div class="solver-plats">
+          {% set pt = s.platforms | selectattr('name', 'equalto', 'ProTalentsHub') | list | first %}
           {% if s.gig_url %}
-            <a href="{{ s.gig_url | affiliate }}" target="_blank" rel="sponsored noopener noreferrer" class="solver-plat">View gig ↗</a>
+            <a href="{{ s.gig_url }}" target="_blank" rel="noopener noreferrer" class="solver-plat">View gig on ProTalentsHub ↗</a>
+          {% elif pt %}
+            <a href="{{ pt.url }}" target="_blank" rel="noopener noreferrer" class="solver-plat">View on ProTalentsHub ↗</a>
           {% endif %}
-          {% for p in s.platforms %}
-            <a href="{{ p.url | affiliate }}" target="_blank" rel="sponsored noopener noreferrer" class="solver-plat">{{ p.name }} ↗</a>
-          {% endfor %}
         </div>
       </div>
       {% endif %}
@@ -44,10 +44,6 @@
 
   {% include "_recommended.html" %}
 
-  {% if affiliate_enabled %}
-  <p class="footnote-inline" style="display:block; margin-top:32px;">Some links here are affiliate links. If you hire through them we may earn a small commission, at no extra cost to you. It never affects who we list or how we rank them.</p>
-  {% else %}
-  <p class="footnote-inline" style="display:block; margin-top:32px;">Platform links open the freelancer's profile on Fiverr, Upwork, or Kwork. We link out and you deal with them directly.</p>
-  {% endif %}
+  <p class="footnote-inline" style="display:block; margin-top:32px;">All profiles link to ProTalentsHub, where you hire and pay the freelancer directly.</p>{% if affiliate_enabled %} <p class="footnote-inline" style="display:block; margin-top:8px;">Some links elsewhere on the site are affiliate links; we may earn a small commission at no extra cost to you.</p>{% endif %}
 </section>
 {% endblock %}
