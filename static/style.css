@@ -1697,6 +1697,26 @@ button.primary.is-loading .spinner {
 }
 .result-banner.is-fail .result-stamp { border-color: #ff7066; color: #ff7066; }
 
+/* publish-readiness gauge */
+.readiness-gauge { position: relative; width: 96px; height: 96px; flex: none; }
+.readiness-ring { width: 96px; height: 96px; transform: rotate(-90deg); }
+.readiness-track { fill: none; stroke: var(--pc-rule-soft); stroke-width: 8; }
+.readiness-fill {
+  fill: none; stroke: var(--pc-ok); stroke-width: 8; stroke-linecap: round;
+  transition: stroke-dashoffset 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.result-banner.is-fail .readiness-fill { stroke: var(--pc-coral); }
+.readiness-center {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; line-height: 1;
+}
+.readiness-num { font-family: var(--font-display); font-size: 26px; color: var(--pc-strong); }
+.readiness-pct { font-size: 14px; }
+.readiness-cap {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 1.4px;
+  text-transform: uppercase; color: var(--pc-faint); margin-top: 3px;
+}
+
 .result-tally {
   display: flex;
   gap: 24px;

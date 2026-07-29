@@ -26,6 +26,18 @@
 {% set g_label = 'EPUB structure' if active_mode == 'kindle' else 'Print geometry (blocking)' %}
 {% set c_label = 'Content & delivery' if active_mode == 'kindle' else 'Content & proofreading (advisory)' %}
 
+{# Publish-readiness %: start at 100, subtract per failed check. A blocking
+   (KDP-rejection) failure costs far more than an advisory polish issue. #}
+{% set rns = namespace(score=100) %}
+{% for r in report.results %}
+  {% if not r.ok %}
+    {% set rns.score = rns.score - (5 if r.warning_only else 16) %}
+  {% endif %}
+{% endfor %}
+{% set readiness = [rns.score, 10] | max %}
+{% set ring_circ = 213.6 %}
+{% set ring_offset = (ring_circ * (1 - readiness / 100)) | round(1) %}
+
 {% macro group_sub(rows) %}
   {% set passed = rows | selectattr('ok') | list | length %}
   {% set flagged = rows | length - passed %}
@@ -91,15 +103,26 @@
       <div class="result-title">{{ 'Ready for KDP.' if report.overall_ok else 'Needs fixes before upload.' }}</div>
       <p class="result-sub">
         {% if not report.overall_ok %}
-          {{ fail_count }} blocking issue{{ 's' if fail_count != 1 else '' }} would stop KDP from accepting this file. They're listed first, each with a fix you can do today, or hand off.
+          This file is <strong>{{ readiness }}% ready</strong>. {{ fail_count }} blocking issue{{ 's' if fail_count != 1 else '' }} would stop KDP from accepting it, fix {{ 'those' if fail_count != 1 else 'that' }} to reach 100%. Each is listed first with a fix you can do today.
         {% elif issue_count %}
-          Nothing here blocks KDP acceptance. {{ issue_count }} advisory finding{{ 's' if issue_count != 1 else '' }} below {{ 'are' if issue_count != 1 else 'is' }} worth a look, though none will stop your upload.
+          This file is <strong>{{ readiness }}% ready</strong>. Nothing here blocks KDP acceptance; the {{ issue_count }} advisory finding{{ 's' if issue_count != 1 else '' }} below {{ 'are' if issue_count != 1 else 'is' }} polish worth a look.
         {% else %}
-          Nothing blocks KDP acceptance. Upload when you're ready.
+          This file is <strong>100% ready</strong>. Nothing blocks KDP acceptance, upload when you're ready.
         {% endif %}
       </p>
     </div>
-    <div class="result-stamp">{{ 'Pass' if report.overall_ok else 'Needs fixes' }}</div>
+    <div class="readiness-gauge {{ 'is-pass' if report.overall_ok else 'is-fail' }}" role="img"
+         aria-label="Publish readiness {{ readiness }} percent">
+      <svg viewBox="0 0 80 80" class="readiness-ring" aria-hidden="true">
+        <circle class="readiness-track" cx="40" cy="40" r="34"></circle>
+        <circle class="readiness-fill" cx="40" cy="40" r="34"
+                stroke-dasharray="{{ ring_circ }}" stroke-dashoffset="{{ ring_offset }}"></circle>
+      </svg>
+      <div class="readiness-center">
+        <span class="readiness-num">{{ readiness }}<span class="readiness-pct">%</span></span>
+        <span class="readiness-cap">ready</span>
+      </div>
+    </div>
   </div>
   <div class="result-tally">
     <span class="{{ 'is-hot' if fail_count else '' }}">{{ fail_count }} blocking</span>
