@@ -49,6 +49,24 @@ SITEMAP_ENDPOINTS = [
 
 app.jinja_env.filters["affiliate"] = affiliate.apply
 
+_STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
+
+
+def _asset_version(filename: str) -> str:
+    """A cache-busting token from the file's last-modified time, so browsers
+    always fetch fresh CSS/JS after a deploy instead of serving a stale copy."""
+    try:
+        return str(int(os.path.getmtime(os.path.join(_STATIC_DIR, filename))))
+    except OSError:
+        return "1"
+
+
+@app.context_processor
+def inject_asset_helper():
+    def static_v(filename):
+        return url_for("static", filename=filename) + "?v=" + _asset_version(filename)
+    return {"static_v": static_v}
+
 
 @app.context_processor
 def inject_globals():

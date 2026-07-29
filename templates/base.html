@@ -34,7 +34,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="{{ static_v('style.css') }}">
   <!-- Google Analytics GA4 -->
   {% if ga_id %}
   <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_id }}"></script>
@@ -210,8 +210,8 @@
     </div>
   </div>
 
-  <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
-  <script src="{{ url_for('static', filename='theme.js') }}"></script>
-  <script src="{{ url_for('static', filename='app.js') }}"></script>
+  <script src="{{ static_v('sidebar.js') }}"></script>
+  <script src="{{ static_v('theme.js') }}"></script>
+  <script src="{{ static_v('app.js') }}"></script>
 </body>
 </html>
