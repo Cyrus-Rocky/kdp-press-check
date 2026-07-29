@@ -575,6 +575,31 @@ def ads_sanity_check():
     return render_template("pro_ads_checker.html", active_mode="pro", ads_result=ads_result, form=inputs)
 
 
+@app.route("/pro/category-finder", methods=["GET"])
+@pro_required
+def category_trap_finder():
+    import category_finder as cf
+    genre = request.args.get("genre", "fiction")
+    return render_template("pro_category_finder.html", active_mode="pro",
+                            genre_labels=cf.GENRE_LABELS, selected_genre=genre,
+                            examples=cf.examples_for(genre),
+                            verdict_label=cf.VERDICT_LABEL, verdict_severity=cf.VERDICT_SEVERITY)
+
+
+@app.route("/pro/category-finder/check", methods=["POST"])
+@pro_required
+def category_finder_check():
+    import category_finder as cf
+    genre = request.form.get("genre", "fiction")
+    custom_path = request.form.get("custom_path", "")
+    custom_result = cf.evaluate_custom_path(custom_path)
+    return render_template("pro_category_finder.html", active_mode="pro",
+                            genre_labels=cf.GENRE_LABELS, selected_genre=genre,
+                            examples=cf.examples_for(genre),
+                            verdict_label=cf.VERDICT_LABEL, verdict_severity=cf.VERDICT_SEVERITY,
+                            custom_path=custom_path, custom_result=custom_result)
+
+
 @app.route("/kindle", methods=["GET"])
 def kindle_index():
     return render_template("kindle_index.html", active_mode="kindle")
