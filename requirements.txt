@@ -6,3 +6,4 @@ Pillow==10.4.0
 striprtf==0.0.26
 odfpy==1.4.1
 pyspellchecker==0.8.1
+stripe==11.1.1

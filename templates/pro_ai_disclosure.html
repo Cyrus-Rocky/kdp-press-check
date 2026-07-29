@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}AI Disclosure & Detection-Risk Advisor · KDP Press Check Pro{% endblock %}
+{% block meta_description %}Know exactly what to answer on KDP's AI-content question, and see which passages in your manuscript read like AI-detector bait before Amazon's scanner does.{% endblock %}
+{% block content %}
+
+<section class="hero-single">
+  <div class="eyebrow">KDP Press Check Pro</div>
+  <h1 class="hero-display">Answer the AI question with confidence.</h1>
+  <p class="hero-lead">Two tools in one: a decision helper for KDP's disclosure question, grounded in Amazon's actual published policy, and a scan of your manuscript for the phrasing patterns AI-detection tools misfire on most.</p>
+
+  <div class="lint-grid" style="margin-bottom:48px;">
+    <div class="lint-inputs">
+      <p class="est-card-label" style="margin-bottom:14px;">Part 1 · Do I need to disclose AI use?</p>
+      <form method="post" action="{{ url_for('ai_disclosure_quiz') }}">
+        <div class="field">
+          <label>Did any AI tool (ChatGPT, Claude, Gemini, etc.) touch the text, images, or translations in this book at all?</label>
+          <div class="ink-toggle">
+            <button type="submit" name="used_ai" value="no" class="{{ 'is-active' if used_ai == 'no' else '' }}">No</button>
+            <button type="submit" name="used_ai" value="yes" class="{{ 'is-active' if used_ai == 'yes' else '' }}">Yes</button>
+          </div>
+        </div>
+        {% if used_ai == 'yes' %}
+        <div class="field">
+          <label>Did the AI produce the actual words/images from scratch, or did you write it yourself and only use AI to brainstorm, edit, or refine?</label>
+          <div class="ink-toggle">
+            <input type="hidden" name="used_ai" value="yes">
+            <button type="submit" name="ai_wrote_it" value="no" class="{{ 'is-active' if ai_wrote_it == 'no' else '' }}">I wrote it, AI only helped edit</button>
+            <button type="submit" name="ai_wrote_it" value="yes" class="{{ 'is-active' if ai_wrote_it == 'yes' else '' }}">AI produced it from scratch</button>
+          </div>
+        </div>
+        {% endif %}
+      </form>
+
+      {% if quiz_result %}
+      <div class="est-card" style="margin-top:20px;">
+        <div class="est-card-label">{{ quiz_result.verdict }}</div>
+        <p style="font-size:15px; line-height:1.6; color:var(--pc-ink); margin-top:10px;">{{ quiz_result.explanation }}</p>
+      </div>
+      {% endif %}
+      <p class="footnote-inline" style="display:block; margin-top:14px;">Based on Amazon KDP's published Content Guidelines distinguishing "AI-generated" from "AI-assisted" content.</p>
+    </div>
+
+    <div>
+      <p class="est-card-label" style="margin-bottom:14px;">Part 2 · Detection-risk scan</p>
+      <form method="post" action="{{ url_for('ai_disclosure_scan') }}" enctype="multipart/form-data">
+        <div class="dropzone" id="drop-zone" tabindex="0" role="button" aria-label="Upload manuscript">
+          <span class="bracket-r" aria-hidden="true"></span>
+          <p class="instructions" id="drop-label">Drop your manuscript here, or
+            <button type="button" class="browse" onclick="document.getElementById('manuscript').click()">click to browse</button>
+          </p>
+          <p class="filehint">.docx · .txt · .rtf · .odt</p>
+          <input type="file" name="manuscript" id="manuscript" accept=".docx,.txt,.rtf,.odt" required
+                 style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;">
+        </div>
+        <div class="actions-inline" style="margin-top:16px;">
+          <button type="submit" class="primary"><span class="label">Scan for detection risk →</span></button>
+        </div>
+      </form>
+
+      {% if scan_result %}
+      <div class="est-card" style="margin-top:20px;">
+        <div class="est-card-label">{{ scan_filename }}</div>
+        <div class="est-big">{{ scan_result.risk_score }}<span style="font-size:20px;">/100</span></div>
+        <div class="est-big-cap">detection-risk score, lower is safer</div>
+        {% if scan_result.findings %}
+        <div class="lint-findings" style="margin-top:20px;">
+          {% for f in scan_result.findings %}
+          <div class="lint-finding">
+            <span class="lint-sev {{ 'issue' if f.severity == 'high' else 'note' }}">{{ f.severity | upper }}</span>
+            <div class="lint-finding-body">
+              <div class="lint-finding-field">{{ f.label }}</div>
+              <div class="lint-finding-msg">{{ f.detail }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p style="margin-top:16px; color:var(--pc-muted); font-size:14px;">No detector-flagged patterns found. This reads like natural human writing.</p>
+        {% endif %}
+      </div>
+      <p class="footnote-inline" style="display:block; margin-top:14px;">This is a heuristic, not a verdict. It highlights phrasing patterns detectors are documented to misfire on, especially for non-native English speakers and neurodivergent writers, it does not determine whether text "is AI."</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

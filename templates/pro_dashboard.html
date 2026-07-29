@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Pro Dashboard · KDP Press Check{% endblock %}
+{% block content %}
+
+<section class="hero-single">
+  <div class="eyebrow">KDP Press Check Pro</div>
+  <h1 class="hero-display">Your Pro tools.</h1>
+  <p class="hero-lead">Signed in as <strong>{{ session.get('pro_email') }}</strong>.</p>
+
+  <div class="product-grid">
+    <a class="product-card" href="{{ url_for('ai_disclosure_advisor') }}" style="text-decoration:none;">
+      <div class="product-name">AI Disclosure &amp; Detection-Risk Advisor</div>
+      <p class="product-blurb">Scan your manuscript for AI-detector-style patterns and get a plain-English disclosure answer.</p>
+      <span class="pv-link">Open →</span>
+    </a>
+    <a class="product-card" href="{{ url_for('ads_sanity_checker') }}" style="text-decoration:none;">
+      <div class="product-name">Ads Sanity Checker</div>
+      <p class="product-blurb">Paste your Amazon Ads numbers, get a diagnosis and the fixes that matter.</p>
+      <span class="pv-link">Open →</span>
+    </a>
+    <a class="product-card" href="{{ url_for('category_trap_finder') }}" style="text-decoration:none;">
+      <div class="product-name">Category &amp; Trap Finder</div>
+      <p class="product-blurb">Find which KDP categories are real, and which are dead-end ghost categories.</p>
+      <span class="pv-link">Open →</span>
+    </a>
+    <a class="product-card" href="{{ url_for('index') }}" style="text-decoration:none;">
+      <div class="product-name">Branded PDF reports</div>
+      <p class="product-blurb">Run any check, e.g. Interior Check, then look for "Download PDF report" on the results page.</p>
+      <span class="pv-link">Run a check →</span>
+    </a>
+  </div>
+
+  <form action="{{ url_for('pro_billing') }}" method="post" style="margin-top:32px;">
+    <button type="submit" class="pv-link" style="background:none;border:none;cursor:pointer;">Manage billing / cancel subscription →</button>
+  </form>
+  <form action="{{ url_for('pro_logout') }}" method="post" style="margin-top:12px;">
+    <button type="submit" class="pv-link" style="background:none;border:none;cursor:pointer;">Sign out of Pro on this device</button>
+  </form>
+</section>
+{% endblock %}

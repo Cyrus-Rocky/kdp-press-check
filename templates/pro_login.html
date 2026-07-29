@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Sign in to Pro · KDP Press Check{% endblock %}
+{% block content %}
+
+<section class="hero-single">
+  <div class="eyebrow">KDP Press Check Pro</div>
+  <h1 class="hero-display">Welcome back.</h1>
+  <p class="hero-lead">Enter the email you subscribed with. We'll check it against your subscription, no password needed.</p>
+
+  <form method="post" style="max-width:420px;">
+    <div class="field">
+      <label for="pro-email">Email</label>
+      <input type="email" id="pro-email" name="email" required placeholder="you@email.com" autofocus>
+    </div>
+    <div class="actions-inline" style="margin-top:16px;">
+      <button type="submit" class="primary"><span class="label">Sign in →</span></button>
+    </div>
+  </form>
+
+  <p class="footnote-inline" style="display:block; margin-top:28px;">Not a Pro subscriber yet? <a href="{{ url_for('pro_landing') }}">See what Pro unlocks</a>.</p>
+</section>
+{% endblock %}

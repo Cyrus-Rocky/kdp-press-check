@@ -102,7 +102,15 @@
       </div>
 
       <nav class="sidebar-nav">
+        {% if pro_enabled or active_mode == 'pro' %}
+        <a href="{{ url_for('pro_dashboard') if is_pro else url_for('pro_landing') }}" class="side-link side-pro {{ 'is-active' if active_mode == 'pro' else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          <span class="sidebar-label">{{ 'Pro Dashboard' if is_pro else 'Upgrade to Pro' }}</span>
+        </a>
         <p class="sidebar-group"><span class="sidebar-label">Checks</span></p>
+        {% else %}
+        <p class="sidebar-group"><span class="sidebar-label">Checks</span></p>
+        {% endif %}
         <a href="{{ url_for('index') }}" class="side-link {{ 'is-active' if active_mode == 'interior' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 2h7l4 4v16H7z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 2v5h4M10 13h6M10 17h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
           <span class="sidebar-label">Interior Check</span>

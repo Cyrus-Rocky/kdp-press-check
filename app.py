@@ -2,7 +2,7 @@ import logging
 import os
 import uuid
 
-from flask import Flask, render_template, request, redirect, url_for, flash, send_file, abort, Response
+from flask import Flask, render_template, request, redirect, url_for, flash, send_file, abort, Response, session
 from werkzeug.exceptions import RequestEntityTooLarge
 
 from checker import run_all_checks
@@ -12,6 +12,7 @@ from epub_checker import run_all_checks_epub
 from text_format_checker import run_all_checks_text_format
 import affiliate
 import newsletter
+import pro_access
 import recommended_tools
 import kdp_rules as rules
 import preview_renderer
@@ -29,6 +30,11 @@ MAX_CONTENT_LENGTH = MAX_UPLOAD_MB * 1024 * 1024
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
 app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
+# Pro-status session cookie: signed (tamper-proof via SECRET_KEY), httponly so
+# JS can't read it, and long-lived so a subscriber isn't logged out every visit.
+app.config["PERMANENT_SESSION_LIFETIME"] = 30 * 24 * 60 * 60  # 30 days
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 logging.basicConfig(level=logging.INFO)
@@ -85,6 +91,9 @@ def inject_globals():
         "newsletter_field": newsletter.EMAIL_FIELD,
         "recommended_tools": recommended_tools.visible(),
         "products_available": bool([p for p in _products() if p.get("buy_url", "").strip()]),
+        "pro_enabled": pro_access.enabled(),
+        "is_pro": pro_access.is_pro(session),
+        "pro_price_display": pro_access.PRO_PRICE_DISPLAY,
     }
 
 
@@ -374,6 +383,168 @@ def templates_page():
 @app.route("/genre-checklist", methods=["GET"])
 def genre_checklist():
     return render_template("genre_checklist.html", active_mode="genre")
+
+
+@app.route("/pro", methods=["GET"])
+def pro_landing():
+    if pro_access.is_pro(session):
+        return redirect(url_for("pro_dashboard"))
+    return render_template("pro_landing.html", active_mode="pro")
+
+
+@app.route("/pro/checkout", methods=["POST"])
+def pro_checkout():
+    if not pro_access.enabled():
+        flash("Pro isn't available yet, check back soon.")
+        return redirect(url_for("pro_landing"))
+    try:
+        url = pro_access.create_checkout_url(
+            success_url=SITE_URL + url_for("pro_success"),
+            cancel_url=SITE_URL + url_for("pro_landing"),
+        )
+    except Exception:
+        logger.exception("Failed to create Stripe checkout session")
+        flash("We couldn't start checkout just now. Please try again in a moment.")
+        return redirect(url_for("pro_landing"))
+    return redirect(url)
+
+
+@app.route("/pro/success", methods=["GET"])
+def pro_success():
+    session_id = request.args.get("session_id", "")
+    if not session_id:
+        return redirect(url_for("pro_landing"))
+    try:
+        email, customer_id = pro_access.email_from_checkout_session(session_id)
+    except Exception:
+        logger.exception("Failed to verify Stripe checkout session")
+        email, customer_id = None, None
+    if not email:
+        flash("We couldn't confirm that payment. If you were charged, email us and we'll sort it out.")
+        return redirect(url_for("pro_landing"))
+    pro_access.mark_session_pro(session, email, customer_id)
+    flash("You're in. Welcome to Pro.")
+    return redirect(url_for("pro_dashboard"))
+
+
+@app.route("/pro/login", methods=["GET", "POST"])
+def pro_login():
+    if request.method == "POST":
+        email = request.form.get("email", "").strip()
+        if not email:
+            flash("Enter the email you subscribed with.")
+            return redirect(url_for("pro_login"))
+        customer_id = pro_access.active_subscription(email)
+        if customer_id:
+            pro_access.mark_session_pro(session, email, customer_id)
+            flash("Welcome back.")
+            return redirect(url_for("pro_dashboard"))
+        flash("We couldn't find an active Pro subscription for that email.")
+        return redirect(url_for("pro_login"))
+    return render_template("pro_login.html", active_mode="pro")
+
+
+@app.route("/pro/logout", methods=["POST"])
+def pro_logout():
+    pro_access.clear_session_pro(session)
+    flash("Signed out of Pro on this device.")
+    return redirect(url_for("pro_landing"))
+
+
+@app.route("/pro/dashboard", methods=["GET"])
+def pro_dashboard():
+    if not pro_access.is_pro(session):
+        return redirect(url_for("pro_login"))
+    return render_template("pro_dashboard.html", active_mode="pro")
+
+
+@app.route("/pro/billing", methods=["POST"])
+def pro_billing():
+    if not pro_access.is_pro(session):
+        return redirect(url_for("pro_login"))
+    try:
+        url = pro_access.create_billing_portal_url(
+            session["pro_customer_id"], return_url=SITE_URL + url_for("pro_dashboard")
+        )
+    except Exception:
+        logger.exception("Failed to create Stripe billing portal session")
+        flash("Couldn't open billing management right now, try again shortly.")
+        return redirect(url_for("pro_dashboard"))
+    return redirect(url)
+
+
+def pro_required(view):
+    from functools import wraps
+
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        if not pro_access.is_pro(session):
+            flash("That tool is part of KDP Press Check Pro.")
+            return redirect(url_for("pro_landing"))
+        return view(*args, **kwargs)
+    return wrapped
+
+
+_MANUSCRIPT_TEXT_EXT = {".docx", ".txt", ".rtf", ".odt"}
+
+
+def _extract_manuscript_text(file_storage) -> str:
+    """Extracts plain text from an uploaded manuscript for text-only analysis
+    (no print geometry needed). Raises ValueError for unsupported types."""
+    ext = os.path.splitext(file_storage.filename)[1].lower()
+    if ext not in _MANUSCRIPT_TEXT_EXT:
+        raise ValueError("Unsupported file type: " + ext)
+    tmp_path = os.path.join(UPLOAD_DIR, f"{uuid.uuid4().hex}{ext}")
+    file_storage.save(tmp_path)
+    try:
+        if ext == ".docx":
+            from docx import Document as _DocxDoc
+            doc = _DocxDoc(tmp_path)
+            return "\n".join(p.text for p in doc.paragraphs)
+        import formats
+        return formats.extract(tmp_path, ext)["full_text"]
+    finally:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+
+
+@app.route("/pro/ai-disclosure", methods=["GET"])
+@pro_required
+def ai_disclosure_advisor():
+    return render_template("pro_ai_disclosure.html", active_mode="pro")
+
+
+@app.route("/pro/ai-disclosure/quiz", methods=["POST"])
+@pro_required
+def ai_disclosure_quiz():
+    import ai_disclosure
+    used_ai = request.form.get("used_ai") == "yes"
+    ai_wrote_it = request.form.get("ai_wrote_it") == "yes"
+    quiz_result = ai_disclosure.classify_disclosure(used_ai, ai_wrote_it)
+    return render_template("pro_ai_disclosure.html", active_mode="pro", quiz_result=quiz_result,
+                            used_ai=request.form.get("used_ai"), ai_wrote_it=request.form.get("ai_wrote_it"))
+
+
+@app.route("/pro/ai-disclosure/scan", methods=["POST"])
+@pro_required
+def ai_disclosure_scan():
+    import ai_disclosure
+    file = request.files.get("manuscript")
+    if not file or file.filename == "":
+        flash("Choose a manuscript file first (.docx, .txt, .rtf, or .odt).")
+        return redirect(url_for("ai_disclosure_advisor"))
+    try:
+        text = _extract_manuscript_text(file)
+    except ValueError:
+        flash("That file type isn't supported. Use .docx, .txt, .rtf, or .odt.")
+        return redirect(url_for("ai_disclosure_advisor"))
+    except Exception:
+        logger.exception("AI disclosure scan failed to read %s", file.filename)
+        flash("We couldn't read that file. It may be corrupted, try re-saving and uploading again.")
+        return redirect(url_for("ai_disclosure_advisor"))
+    scan_result = ai_disclosure.scan_manuscript(text)
+    return render_template("pro_ai_disclosure.html", active_mode="pro",
+                            scan_result=scan_result, scan_filename=file.filename)
 
 
 @app.route("/kindle", methods=["GET"])
