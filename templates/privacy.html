@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Privacy · KDP Press Check{% endblock %}
+{% block meta_description %}How KDP Press Check handles your data: uploaded files are deleted immediately, we only keep an email if you choose to subscribe, and analytics and affiliate links are disclosed.{% endblock %}
+{% block content %}
+
+<section class="hero-single">
+  <div class="eyebrow">Privacy</div>
+  <h1 class="hero-display">Your files, your data.</h1>
+  <p class="hero-lead">Plain-English summary of what we collect and what we don't. No lawyer-speak.</p>
+
+  <div class="prose">
+    <h2>Files you upload</h2>
+    <p>Manuscripts and covers you upload are analyzed in your browsing session and <strong>deleted the moment the check is complete</strong>. We do not store, read, share, or keep copies of your book files.</p>
+
+    <h2>Email</h2>
+    <p>We only collect your email address if you choose to enter it in a signup form. It's used to send occasional KDP tips and product updates, and it's handled by our email provider. You can unsubscribe at any time. We never sell your email.</p>
+
+    <h2>Analytics</h2>
+    <p>We use privacy-respecting website analytics to understand which tools are used and improve the site. This may set cookies and collects standard, non-identifying data such as pages viewed and general location. We do not use it to identify you personally.</p>
+
+    <h2>Affiliate links</h2>
+    <p>Some outbound links to third-party tools and services are affiliate links. If you buy or hire through them we may earn a commission, at no extra cost to you. This is disclosed where it applies and never affects the results a check gives you.</p>
+
+    <h2>What we never do</h2>
+    <ul>
+      <li>Store your uploaded manuscripts or covers.</li>
+      <li>Sell or rent your personal data.</li>
+      <li>Ask for your KDP or Amazon login (we never need it).</li>
+    </ul>
+
+    {% if contact_email %}
+    <h2>Contact</h2>
+    <p>Questions about your data? Email <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>.</p>
+    {% endif %}
+
+    <p class="footnote-inline" style="display:block; margin-top:24px;">KDP Press Check is an independent tool, not affiliated with Amazon or Kindle Direct Publishing.</p>
+  </div>
+</section>
+{% endblock %}

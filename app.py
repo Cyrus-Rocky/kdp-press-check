@@ -68,17 +68,48 @@ def inject_asset_helper():
     return {"static_v": static_v}
 
 
+# Public contact address, shown in the footer and on About/Privacy when set.
+# Leave unset (or set to your own) via the CONTACT_EMAIL env var.
+CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "").strip()
+
+
 @app.context_processor
 def inject_globals():
     return {
         "ga_id": GA_ID,
         "site_url": SITE_URL,
+        "contact_email": CONTACT_EMAIL,
         "affiliate_enabled": affiliate.enabled(),
         "newsletter_enabled": newsletter.enabled(),
         "newsletter_action": newsletter.FORM_ACTION,
         "newsletter_field": newsletter.EMAIL_FIELD,
         "recommended_tools": recommended_tools.visible(),
+        "products_available": bool([p for p in _products() if p.get("buy_url", "").strip()]),
     }
+
+
+def _products():
+    from products_data import PRODUCTS
+    return PRODUCTS
+
+
+@app.after_request
+def set_security_headers(resp):
+    resp.headers.setdefault("X-Content-Type-Options", "nosniff")
+    resp.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
+    resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    resp.headers.setdefault("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
+    return resp
+
+
+@app.route("/about")
+def about():
+    return render_template("about.html", active_mode="about")
+
+
+@app.route("/privacy")
+def privacy():
+    return render_template("privacy.html", active_mode="privacy")
 
 
 @app.route("/robots.txt")
@@ -497,6 +528,11 @@ def handle_too_large(_exc):
     else:
         destination = "index"
     return redirect(url_for(destination)), 413
+
+
+@app.errorhandler(404)
+def handle_not_found(_exc):
+    return render_template("404.html", active_mode=""), 404
 
 
 @app.errorhandler(500)

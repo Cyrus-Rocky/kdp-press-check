@@ -34,6 +34,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="{{ static_v('favicon.svg') }}">
   <link rel="stylesheet" href="{{ static_v('style.css') }}">
   <!-- Google Analytics GA4 -->
   {% if ga_id %}
@@ -151,11 +152,13 @@
           <span class="sidebar-label">Launch Checklist</span>
         </a>
 
+        {% if products_available or active_mode == 'products' %}
         <p class="sidebar-group"><span class="sidebar-label">Store</span></p>
         <a href="{{ url_for('templates_page') }}" class="side-link {{ 'is-active' if active_mode == 'products' else '' }}">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.7"/><rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.7"/><rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.7"/><rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.7"/></svg>
           <span class="sidebar-label">Templates</span>
         </a>
+        {% endif %}
       </nav>
 
       <div class="sidebar-foot">
@@ -193,23 +196,24 @@
           <p class="footer-eyebrow">KDP requirements change often</p>
           <p class="footer-display">Check every version before you upload.</p>
         </div>
+        {% if newsletter_enabled %}
         <div class="footer-signup-form">
           <p class="footer-signup-label">Get KDP tips and new tools in your inbox</p>
-          {% if newsletter_enabled %}
           <form action="{{ newsletter_action }}" method="post" target="_blank" class="signup-row">
             <input type="email" name="{{ newsletter_field }}" required placeholder="you@email.com" class="signup-input" aria-label="Email address">
             <button type="submit" class="signup-btn">Subscribe</button>
           </form>
           <p class="footer-signup-note">No spam. Unsubscribe anytime.</p>
-          {% else %}
-          <div class="signup-row">
-            <input type="email" placeholder="you@email.com" class="signup-input" disabled aria-label="Email address">
-            <span class="signup-soon">Coming soon</span>
-          </div>
-          {% endif %}
         </div>
+        {% endif %}
       </div>
       <hr class="footer-rule">
+      <nav class="footer-links" aria-label="Footer">
+        <a href="{{ url_for('about') }}">About</a>
+        <a href="{{ url_for('privacy') }}">Privacy</a>
+        {% if contact_email %}<a href="mailto:{{ contact_email }}">Contact</a>{% endif %}
+        <a href="{{ url_for('problem_solvers') }}">Find help</a>
+      </nav>
       <div class="footer-bar">
         <span>KDP Press Check is free. Files are analyzed in your session and never stored.</span>
         <span>Independent tool, not affiliated with Amazon or Kindle Direct Publishing.</span>

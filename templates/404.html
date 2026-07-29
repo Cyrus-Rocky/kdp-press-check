@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Page not found · KDP Press Check{% endblock %}
+{% block meta_description %}That page doesn't exist. Head back to the free KDP checks and tools.{% endblock %}
+{% block content %}
+
+<section class="hero-single" style="text-align:center; padding-top:40px;">
+  <div class="eyebrow" style="justify-content:center;">Error 404</div>
+  <h1 class="hero-display">That page ran off the press.</h1>
+  <p class="hero-lead" style="margin-left:auto; margin-right:auto;">The page you're looking for doesn't exist or has moved. Let's get you back to a tool that works.</p>
+  <div class="actions-inline" style="justify-content:center; margin-top:8px;">
+    <a class="primary" href="{{ url_for('index') }}"><span class="label">Back to Interior Check →</span></a>
+  </div>
+  <p class="footnote-inline" style="display:block; margin-top:28px;">
+    Or jump to the <a href="{{ url_for('error_decoder') }}">Error Decoder</a>,
+    <a href="{{ url_for('keyword_linter') }}">Keyword Checker</a>, or
+    <a href="{{ url_for('royalty_calculator') }}">Royalty Calculator</a>.
+  </p>
+</section>
+{% endblock %}

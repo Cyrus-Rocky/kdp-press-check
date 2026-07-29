@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}About KDP Press Check — free pre-upload checks for self-publishers{% endblock %}
+{% block meta_description %}KDP Press Check is a free set of tools that check your book against Amazon KDP's print and ebook requirements before you upload, so you fix problems on your schedule, not after a rejection.{% endblock %}
+{% block content %}
+
+<section class="hero-single">
+  <div class="eyebrow">About</div>
+  <h1 class="hero-display">Catch it before KDP does.</h1>
+  <p class="hero-lead">KDP Press Check is a free set of tools for self-publishing authors. Upload your book and see exactly what Amazon KDP will flag, before you submit, so a rejected upload never catches you by surprise.</p>
+
+  <div class="prose">
+    <h2>What it does</h2>
+    <p>Amazon KDP tells you a file is wrong only after you've uploaded it, and often in vague language. This tool checks the same things up front: trim size, margins and gutter, bleed, embedded fonts, image resolution, Kindle structure, cover spine and barcode zones, keywords, page count, and more. Each result comes with a plain-English fix.</p>
+
+    <h2>Who it's for</h2>
+    <p>First-time and experienced self-publishers who want to hit "Publish" with confidence, whether you wrote the book yourself or had it ghostwritten and formatted.</p>
+
+    <h2>Is it really free?</h2>
+    <p>Yes. Every check and tool on this site is free to use. We may earn a commission if you buy a recommended tool or hire through a linked service, at no extra cost to you, and that's clearly labelled where it applies. It never changes the results a check gives you.</p>
+
+    <h2>Is my file safe?</h2>
+    <p>Your uploads are analyzed in your session and deleted the moment the check is done. We don't store your manuscript or cover. See our <a href="{{ url_for('privacy') }}">privacy page</a> for details.</p>
+
+    <h2>Not affiliated with Amazon</h2>
+    <p>KDP Press Check is an independent tool. It is not affiliated with, endorsed by, or connected to Amazon or Kindle Direct Publishing. "KDP", "Kindle", and "Amazon" are trademarks of Amazon. Always confirm your file in KDP's own previewer before publishing, as Amazon can change its requirements at any time.</p>
+
+    {% if contact_email %}
+    <h2>Get in touch</h2>
+    <p>Questions, bugs, or ideas? Email <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>.</p>
+    {% endif %}
+  </div>
+
+  <div class="actions-inline" style="margin-top:32px;">
+    <a class="primary" href="{{ url_for('index') }}"><span class="label">Run a free check →</span></a>
+  </div>
+</section>
+{% endblock %}
