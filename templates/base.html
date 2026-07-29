@@ -75,7 +75,13 @@
     <button type="button" class="hamburger" id="sidebar-open" aria-label="Open menu">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
     </button>
-    <a href="{{ url_for('index') }}" class="mobile-mark"><span class="mark-dot" aria-hidden="true"></span> kdp press check</a>
+    <a href="{{ url_for('index') }}" class="mobile-mark">
+      <svg class="mark-logo" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <rect x="2.5" y="2.5" width="27" height="27" rx="7.5" fill="var(--pc-coral)"/>
+        <path d="M9.5 16.4l4.2 4.2L23 11" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      kdp press check
+    </a>
   </div>
 
   <div class="app-shell" id="app-shell">
@@ -83,7 +89,10 @@
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-head">
         <a href="{{ url_for('index') }}" class="mark" style="text-decoration:none; color:inherit;">
-          <span class="mark-dot" aria-hidden="true"></span>
+          <svg class="mark-logo" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+            <rect x="2.5" y="2.5" width="27" height="27" rx="7.5" fill="var(--pc-coral)"/>
+            <path d="M9.5 16.4l4.2 4.2L23 11" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
           <span class="sidebar-label">kdp press check</span>
         </a>
         <button type="button" class="sidebar-toggle" id="sidebar-toggle" aria-label="Collapse sidebar" title="Collapse sidebar">

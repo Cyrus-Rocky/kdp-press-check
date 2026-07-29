@@ -261,6 +261,12 @@ a { color: var(--accent-ink); }
   font-family: var(--font-display); font-size: 17px; letter-spacing: -0.3px;
   color: var(--pc-strong); white-space: nowrap; overflow: hidden;
 }
+.mark-logo { width: 26px; height: 26px; flex: none; display: block; animation: markBlink 2.2s ease-in-out infinite; }
+@keyframes markBlink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.9); }
+}
+@media (prefers-reduced-motion: reduce) { .mark-logo { animation: none; } }
 .sidebar-toggle {
   flex: none; width: 30px; height: 30px; border-radius: 8px;
   border: 1px solid var(--pc-rule); background: none; color: var(--pc-muted);
@@ -305,7 +311,7 @@ a { color: var(--accent-ink); }
 /* collapsed rail */
 .app-shell.is-collapsed .sidebar { width: 66px; }
 .app-shell.is-collapsed .sidebar-label { display: none; }
-.app-shell.is-collapsed .sidebar-head { justify-content: center; }
+.app-shell.is-collapsed .sidebar-head { flex-direction: column; justify-content: center; gap: 12px; }
 .app-shell.is-collapsed .sidebar-toggle svg { transform: rotate(180deg); }
 .app-shell.is-collapsed .side-link { justify-content: center; padding: 10px 0; }
 .app-shell.is-collapsed .sidebar-group {
@@ -316,8 +322,10 @@ a { color: var(--accent-ink); }
 /* fixed light/dark toggle in the top-right corner.
    Uses .theme-toggle.theme-fab (higher specificity) so it beats the base
    .theme-toggle { position: relative } rule defined later in this file. */
+/* Sits at the top-right and scrolls away with the page (absolute, not fixed),
+   so it doesn't follow the reader down the page. */
 .theme-toggle.theme-fab {
-  position: fixed;
+  position: absolute;
   top: 46px;
   right: 24px;
   z-index: 45;
