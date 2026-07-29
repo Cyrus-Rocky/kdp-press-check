@@ -547,6 +547,34 @@ def ai_disclosure_scan():
                             scan_result=scan_result, scan_filename=file.filename)
 
 
+@app.route("/pro/ads-checker", methods=["GET"])
+@pro_required
+def ads_sanity_checker():
+    return render_template("pro_ads_checker.html", active_mode="pro")
+
+
+@app.route("/pro/ads-checker/check", methods=["POST"])
+@pro_required
+def ads_sanity_check():
+    import ads_sanity
+
+    def _num(name, cast=float):
+        try:
+            return cast(request.form.get(name, "0") or "0")
+        except ValueError:
+            return 0
+
+    inputs = {
+        "spend": _num("spend"),
+        "sales": _num("sales"),
+        "clicks": _num("clicks", int),
+        "impressions": _num("impressions", int),
+        "days_running": _num("days_running", int),
+    }
+    ads_result = ads_sanity.evaluate(**inputs)
+    return render_template("pro_ads_checker.html", active_mode="pro", ads_result=ads_result, form=inputs)
+
+
 @app.route("/kindle", methods=["GET"])
 def kindle_index():
     return render_template("kindle_index.html", active_mode="kindle")
