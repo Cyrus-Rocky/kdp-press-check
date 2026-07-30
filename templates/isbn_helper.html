@@ -1,0 +1,368 @@
+{% extends "base.html" %}
+{% block title %}ISBN Validator & Guide · KDP Press Check{% endblock %}
+{% block meta_description %}Free ISBN-13 validator, checksum checker, and guide to free vs. paid ISBNs. Learn when you need an ISBN for KDP ebook vs. print, and validate your ISBN instantly.{% endblock %}
+{% block content %}
+
+<section class="hero-single">
+  <div class="eyebrow">ISBN Helper</div>
+  <h1 class="hero-display">Validate your ISBN & understand when you need one.</h1>
+  <p class="hero-lead">ISBNs are confusing. This guide explains when you need a free ISBN (KDP) vs. buying your own, and validates your ISBN-13 checksum so you catch errors before upload.</p>
+
+  <div class="margin-grid">
+    <div class="margin-inputs">
+      <div class="est-card">
+        <h3>ISBN-13 Validator</h3>
+        <p class="small">Paste your 13-digit ISBN to verify it's valid (checksum check).</p>
+        <div class="field">
+          <label for="isbn-input">ISBN-13</label>
+          <input type="text" id="isbn-input" placeholder="978-0-123456-78-9" autocomplete="off">
+          <small class="hint">Digits only or with hyphens; we'll strip them.</small>
+        </div>
+        <div id="isbn-result" class="isbn-result" style="display:none;">
+          <div class="result-status" id="isbn-status"></div>
+          <div class="result-details" id="isbn-details"></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="est-card guide-card">
+        <h3>Do You Need an ISBN?</h3>
+
+        <div class="guide-row">
+          <h4>📱 KDP Ebook Only</h4>
+          <p><strong>Need ISBN?</strong> No — KDP gives you a free one (ASIN)</p>
+          <p>Amazon's ASIN (Amazon Standard Identification Number) is your unique ID for ebooks. Free, automatic, works everywhere on Amazon.</p>
+        </div>
+
+        <div class="guide-row">
+          <h4>📖 KDP Print (Paperback/Hardcover)</h4>
+          <p><strong>Need ISBN?</strong> <strong>Yes — you have 2 options:</strong></p>
+          <ul>
+            <li><strong>Free ISBN from KDP:</strong> KDP Print will assign you a free ISBN. It only works on Amazon (not libraries, bookstores). ✅ Best if you're Amazon-exclusive.</li>
+            <li><strong>Buy your own ISBN from Bowker:</strong> $119 for a single ISBN (or $295 for 10). Works on Amazon, IngramSpark, bookstores, libraries. ✅ Best if you want wide distribution.</li>
+          </ul>
+          <p class="small"><strong>⚠️ Important:</strong> You can only use one ISBN per book version. If you use KDP's free ISBN, you can't also sell the same version on IngramSpark.</p>
+        </div>
+
+        <div class="guide-row">
+          <h4>🌍 Going Wide (Apple Books, B&N, Google Play, IngramSpark)</h4>
+          <p><strong>Need ISBN?</strong> <strong>Yes — buy your own</strong></p>
+          <p>These platforms require an ISBN-13. You must buy it from Bowker (or a reseller like ISBN Search). Free KDP ISBN won't work.</p>
+          <p class="small">Cost: ~$119/ISBN. Budget ~$300-500 if you're publishing 3+ books.</p>
+        </div>
+
+        <div class="guide-row">
+          <h4>📚 Print-on-Demand Beyond KDP (IngramSpark, Lightning Source)</h4>
+          <p><strong>Need ISBN?</strong> <strong>Yes — bring your own</strong></p>
+          <p>These platforms don't assign ISBNs; you must provide one. Buy from Bowker or reseller.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="guide-section">
+  <h2>ISBN Myth-Busting</h2>
+  <div class="myth-grid">
+    <div class="myth-card">
+      <h3>🚫 Myth: "I need an ISBN for Amazon ebook"</h3>
+      <p><strong>False.</strong> Amazon uses ASINs for ebooks, not ISBNs. KDP assigns a free ASIN automatically. ISBNs are for print books only.</p>
+    </div>
+    <div class="myth-card">
+      <h3>🚫 Myth: "KDP's free ISBN works everywhere"</h3>
+      <p><strong>False.</strong> KDP's free ISBN only works on Amazon. Bookstores, libraries, and wide-distribution platforms reject it. You need Bowker's ISBN for that.</p>
+    </div>
+    <div class="myth-card">
+      <h3>🚫 Myth: "ISBN costs $1,000"</h3>
+      <p><strong>False.</strong> Bowker (the official US ISBN authority) charges $119 for one ISBN. You don't need an ISBN to publish on Amazon KDP (free ebook or free print ISBN).</p>
+    </div>
+    <div class="myth-card">
+      <h3>✅ Fact: "One ISBN = one version"</h3>
+      <p>Each format (paperback 5x8", hardcover 6x9", ebook, audiobook) needs its own ISBN. You can't reuse the same ISBN for different versions.</p>
+    </div>
+  </div>
+</section>
+
+<section class="guide-section">
+  <h2>Quick Decision Tree</h2>
+  <div class="decision-tree">
+    <p class="tree-q">Are you publishing ONLY on Amazon Kindle (ebook)?</p>
+    <p class="tree-a yes">→ <strong>No ISBN needed.</strong> KDP gives you a free ASIN. Move on.</p>
+
+    <p class="tree-q">Are you publishing a paperback/hardcover on KDP Print?</p>
+    <p class="tree-a yes">→ <strong>Choose one:</strong> Use KDP's free ISBN (Amazon-only) OR buy your own (for wider distribution). Can't do both.</p>
+
+    <p class="tree-q">Do you want to sell on bookstores, libraries, or IngramSpark?</p>
+    <p class="tree-a yes">→ <strong>Buy your own ISBN from Bowker ($119).</strong> KDP's free ISBN won't work.</p>
+
+    <p class="tree-q">Are you publishing multiple formats (ebook + paperback + hardcover)?</p>
+    <p class="tree-a yes">→ <strong>Budget: Each format needs its own ISBN (if print).</strong> Ebook doesn't need one (use ASIN).</p>
+  </div>
+</section>
+
+<section class="guide-section">
+  <h2>Bowker ISBN Pricing (as of 2026)</h2>
+  <div class="pricing-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Quantity</th>
+          <th>Price</th>
+          <th>Per ISBN</th>
+          <th>Best For</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1 ISBN</td>
+          <td>$119</td>
+          <td>$119</td>
+          <td>One-off book</td>
+        </tr>
+        <tr>
+          <td>10 ISBNs</td>
+          <td>$295</td>
+          <td>$29.50</td>
+          <td>Author with 2-3 books</td>
+        </tr>
+        <tr>
+          <td>100 ISBNs</td>
+          <td>$575</td>
+          <td>$5.75</td>
+          <td>Prolific author (10+ books)</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="small"><em>Check Bowker.com for current pricing. Prices update annually.</em></p>
+  </div>
+</section>
+
+<script>
+function validateISBN13(isbn) {
+  // Strip non-digits
+  const cleaned = isbn.replace(/[^0-9]/g, '');
+
+  // Must be exactly 13 digits
+  if (cleaned.length !== 13) {
+    return { valid: false, reason: `Must be exactly 13 digits. You entered ${cleaned.length}.` };
+  }
+
+  // Check if all digits are numbers
+  if (!/^\d{13}$/.test(cleaned)) {
+    return { valid: false, reason: 'Must contain only digits.' };
+  }
+
+  // ISBN-13 checksum: sum alternating positions (1,3,5,7,9,11,13) and (2,4,6,8,10,12) x3
+  let sum = 0;
+  for (let i = 0; i < 12; i++) {
+    const digit = parseInt(cleaned[i], 10);
+    const weight = (i % 2 === 0) ? 1 : 3;
+    sum += digit * weight;
+  }
+
+  const checkDigit = (10 - (sum % 10)) % 10;
+  const providedCheck = parseInt(cleaned[12], 10);
+
+  if (checkDigit !== providedCheck) {
+    return {
+      valid: false,
+      reason: `Checksum failed. You provided ${providedCheck}, but the correct check digit is ${checkDigit}.`,
+      corrected: cleaned.slice(0, 12) + checkDigit
+    };
+  }
+
+  return { valid: true, isbn: cleaned };
+}
+
+document.getElementById('isbn-input').addEventListener('input', function() {
+  const value = this.value.trim();
+  const result = document.getElementById('isbn-result');
+  const status = document.getElementById('isbn-status');
+  const details = document.getElementById('isbn-details');
+
+  if (!value) {
+    result.style.display = 'none';
+    return;
+  }
+
+  const validation = validateISBN13(value);
+  result.style.display = 'block';
+
+  if (validation.valid) {
+    status.innerHTML = '✅ <strong>Valid ISBN-13</strong>';
+    status.className = 'result-status valid';
+    details.innerHTML = `<p><strong>ISBN:</strong> ${validation.isbn}</p><p>This ISBN's checksum is correct and will be accepted by KDP, IngramSpark, and other print platforms.</p>`;
+  } else {
+    status.innerHTML = '❌ <strong>Invalid ISBN-13</strong>';
+    status.className = 'result-status invalid';
+    let detailsHTML = `<p><strong>Problem:</strong> ${validation.reason}</p>`;
+    if (validation.corrected) {
+      detailsHTML += `<p><strong>Did you mean?</strong> <code>${validation.corrected}</code></p>`;
+    }
+    detailsHTML += `<p class="small">Double-check you copied the ISBN correctly. If it's still wrong, the ISBN may have been entered incorrectly when purchased.</p>`;
+    details.innerHTML = detailsHTML;
+  }
+});
+</script>
+
+<style>
+.isbn-result {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border-radius: 6px;
+  background: var(--color-bg-alt);
+}
+
+.result-status {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.result-status.valid {
+  color: #22c55e;
+}
+
+.result-status.invalid {
+  color: #ef4444;
+}
+
+.result-details {
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.result-details p {
+  margin: 0.5rem 0;
+}
+
+.result-details code {
+  background: var(--color-bg-secondary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  font-family: 'Monaco', monospace;
+  font-size: 0.95rem;
+}
+
+.guide-card {
+  background: var(--color-bg-alt);
+}
+
+.guide-row {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.guide-row:last-child {
+  border-bottom: none;
+}
+
+.guide-row h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  color: var(--color-text-primary);
+}
+
+.guide-row ul {
+  margin: 0.5rem 0 0 1.5rem;
+  padding: 0;
+}
+
+.guide-row li {
+  margin-bottom: 0.5rem;
+}
+
+.guide-section {
+  margin-top: 3rem;
+  padding: 2rem 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.guide-section h2 {
+  margin-bottom: 1.5rem;
+}
+
+.myth-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.myth-card {
+  padding: 1.5rem;
+  background: var(--color-bg-alt);
+  border-radius: 8px;
+  border-left: 4px solid #3b82f6;
+}
+
+.myth-card h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.95rem;
+}
+
+.decision-tree {
+  background: var(--color-bg-alt);
+  padding: 2rem;
+  border-radius: 8px;
+  line-height: 2;
+}
+
+.tree-q {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-top: 1rem;
+}
+
+.tree-q:first-child {
+  margin-top: 0;
+}
+
+.tree-a {
+  color: #22c55e;
+  font-weight: 500;
+  margin-left: 2rem;
+}
+
+.pricing-table {
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+.pricing-table table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-bg-alt);
+}
+
+.pricing-table th {
+  background: var(--color-bg-secondary);
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid var(--color-border);
+}
+
+.pricing-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.pricing-table tr:last-child td {
+  border-bottom: none;
+}
+
+.hint {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+.small {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+</style>
+
+{% endblock %}
