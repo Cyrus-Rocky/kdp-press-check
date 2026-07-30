@@ -149,6 +149,18 @@
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6h16M4 10h16M4 14h16M4 18h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
           <span class="sidebar-label">Description Formatter</span>
         </a>
+        <a href="{{ url_for('copyright_builder') }}" class="side-link {{ 'is-active' if active_mode == 'copyright' else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M9 12.5h6M12 9.5v5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          <span class="sidebar-label">Copyright Builder</span>
+        </a>
+        <a href="{{ url_for('metadata_optimizer') }}" class="side-link {{ 'is-active' if active_mode == 'metadata' else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="1.5" stroke="currentColor" stroke-width="1.7"/><path d="M7 10h10M7 14h10M7 18h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <span class="sidebar-label">Metadata Optimizer</span>
+        </a>
+        <a href="{{ url_for('review_timeline') }}" class="side-link {{ 'is-active' if active_mode == 'timeline' else '' }}">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 9h18M3 5h18M3 13h18M3 17h18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          <span class="sidebar-label">Review Timeline</span>
+        </a>
 
         <p class="sidebar-group"><span class="sidebar-label">Plan &amp; price</span></p>
         <a href="{{ url_for('royalty_calculator') }}" class="side-link {{ 'is-active' if active_mode == 'royalty' else '' }}">
