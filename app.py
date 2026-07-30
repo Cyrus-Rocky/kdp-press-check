@@ -48,7 +48,7 @@ SITE_URL = os.environ.get("SITE_URL", "https://kdp-press-check.onrender.com").rs
 # Every GET page, for the sitemap.
 SITEMAP_ENDPOINTS = [
     "index", "cover_index", "kindle_index", "preview_index", "error_decoder",
-    "keyword_linter", "margin_advisor", "isbn_helper", "royalty_calculator",
+    "keyword_linter", "margin_advisor", "isbn_helper", "description_formatter", "royalty_calculator",
     "estimate_pages_index", "genre_checklist", "launch_checklist",
     "templates_page", "problem_solvers",
 ]
@@ -375,6 +375,11 @@ def margin_advisor():
 @app.route("/isbn-helper", methods=["GET"])
 def isbn_helper():
     return render_template("isbn_helper.html", active_mode="isbn")
+
+
+@app.route("/description-formatter", methods=["GET"])
+def description_formatter():
+    return render_template("description_formatter.html", active_mode="description")
 
 
 @app.route("/launch-checklist", methods=["GET"])

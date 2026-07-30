@@ -1,0 +1,525 @@
+{% extends "base.html" %}
+{% block title %}Book Description HTML Formatter · KDP Press Check{% endblock %}
+{% block meta_description %}Format your Amazon KDP book description safely. Real-time HTML validation, 4000-char counter, markdown conversion, and preview. Catch invalid tags before upload.{% endblock %}
+{% block content %}
+
+<section class="hero-single">
+  <div class="eyebrow">Description Formatter</div>
+  <h1 class="hero-display">Format your description with confidence.</h1>
+  <p class="hero-lead">Amazon allows only certain HTML tags in book descriptions. This tool validates your tags in real-time, shows a live preview, and auto-converts markdown so you catch formatting errors before upload.</p>
+
+  <div class="desc-grid">
+    <div class="desc-input-section">
+      <div class="est-card">
+        <h3>Book Description</h3>
+        <p class="small">Paste your description, or type it here. Amazon limit is 4000 characters.</p>
+
+        <div class="markdown-hint">
+          <strong>💡 Quick markdown:</strong> Use **bold**, *italic*, [link text](url) — we'll convert to HTML
+        </div>
+
+        <textarea id="desc-textarea" placeholder="Your book description here...&#10;&#10;You can use **markdown** for **bold**, *italic*, or [links](https://example.com)&#10;&#10;Or paste HTML directly: &lt;p&gt;text&lt;/p&gt;, &lt;br&gt;, &lt;em&gt;, &lt;strong&gt;" class="desc-textarea"></textarea>
+
+        <div class="char-counter">
+          <span id="desc-char-count">0</span> / 4000 characters
+          <span id="desc-char-warn" class="char-warn" style="display:none;">⚠️ Over limit</span>
+        </div>
+
+        <div class="tag-info">
+          <strong>✅ Allowed tags:</strong> &lt;p&gt;, &lt;br&gt;, &lt;em&gt;, &lt;strong&gt;, &lt;i&gt;, &lt;b&gt;, &lt;a href&gt;, &lt;u&gt;
+          <br><strong>❌ Blocked tags:</strong> &lt;script&gt;, &lt;style&gt;, &lt;iframe&gt;, &lt;img&gt;, event handlers
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button type="button" id="desc-convert-markdown" class="btn btn-secondary">Convert Markdown to HTML</button>
+        <button type="button" id="desc-clear" class="btn btn-secondary">Clear</button>
+      </div>
+    </div>
+
+    <div class="desc-preview-section">
+      <div class="est-card">
+        <h3>Live Preview</h3>
+        <p class="small">How it will appear on Amazon (styled)</p>
+        <div id="desc-preview" class="desc-preview-pane"></div>
+      </div>
+
+      <div class="est-card">
+        <h3>Validation Report</h3>
+        <div id="desc-validation" class="validation-report"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="guide-section">
+  <h2>HTML Tags Explained</h2>
+  <div class="tag-guide">
+    <div class="tag-row">
+      <div class="tag-allowed">✅</div>
+      <div>
+        <strong>&lt;p&gt;...&lt;/p&gt;</strong> — Paragraph. Creates space between sections.
+        <br><code>&lt;p&gt;First paragraph&lt;/p&gt;&lt;p&gt;Second paragraph&lt;/p&gt;</code>
+      </div>
+    </div>
+    <div class="tag-row">
+      <div class="tag-allowed">✅</div>
+      <div>
+        <strong>&lt;br&gt;</strong> — Line break. Use for single line breaks.
+        <br><code>Line 1&lt;br&gt;Line 2</code>
+      </div>
+    </div>
+    <div class="tag-row">
+      <div class="tag-allowed">✅</div>
+      <div>
+        <strong>&lt;strong&gt;...&lt;/strong&gt;</strong> — Bold text.
+        <br><code>&lt;strong&gt;Important!&lt;/strong&gt;</code>
+      </div>
+    </div>
+    <div class="tag-row">
+      <div class="tag-allowed">✅</div>
+      <div>
+        <strong>&lt;b&gt;...&lt;/b&gt;</strong> — Also bold (older tag).
+        <br><code>&lt;b&gt;Bold&lt;/b&gt;</code>
+      </div>
+    </div>
+    <div class="tag-row">
+      <div class="tag-allowed">✅</div>
+      <div>
+        <strong>&lt;em&gt;...&lt;/em&gt;</strong> — Emphasis (italic).
+        <br><code>&lt;em&gt;Emphasized&lt;/em&gt;</code>
+      </div>
+    </div>
+    <div class="tag-row">
+      <div class="tag-allowed">✅</div>
+      <div>
+        <strong>&lt;i&gt;...&lt;/i&gt;</strong> — Also italic (older tag).
+        <br><code>&lt;i&gt;Italic&lt;/i&gt;</code>
+      </div>
+    </div>
+    <div class="tag-row">
+      <div class="tag-allowed">✅</div>
+      <div>
+        <strong>&lt;a href="url"&gt;...&lt;/a&gt;</strong> — Hyperlink. Use absolute URLs.
+        <br><code>&lt;a href="https://example.com"&gt;Click here&lt;/a&gt;</code>
+      </div>
+    </div>
+    <div class="tag-row">
+      <div class="tag-allowed">✅</div>
+      <div>
+        <strong>&lt;u&gt;...&lt;/u&gt;</strong> — Underline (rare).
+        <br><code>&lt;u&gt;Underlined&lt;/u&gt;</code>
+      </div>
+    </div>
+
+    <div class="tag-row">
+      <div class="tag-blocked">❌</div>
+      <div>
+        <strong>&lt;script&gt;, &lt;style&gt;</strong> — Security risk. Always blocked.
+      </div>
+    </div>
+    <div class="tag-row">
+      <div class="tag-blocked">❌</div>
+      <div>
+        <strong>&lt;iframe&gt;, &lt;embed&gt;, &lt;object&gt;</strong> — Embeds. Not allowed.
+      </div>
+    </div>
+    <div class="tag-row">
+      <div class="tag-blocked">❌</div>
+      <div>
+        <strong>&lt;img&gt;</strong> — Images. Amazon doesn't render images in descriptions.
+      </div>
+    </div>
+    <div class="tag-row">
+      <div class="tag-blocked">❌</div>
+      <div>
+        <strong>Event handlers:</strong> onclick, onload, onerror, etc. Security risk, always blocked.
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="guide-section">
+  <h2>Tips for Great Descriptions</h2>
+  <div class="tips-grid">
+    <div class="tip-card">
+      <h3>1. Hook readers immediately</h3>
+      <p>Start with a question, surprising fact, or emotional hook. You have 100 characters before the "Read more" cutoff.</p>
+    </div>
+    <div class="tip-card">
+      <h3>2. Use short paragraphs</h3>
+      <p>One idea per paragraph. Wrap in &lt;p&gt; tags to add space. Blocks of text scare readers on mobile.</p>
+    </div>
+    <div class="tip-card">
+      <h3>3. Bold key selling points</h3>
+      <p>Use &lt;strong&gt; sparingly—2-3 times max. Highlight: "Award-winning author" or "Perfect for fans of X."</p>
+    </div>
+    <div class="tip-card">
+      <h3>4. Avoid hype words</h3>
+      <p>Skip: "Bestseller," "Award-winning" (unless true), "Must-read." Let the story speak.</p>
+    </div>
+    <div class="tip-card">
+      <h3>5. End with a CTA or hook</h3>
+      <p>Final sentence should make readers want to buy: "Find out..." or "Discover..." or "Scroll up to grab your copy."</p>
+    </div>
+    <div class="tip-card">
+      <h3>6. Test on mobile</h3>
+      <p>Most readers browse descriptions on phones. Short paragraphs + line breaks make it readable.</p>
+    </div>
+  </div>
+</section>
+
+<script>
+const ALLOWED_TAGS = ['p', 'br', 'em', 'strong', 'i', 'b', 'a', 'u'];
+const BLOCKED_PATTERNS = ['<script', '<style', '<iframe', '<embed', '<object', 'onclick', 'onload', 'onerror', 'onmouseover', 'onerror'];
+
+const textarea = document.getElementById('desc-textarea');
+const preview = document.getElementById('desc-preview');
+const validation = document.getElementById('desc-validation');
+const charCount = document.getElementById('desc-char-count');
+const charWarn = document.getElementById('desc-char-warn');
+const convertBtn = document.getElementById('desc-convert-markdown');
+const clearBtn = document.getElementById('desc-clear');
+
+function escapeHtml(unsafe) {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function validateHTML(html) {
+  const issues = [];
+
+  // Check for blocked patterns (case insensitive)
+  BLOCKED_PATTERNS.forEach(pattern => {
+    if (html.toLowerCase().includes(pattern)) {
+      issues.push({
+        severity: 'error',
+        message: `Security issue: "${pattern}" is not allowed`
+      });
+    }
+  });
+
+  // Check for unclosed or mismatched tags
+  const tagRegex = /<\/?([a-z]+)[^>]*>/gi;
+  const openTags = [];
+  let match;
+
+  while ((match = tagRegex.exec(html)) !== null) {
+    const tagName = match[1].toLowerCase();
+    const isClosing = match[0].startsWith('</');
+
+    if (!ALLOWED_TAGS.includes(tagName) && tagName !== 'br') {
+      issues.push({
+        severity: 'error',
+        message: `Tag &lt;${tagName}&gt; is not allowed. Use: ${ALLOWED_TAGS.join(', ')}`
+      });
+    }
+
+    if (tagName === 'a' && !html.includes('href=')) {
+      issues.push({
+        severity: 'error',
+        message: '&lt;a&gt; tag must have href attribute'
+      });
+    }
+  }
+
+  // Warn if href is not absolute URL
+  if (html.includes('<a href="') && !html.includes('http')) {
+    issues.push({
+      severity: 'warning',
+      message: 'Links should be absolute URLs (start with http:// or https://)'
+    });
+  }
+
+  return issues;
+}
+
+function convertMarkdown(text) {
+  // **bold** -> <strong>bold</strong>
+  text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+  // *italic* -> <em>italic</em>
+  text = text.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+
+  // [link text](url) -> <a href="url">link text</a>
+  text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+
+  // Double line breaks -> </p><p>
+  text = text.replace(/\n\n+/g, '</p><p>');
+
+  // Single line breaks -> <br>
+  text = text.replace(/\n/g, '<br>');
+
+  // Wrap in <p> if not already wrapped
+  if (!text.startsWith('<p>')) {
+    text = '<p>' + text;
+  }
+  if (!text.endsWith('</p>')) {
+    text = text + '</p>';
+  }
+
+  return text;
+}
+
+function updatePreview() {
+  const text = textarea.value;
+
+  // Update char count
+  charCount.textContent = text.length;
+  if (text.length > 4000) {
+    charWarn.style.display = 'inline';
+  } else {
+    charWarn.style.display = 'none';
+  }
+
+  // Validate and show issues
+  const issues = validateHTML(text);
+  if (issues.length === 0 && text.length > 0) {
+    validation.innerHTML = '<div class="validation-ok">✅ <strong>All clear!</strong> Your HTML looks good.</div>';
+  } else if (issues.length > 0) {
+    let html = '<div class="validation-issues">';
+    issues.forEach(issue => {
+      const icon = issue.severity === 'error' ? '❌' : '⚠️';
+      const cls = issue.severity === 'error' ? 'issue-error' : 'issue-warning';
+      html += `<div class="${cls}">${icon} ${issue.message}</div>`;
+    });
+    html += '</div>';
+    validation.innerHTML = html;
+  } else {
+    validation.innerHTML = '';
+  }
+
+  // Update preview (safely)
+  const sanitized = text
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/&lt;(p|br|em|strong|i|b|u|a|\/p|\/em|\/strong|\/i|\/b|\/u|\/a)([^&]*?)&gt;/g, '<$1$2>');
+
+  preview.innerHTML = sanitized || '<p style="color: var(--color-text-secondary);">Your preview will appear here...</p>';
+}
+
+textarea.addEventListener('input', updatePreview);
+
+convertBtn.addEventListener('click', () => {
+  const converted = convertMarkdown(textarea.value);
+  textarea.value = converted;
+  updatePreview();
+});
+
+clearBtn.addEventListener('click', () => {
+  textarea.value = '';
+  updatePreview();
+});
+</script>
+
+<style>
+.desc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+@media (max-width: 1024px) {
+  .desc-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.markdown-hint {
+  background: var(--color-bg-secondary);
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  border-left: 3px solid #3b82f6;
+}
+
+.desc-textarea {
+  width: 100%;
+  height: 300px;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-family: 'Monaco', monospace;
+  font-size: 0.9rem;
+  resize: vertical;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  margin: 1rem 0;
+}
+
+.desc-textarea::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.char-counter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 1rem;
+}
+
+.char-warn {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.tag-info {
+  background: var(--color-bg-alt);
+  padding: 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn:hover {
+  background: var(--color-bg-alt);
+  border-color: #3b82f6;
+}
+
+.btn-secondary {
+  background: var(--color-bg-alt);
+}
+
+.desc-preview-pane {
+  background: var(--color-bg-secondary);
+  padding: 1.5rem;
+  border-radius: 6px;
+  min-height: 300px;
+  line-height: 1.8;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.desc-preview-pane p {
+  margin: 1rem 0;
+}
+
+.desc-preview-pane a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.validation-report {
+  min-height: 60px;
+  padding: 1rem;
+}
+
+.validation-ok {
+  color: #22c55e;
+  font-weight: 600;
+  padding: 0.75rem;
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 4px;
+}
+
+.validation-issues {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.issue-error {
+  color: #ef4444;
+  padding: 0.75rem;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.issue-warning {
+  color: #f59e0b;
+  padding: 0.75rem;
+  background: rgba(245, 158, 11, 0.1);
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.tag-guide {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.tag-row {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--color-bg-alt);
+  border-radius: 6px;
+}
+
+.tag-allowed {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #22c55e;
+}
+
+.tag-blocked {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #ef4444;
+}
+
+.tag-row code {
+  background: var(--color-bg-secondary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  font-family: 'Monaco', monospace;
+  font-size: 0.9rem;
+}
+
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.tip-card {
+  padding: 1.5rem;
+  background: var(--color-bg-alt);
+  border-radius: 8px;
+  border-left: 4px solid #3b82f6;
+}
+
+.tip-card h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+}
+
+.tip-card p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+}
+</style>
+
+{% endblock %}
