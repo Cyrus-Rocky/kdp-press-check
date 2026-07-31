@@ -1,0 +1,464 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard · KDP Press Check{% endblock %}
+{% block content %}
+
+<style>
+.admin-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.admin-header h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.admin-logout {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255,255,255,0.2);
+  color: white;
+  border: 1px solid white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.admin-logout:hover {
+  background: rgba(255,255,255,0.3);
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.metric-card {
+  background: var(--color-bg-alt);
+  padding: 1.5rem;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+}
+
+.metric-label {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.metric-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #667eea;
+  margin-bottom: 0.25rem;
+}
+
+.metric-detail {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--color-border);
+  margin-bottom: 2rem;
+}
+
+.tab-button {
+  padding: 1rem 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+}
+
+.tab-button:hover {
+  color: var(--color-text-primary);
+}
+
+.tab-button.active {
+  color: #667eea;
+  border-bottom-color: #667eea;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.table-container {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-secondary);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.admin-table th {
+  background: var(--color-bg-alt);
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.admin-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+.admin-table tr:hover {
+  background: var(--color-bg-alt);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.status-active {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.status-trialing {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+.status-canceled {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-small {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-small:hover {
+  background: #764ba2;
+}
+
+.btn-small.danger {
+  background: #ef4444;
+}
+
+.btn-small.danger:hover {
+  background: #dc2626;
+}
+
+.chart-container {
+  background: var(--color-bg-alt);
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.chart-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.chart-label {
+  min-width: 150px;
+  font-weight: 500;
+}
+
+.chart-fill {
+  flex: 1;
+  height: 24px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  border-radius: 4px;
+  position: relative;
+  min-width: 50px;
+}
+
+.chart-value {
+  min-width: 60px;
+  text-align: right;
+  font-weight: 600;
+  color: #667eea;
+}
+
+.error-log {
+  background: var(--color-bg-alt);
+  padding: 1rem;
+  border-radius: 6px;
+  border-left: 3px solid #ef4444;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  font-family: monospace;
+}
+
+.error-time {
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-secondary);
+}
+
+.stat-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .stat-row {
+    grid-template-columns: 1fr;
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-logout {
+    position: static;
+    display: block;
+    margin-bottom: 1rem;
+  }
+}
+</style>
+
+<div class="admin-header">
+  <a href="{{ url_for('admin_logout') }}" class="admin-logout">Logout</a>
+  <h1>Admin Dashboard</h1>
+  <p>Monitor revenue, subscribers, usage, and system health</p>
+</div>
+
+<!-- Key Metrics -->
+<div class="metrics-grid">
+  <div class="metric-card">
+    <div class="metric-label">Monthly Recurring Revenue</div>
+    <div class="metric-value">${{ mrr | round(2) }}</div>
+    <div class="metric-detail">{{ subscriber_count }} active subscribers</div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-label">Total Pro Subscriptions</div>
+    <div class="metric-value">{{ subscriber_count }}</div>
+    <div class="metric-detail">{{ active_sub_count }} active, {{ trial_count }} trialing</div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-label">Free Checks Today</div>
+    <div class="metric-value">{{ stats.total_checks }}</div>
+    <div class="metric-detail">All features combined</div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-label">System Uptime</div>
+    <div class="metric-value">{{ (stats.uptime_seconds / 3600) | round(1) }}h</div>
+    <div class="metric-detail">{{ stats.error_count }} errors logged</div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-label">Total Files Uploaded</div>
+    <div class="metric-value">{{ stats.total_uploads }}</div>
+    <div class="metric-detail">PDFs, DOCXs, EPUBs, etc.</div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-label">Pro Feature Usage</div>
+    <div class="metric-value">{{ stats.total_pro_checks }}</div>
+    <div class="metric-detail">Checks by paying subscribers</div>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <button class="tab-button active" onclick="switchTab('subscribers')">Subscribers</button>
+  <button class="tab-button" onclick="switchTab('analytics')">Analytics</button>
+  <button class="tab-button" onclick="switchTab('uploads')">Uploads</button>
+  <button class="tab-button" onclick="switchTab('errors')">Error Logs</button>
+</div>
+
+<!-- Subscribers Tab -->
+<div id="subscribers" class="tab-content active">
+  <h2>Pro Subscribers</h2>
+  {% if subscribers %}
+  <div class="table-container">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Status</th>
+          <th>Joined</th>
+          <th>Next Billing</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sub in subscribers %}
+        <tr>
+          <td>{{ sub.email }}</td>
+          <td>
+            <span class="status-badge status-{{ sub.status }}">
+              {{ sub.status | upper }}
+            </span>
+          </td>
+          <td>{{ sub.created | strftime('%Y-%m-%d') }}</td>
+          <td>{{ sub.current_period_end | strftime('%Y-%m-%d') }}</td>
+          <td>
+            <div class="action-buttons">
+              <form method="POST" action="{{ url_for('admin_refund') }}" style="display:inline;">
+                <input type="hidden" name="subscription_id" value="{{ sub.subscription_id }}">
+                <button type="submit" class="btn-small" onclick="return confirm('Issue refund?')">Refund</button>
+              </form>
+              <form method="POST" action="{{ url_for('admin_cancel') }}" style="display:inline;">
+                <input type="hidden" name="subscription_id" value="{{ sub.subscription_id }}">
+                <button type="submit" class="btn-small danger" onclick="return confirm('Cancel subscription?')">Cancel</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <p>No Pro subscribers yet. Stripe not configured or no active subscriptions.</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Analytics Tab -->
+<div id="analytics" class="tab-content">
+  <h2>Feature Usage Analytics</h2>
+
+  <div class="stat-row">
+    <div class="chart-container">
+      <h3>Top Free Features</h3>
+      {% for feature, count in top_features.items() %}
+      <div class="chart-bar">
+        <div class="chart-label">{{ feature }}</div>
+        <div class="chart-fill" style="width: {{ (count / max_checks * 100) if max_checks else 0 }}%"></div>
+        <div class="chart-value">{{ count }}</div>
+      </div>
+      {% endfor %}
+      {% if not top_features %}
+      <div class="empty-state"><p>No data yet</p></div>
+      {% endif %}
+    </div>
+
+    <div class="chart-container">
+      <h3>Pro Feature Usage</h3>
+      {% for feature, count in stats.pro_checks_by_feature.items() %}
+      <div class="chart-bar">
+        <div class="chart-label">{{ feature }}</div>
+        <div class="chart-fill" style="width: {{ (count / max_pro * 100) if max_pro else 0 }}%"></div>
+        <div class="chart-value">{{ count }}</div>
+      </div>
+      {% endfor %}
+      {% if not stats.pro_checks_by_feature %}
+      <div class="empty-state"><p>No pro checks yet</p></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Uploads Tab -->
+<div id="uploads" class="tab-content">
+  <h2>File Upload Statistics</h2>
+  <div class="chart-container">
+    <h3>Uploads by Format</h3>
+    {% for format, count in stats.uploads_by_format.items() %}
+    <div class="chart-bar">
+      <div class="chart-label">{{ format | upper }}</div>
+      <div class="chart-fill" style="width: {{ (count / max_uploads * 100) if max_uploads else 0 }}%"></div>
+      <div class="chart-value">{{ count }}</div>
+    </div>
+    {% endfor %}
+    {% if not stats.uploads_by_format %}
+    <div class="empty-state"><p>No uploads yet</p></div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Errors Tab -->
+<div id="errors" class="tab-content">
+  <h2>Error Logs</h2>
+  {% if stats.recent_errors %}
+  <div>
+    {% for error in stats.recent_errors | reverse %}
+    <div class="error-log">
+      <div class="error-time">{{ error.timestamp | strftime('%Y-%m-%d %H:%M:%S') }} - {{ error.feature or 'system' }}</div>
+      <div>{{ error.message[:200] }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <p>No errors logged. System running smoothly!</p>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+function switchTab(tabName) {
+  // Hide all tabs
+  const tabs = document.querySelectorAll('.tab-content');
+  tabs.forEach(tab => tab.classList.remove('active'));
+
+  // Deactivate all buttons
+  const buttons = document.querySelectorAll('.tab-button');
+  buttons.forEach(btn => btn.classList.remove('active'));
+
+  // Show selected tab
+  document.getElementById(tabName).classList.add('active');
+
+  // Activate selected button
+  event.target.classList.add('active');
+}
+</script>
+
+{% endblock %}
