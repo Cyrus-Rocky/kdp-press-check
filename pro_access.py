@@ -96,7 +96,13 @@ def clear_session_pro(session):
 
 def is_pro(session) -> bool:
     """True if this browser session currently belongs to an active
-    subscriber, re-checking Stripe if the cached verification is stale."""
+    subscriber, re-checking Stripe if the cached verification is stale.
+
+    Admins get free Pro access for testing purposes."""
+    # Admin bypass: admins always get Pro access for testing
+    if session.get("admin_authenticated"):
+        return True
+
     if not enabled():
         return False
     email = session.get("pro_email")
