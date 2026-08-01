@@ -471,7 +471,11 @@ def check_color_pages(doc) -> dict:
 
 
 def check_orphans_widows(doc) -> dict:
-    """Detect orphan and widow lines, single lines stranded at the top or bottom of a page."""
+    """Detect orphan and widow lines, single lines stranded at the top or bottom of a page.
+
+    NOTE: This check is MUCH more relaxed than before. Professional books often have
+    orphans/widows as a layout choice. We only flag EXTREME cases (many pages affected),
+    not occasional single-line paragraphs. KDP does NOT reject books for orphans/widows."""
     issues = []  # list of (page_num, kind)
 
     def _is_heading(block) -> bool:
@@ -511,11 +515,14 @@ def check_orphans_widows(doc) -> dict:
             if len(text) > 10:
                 issues.append((i + 1, "orphan"))
 
-    if not issues:
+    # Only flag if MANY pages are affected (>10% of book). Professional layouts sometimes
+    # accept orphans/widows as a deliberate choice for better overall page breaks.
+    threshold = max(3, int(doc.page_count * 0.1))  # at least 3 pages or 10% of book
+    if len(issues) < threshold:
         return {
             "title": "Orphans & Widows", "ok": True,
-            "summary": "No orphan or widow lines detected.",
-            "detail": "Every page appears to have at least two lines at the top and bottom of each paragraph block.",
+            "summary": "Paragraph flow looks good. Occasional single-line paragraphs are normal.",
+            "detail": f"Detected {len(issues)} instance(s), but under the {threshold}-page threshold for professional layouts.",
         }
 
     orphan_pages = sorted({p for p, k in issues if k == "orphan"})
@@ -528,11 +535,11 @@ def check_orphans_widows(doc) -> dict:
 
     return {
         "title": "Orphans & Widows", "ok": False, "warning_only": True,
-        "summary": f"Found {'; '.join(parts)}. These are signs of poor paragraph flow.",
+        "summary": f"Found {'; '.join(parts)}. Note: This is a typography preference, not a KDP requirement.",
         "fix": (
-            "In your word processor, enable widow/orphan control: in Word go to "
-            "Format > Paragraph > Line and Page Breaks and check 'Widow/Orphan control'. "
-            "In InDesign, select all text and enable Keep Options. Re-export the PDF when done."
+            "This is a quality suggestion, not a blocker. If you'd like tighter control: "
+            "in Word, go to Format > Paragraph > Line and Page Breaks and check 'Widow/Orphan control'. "
+            "In InDesign, select all text and enable Keep Options. KDP will accept your book regardless."
         ),
         "detail": (
             (f"Orphan pages (single line at bottom): {orphan_pages}\n" if orphan_pages else "") +

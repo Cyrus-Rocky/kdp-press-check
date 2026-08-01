@@ -32,14 +32,22 @@ def _check_repeated_words(text: str) -> dict:
                 "summary": "No accidentally doubled words found.",
                 "detail": "Scanned for patterns like \"the the\", none found."}
     counts = Counter(w.lower() for w in matches)
-    examples = ", ".join(f"\"{w} {w}\"" for w, _ in counts.most_common(5))
+    # Only flag if a word is doubled 2+ times (likely an accident, not stylistic emphasis)
+    frequent_repeats = {w: n for w, n in counts.items() if n >= 2}
+    if not frequent_repeats:
+        return {"title": "Repeated Words", "ok": True,
+                "summary": "Doubled words found, but only once each (likely intentional emphasis).",
+                "detail": f"Scanned {len(matches)} doubled-word instance(s), none repeated."}
+    examples = ", ".join(f"\"{w} {w}\"" for w, _ in sorted(frequent_repeats.items(),
+                                                            key=lambda x: x[1], reverse=True)[:5])
     return {
         "title": "Repeated Words", "ok": False, "warning_only": True,
-        "summary": f"Found {len(matches)} place(s) where a word repeats back-to-back, "
+        "summary": f"Found {len(frequent_repeats)} doubled-word pattern(s) that repeat multiple times, "
                    f"like {examples}.",
         "fix": "Search your manuscript for these doubled words and remove the extra one, "
                "this usually happens from editing/pasting.",
-        "detail": ", ".join(f"\"{w} {w}\" x{n}" for w, n in counts.most_common(15)),
+        "detail": ", ".join(f"\"{w} {w}\" x{n}" for w, n in sorted(frequent_repeats.items(),
+                                                                     key=lambda x: x[1], reverse=True)[:15]),
     }
 
 
@@ -50,11 +58,25 @@ def _check_spacing(text: str) -> dict:
         return {"title": "Spacing", "ok": True,
                 "summary": "No stray double spaces or oversized gaps found.",
                 "detail": "Checked for repeated spaces and 3+ consecutive blank lines."}
+    # Only flag excessive spacing (25+ instances suggests a real problem)
     bits = []
-    if double_spaces:
+    flagged = False
+    if double_spaces >= 25:
         bits.append(f"{double_spaces} place(s) with a double (or larger) space between words")
-    if multi_blank:
+        flagged = True
+    elif double_spaces > 0:
+        bits.append(f"{double_spaces} double space(s) (minor)")
+    if multi_blank >= 10:
         bits.append(f"{multi_blank} place(s) with 3+ blank lines in a row")
+        flagged = True
+    elif multi_blank > 0:
+        bits.append(f"{multi_blank} oversized gap(s) (usually intentional)")
+    if not flagged:
+        return {
+            "title": "Spacing", "ok": True, "warning_only": True,
+            "summary": "Minor spacing issues found, but not excessive. Likely intentional formatting.",
+            "detail": f"Double/extra spaces: {double_spaces}. Oversized paragraph gaps: {multi_blank}.",
+        }
     return {
         "title": "Spacing", "ok": False, "warning_only": True,
         "summary": "Found " + " and ".join(bits) + ".",
@@ -66,22 +88,28 @@ def _check_spacing(text: str) -> dict:
 
 
 def _check_quote_consistency(text: str) -> dict:
-    straight = text.count('"') + text.count("'")
-    curly = sum(text.count(c) for c in ['“', '”', '‘', '’'])
+    straight = text.count(‘”’) + text.count(“’”)
+    curly = sum(text.count(c) for c in [‘”’, ‘”’, ‘’’, ‘’’])
     total = straight + curly
-    if total < 10 or straight == 0 or curly == 0:
-        return {"title": "Quote Style", "ok": True,
-                "summary": "Quote marks are used consistently (all straight or all curly).",
-                "detail": f"Straight quotes: {straight}. Curly/smart quotes: {curly}."}
+    if total < 20:  # need meaningful sample size
+        return {“title”: “Quote Style”, “ok”: True,
+                “summary”: “Too few quotes to reliably check consistency.”,
+                “detail”: f”Straight quotes: {straight}. Curly/smart quotes: {curly}.”}
+    # Only flag if minority style is >20% of total (very heavy mixing)
+    minority_pct = min(straight, curly) / total if total > 0 else 0
+    if minority_pct < 0.2:
+        return {“title”: “Quote Style”, “ok”: True,
+                “summary”: “Quote marks are mostly consistent. Rare exceptions are normal.”,
+                “detail”: f”Straight quotes: {straight} ({straight/total*100:.0f}%). Curly/smart quotes: {curly} ({curly/total*100:.0f}%).”}
+    # Only warn if heavily mixed (20%+ minority style), which indicates PDFs from multiple sources
     minority = min(straight, curly)
     return {
-        "title": "Quote Style", "ok": False, "warning_only": True,
-        "summary": f"This manuscript mixes straight quotes (\"like this\") and curly quotes "
-                   f"(“like this”), {minority} marks are the minority style.",
-        "fix": "Pick one style and apply it throughout. Most word processors auto-convert to "
-               "curly (\"smart\") quotes by default, if you see straight quotes mixed in, "
-               "they were likely typed somewhere autocorrect was off, or pasted from another source.",
-        "detail": f"Straight quotes: {straight}. Curly/smart quotes: {curly}.",
+        “title”: “Quote Style”, “ok”: False, “warning_only”: True,
+        “summary”: f”This manuscript mixes straight quotes (\”like this\”) and curly quotes “
+                   f”(“like this”), with {int(minority_pct*100)}% being the minority style.”,
+        “fix”: “This is usually from PDFs combining text from multiple sources or scanned content. “
+               “If it bothers you, use Find & Replace to standardize, but KDP accepts mixed quotes.”,
+        “detail”: f”Straight quotes: {straight} ({straight/total*100:.0f}%). Curly/smart quotes: {curly} ({curly/total*100:.0f}%).”,
     }
 
 

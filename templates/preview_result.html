@@ -21,6 +21,14 @@
       </svg>
       Guides: On
     </button>
+    {%- set quick_mode = request.args.get('quick', 'false') == 'true' -%}
+    <button type="button" class="bv-btn" id="btn-quick-toggle" title="Show only KDP blockers, hide quality suggestions">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+        <path d="M12 19a7 7 0 100-14 7 7 0 000 14z" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M12 9v4l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      {{ 'Full details' if quick_mode else 'KDP blockers only' }}
+    </button>
     <a href="{{ url_for('preview_index') }}" class="bv-btn">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
         <path d="M19 12H5M5 12l7-7M5 12l7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -137,18 +145,26 @@
     {% set has_margin_issues = margin_report and margin_report.violations | length > 0 %}
     {% if not has_compliance_fails and not has_margin_issues %}
       <div class="scan-verdict scan-verdict-pass">
-        <span class="scan-verdict-emoji">👍</span>
+        <span class="scan-verdict-emoji">✓</span>
         <div>
-          <strong>Looking good!</strong>
-          <span>No blocking issues found. Always confirm in KDP's own previewer before submitting.</span>
+          <strong>PASS — No KDP blockers detected</strong>
+          <span>
+            This book will be accepted by KDP. The quality suggestions below are optional improvements,
+            not required fixes. Always do a final check in KDP's own previewer before submitting.
+            <span title="A PASS means we found no hard blocking errors. Quality notes (like formatting consistency) are helpful but not required for KDP publication." style="cursor:help; text-decoration:underline dotted; color:inherit;">ℹ</span>
+          </span>
         </div>
       </div>
     {% else %}
-      <div class="scan-verdict scan-verdict-fail">
+      <div class="scan-verdict" style="background:rgba(255,176,59,0.12); border-left-color:#ffb03b;">
         <span class="scan-verdict-emoji">⚠️</span>
         <div>
-          <strong>Issues found</strong>
-          <span>Fix the items below before uploading to KDP.</span>
+          <strong>Blocking issues found</strong>
+          <span>
+            The red ✗ items below will prevent KDP from accepting your book. The yellow ⚠ items are quality suggestions.
+            Fix all red items, then re-upload.
+            <span title="Red items = hard KDP blockers (trim size, fonts, DPI, margins, bleed). Yellow items = quality tips (not blockers, won't stop publication)." style="cursor:help; text-decoration:underline dotted; color:inherit;">ℹ</span>
+          </span>
         </div>
       </div>
     {% endif %}
@@ -216,7 +232,7 @@
 
   {# ── KDP Compliance results ── #}
   {% if check_report %}
-  <div class="scan-section">
+  <div class="scan-section" id="compliance-section">
     <h3 class="scan-section-title">KDP Compliance Check</h3>
     {% set blocking = check_report.results | rejectattr('warning_only', 'defined') | list %}
     {% for r in check_report.results %}
@@ -253,7 +269,7 @@
           </div>
         </div>
       {% elif r.warning_only and not r.ok %}
-        <div class="scan-issue scan-issue-warn">
+        <div class="scan-issue scan-issue-warn" data-advisory="true">
           <div class="scan-issue-icon">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <path d="M12 9v4M12 16.5v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -261,13 +277,16 @@
             </svg>
           </div>
           <div class="scan-issue-body">
-            <p class="scan-issue-title">{{ r.title }} <span class="scan-note-chip">NOTE</span></p>
+            <p class="scan-issue-title">
+              {{ r.title }}
+              <span class="scan-note-chip" title="Quality suggestion, not a KDP blocker">💡 QUALITY TIP</span>
+            </p>
             <p class="scan-issue-desc">{{ r.summary }}</p>
             {% if r.fix %}<p class="scan-fix-text" style="margin-top:4px;">{{ r.fix }}</p>{% endif %}
           </div>
         </div>
       {% else %}
-        <div class="scan-issue scan-issue-pass">
+        <div class="scan-issue scan-issue-pass" data-advisory="true">
           <div class="scan-issue-icon">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <path d="M5 12l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -394,6 +413,32 @@
     });
     document.getElementById("guide-legend").style.display = showGuides ? "" : "none";
   });
+
+  // Quick-check toggle (show only KDP blockers)
+  var quickCheckActive = {{ 'true' if request.args.get('quick') == 'true' else 'false' | lower }};
+  var btnQuick = document.getElementById("btn-quick-toggle");
+  if (btnQuick) {
+    function updateQuickView(isQuick) {
+      var advisoryIssues = document.querySelectorAll("[data-advisory=true]");
+      advisoryIssues.forEach(function (el) {
+        el.style.display = isQuick ? "none" : "";
+      });
+      btnQuick.innerHTML = btnQuick.innerHTML.replace(
+        /(KDP blockers only|Full details)/,
+        isQuick ? "Full details" : "KDP blockers only"
+      );
+    }
+    btnQuick.addEventListener("click", function () {
+      quickCheckActive = !quickCheckActive;
+      updateQuickView(quickCheckActive);
+      var newUrl = window.location.pathname + "?" + new URLSearchParams(window.location.search)
+        .set("quick", quickCheckActive ? "true" : "false").toString();
+      window.history.replaceState({}, "", newUrl);
+    });
+    if (quickCheckActive) {
+      updateQuickView(true);
+    }
+  }
 
   // Nav buttons
   document.getElementById("btn-first").addEventListener("click", function(){ goTo(0); });
