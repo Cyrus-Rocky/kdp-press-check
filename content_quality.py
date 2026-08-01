@@ -88,28 +88,25 @@ def _check_spacing(text: str) -> dict:
 
 
 def _check_quote_consistency(text: str) -> dict:
-    straight = text.count(‘”’) + text.count(“’”)
-    curly = sum(text.count(c) for c in [‘”’, ‘”’, ‘’’, ‘’’])
+    straight = text.count('"') + text.count("'")
+    curly = 0
+    for quote_char in ['“', '”', '‘', '’']:
+        curly += text.count(quote_char)
     total = straight + curly
-    if total < 20:  # need meaningful sample size
-        return {“title”: “Quote Style”, “ok”: True,
-                “summary”: “Too few quotes to reliably check consistency.”,
-                “detail”: f”Straight quotes: {straight}. Curly/smart quotes: {curly}.”}
-    # Only flag if minority style is >20% of total (very heavy mixing)
+    if total < 20:
+        return {"title": "Quote Style", "ok": True,
+                "summary": "Too few quotes to reliably check consistency.",
+                "detail": f"Straight quotes: {straight}. Curly/smart quotes: {curly}."}
     minority_pct = min(straight, curly) / total if total > 0 else 0
     if minority_pct < 0.2:
-        return {“title”: “Quote Style”, “ok”: True,
-                “summary”: “Quote marks are mostly consistent. Rare exceptions are normal.”,
-                “detail”: f”Straight quotes: {straight} ({straight/total*100:.0f}%). Curly/smart quotes: {curly} ({curly/total*100:.0f}%).”}
-    # Only warn if heavily mixed (20%+ minority style), which indicates PDFs from multiple sources
-    minority = min(straight, curly)
+        return {"title": "Quote Style", "ok": True,
+                "summary": "Quote marks are mostly consistent. Rare exceptions are normal.",
+                "detail": f"Straight quotes: {straight} ({straight/total*100:.0f}%). Curly/smart quotes: {curly} ({curly/total*100:.0f}%)."}
     return {
-        “title”: “Quote Style”, “ok”: False, “warning_only”: True,
-        “summary”: f”This manuscript mixes straight quotes (\”like this\”) and curly quotes “
-                   f”(“like this”), with {int(minority_pct*100)}% being the minority style.”,
-        “fix”: “This is usually from PDFs combining text from multiple sources or scanned content. “
-               “If it bothers you, use Find & Replace to standardize, but KDP accepts mixed quotes.”,
-        “detail”: f”Straight quotes: {straight} ({straight/total*100:.0f}%). Curly/smart quotes: {curly} ({curly/total*100:.0f}%).”,
+        "title": "Quote Style", "ok": False, "warning_only": True,
+        "summary": f"This manuscript mixes straight quotes and curly quotes, with {int(minority_pct*100)}% being the minority style.",
+        "fix": "This is usually from PDFs combining text from multiple sources or scanned content. If it bothers you, use Find & Replace to standardize, but KDP accepts mixed quotes.",
+        "detail": f"Straight quotes: {straight} ({straight/total*100:.0f}%). Curly/smart quotes: {curly} ({curly/total*100:.0f}%).",
     }
 
 
@@ -169,8 +166,7 @@ def _check_scene_break_consistency(text: str) -> dict:
     if not candidates:
         return {"title": "Scene Break Style", "ok": True,
                 "summary": "No scene-break markers (like *** or #) found to check.",
-                "detail": "Scanned for standalone lines made only of repeated symbols "
-                          "(*, #, ~, -, etc)."}
+                "detail": "Scanned for standalone lines made only of repeated symbols (*, #, ~, -, etc)."}
 
     sig_counts = Counter(candidates)
     if len(sig_counts) == 1:
@@ -189,7 +185,7 @@ def _check_scene_break_consistency(text: str) -> dict:
     }
 
 
-_TYPO_REPEAT_THRESHOLD = 3  # a word appearing this many+ times reads as a name/invented term, not a typo
+_TYPO_REPEAT_THRESHOLD = 3
 
 
 def _check_spelling(text: str) -> dict:
@@ -200,7 +196,7 @@ def _check_spelling(text: str) -> dict:
                 "detail": "No words found."}
     spell = _get_spell()
     lower_words = [w.lower() for w in words if not w.isupper()]
-    sample = lower_words[:20000]  # cap for very long manuscripts
+    sample = lower_words[:20000]
     unknown = spell.unknown(sample)
     if not unknown:
         return {"title": "Possible Typos", "ok": True,
@@ -208,8 +204,6 @@ def _check_spelling(text: str) -> dict:
                 "detail": f"Checked {len(sample)} word(s)."}
 
     counts = Counter(w for w in sample if w in unknown)
-    # A word that recurs is almost certainly a character name or invented term an author
-    # typed on purpose; a word seen once or twice is much more likely to be an actual typo.
     repeated = {w: n for w, n in counts.items() if n >= _TYPO_REPEAT_THRESHOLD}
     one_offs = {w: n for w, n in counts.items() if n < _TYPO_REPEAT_THRESHOLD}
 
