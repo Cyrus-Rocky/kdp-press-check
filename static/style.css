@@ -3623,3 +3623,183 @@ button:focus-visible,
 }
 .genre-btn-primary:hover { opacity: 0.88; }
 .calc-earnings-table tr:last-child td { border-bottom: none; }
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   ANIMATIONS & MICRO-INTERACTIONS — Make the app feel alive
+   ────────────────────────────────────────────────────────────────────────────── */
+
+/* Page fade-in animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Subtle slide-in from left */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Button press effect */
+@keyframes buttonPress {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+
+/* Glow effect */
+@keyframes glow {
+  0% { box-shadow: 0 0 0 0 rgba(255, 119, 89, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(255, 119, 89, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 119, 89, 0); }
+}
+
+/* Apply fade-in to main sections */
+section {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Sidebar animation */
+.sidebar {
+  animation: slideInLeft 0.4s ease-out;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   IMPROVED INPUT FIELDS — Better UX & Visual Feedback
+   ────────────────────────────────────────────────────────────────────────────── */
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+textarea,
+select {
+  transition: all 180ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Input focus state — better visual feedback */
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: #ff7759;
+  box-shadow: 0 0 0 3px rgba(255, 119, 89, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Input hover state */
+input[type="text"]:hover,
+input[type="email"]:hover,
+input[type="password"]:hover,
+input[type="number"]:hover,
+textarea:hover,
+select:hover {
+  border-color: var(--pc-muted);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   BUTTON ANIMATIONS — Polished Interactions
+   ────────────────────────────────────────────────────────────────────────────── */
+
+button, .btn, a[role="button"],
+input[type="button"], input[type="submit"] {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Button hover lift effect */
+button:hover, .btn:hover, a[role="button"]:hover,
+input[type="button"]:hover, input[type="submit"]:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Button active/press effect */
+button:active, .btn:active,
+input[type="button"]:active, input[type="submit"]:active {
+  animation: buttonPress 0.3s ease-out;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   CARD ANIMATIONS — Staggered Entrance
+   ────────────────────────────────────────────────────────────────────────────── */
+
+.est-card, .side-link, .tab-content {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.est-card:nth-child(2) { animation-delay: 0.1s; }
+.est-card:nth-child(3) { animation-delay: 0.2s; }
+.est-card:nth-child(4) { animation-delay: 0.3s; }
+.est-card:nth-child(5) { animation-delay: 0.4s; }
+.est-card:nth-child(6) { animation-delay: 0.5s; }
+
+/* Sidebar links hover animation */
+.side-link {
+  transition: all 180ms ease-out;
+}
+
+.side-link:hover {
+  transform: translateX(4px);
+  background: rgba(255, 119, 89, 0.05);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   HERO SECTIONS — Enhanced Landing Pages
+   ────────────────────────────────────────────────────────────────────────────── */
+
+.hero-single, .hero-display {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.hero-display {
+  animation-delay: 0.2s;
+}
+
+.hero-lead {
+  animation: fadeInUp 0.8s ease-out 0.3s both;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   PROGRESS & STATUS INDICATORS
+   ────────────────────────────────────────────────────────────────────────────── */
+
+.progress-bar {
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.status-badge {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   SMOOTH SCROLLING
+   ────────────────────────────────────────────────────────────────────────────── */
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
