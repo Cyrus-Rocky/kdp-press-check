@@ -17,6 +17,7 @@ import classify
 import content_quality
 import frontmatter
 import page_breaks
+import pre_flight_checklist
 import kdp_rules as rules
 
 
@@ -671,6 +672,22 @@ def run_all_checks(pdf_path: str) -> dict:
         advisory_issue_count = sum(1 for r in results if r.get("warning_only") and not r["ok"])
         note_count = sum(1 for r in results if r.get("warning_only") and r["ok"])
         ok_count = sum(1 for r in results if not r.get("warning_only") and r["ok"])
+
+        # New scoring: separate KDP-ready (blockers) from quality-polish (advisory)
+        # KDP Ready % = (passed blockers / total blockers) * 100
+        # Quality Polish % = (passed advisory + notes) / total advisory) * 100
+        kdp_ready_pct = int((ok_count / len(blocking_results) * 100) if blocking_results else 100)
+        advisory_results = [r for r in results if r.get("warning_only")]
+        advisory_passed = sum(1 for r in advisory_results if r["ok"])
+        quality_polish_pct = int((advisory_passed / len(advisory_results) * 100) if advisory_results else 100)
+
+        # Generate pre-flight checklist
+        check_report = {
+            "page_count": doc.page_count,
+            "results": results,
+        }
+        preflight = pre_flight_checklist.generate_preflight_checklist(check_report)
+
         return {
             "page_count": doc.page_count,
             "results": results,
@@ -679,6 +696,10 @@ def run_all_checks(pdf_path: str) -> dict:
             "advisory_issue_count": advisory_issue_count,
             "note_count": note_count,
             "ok_count": ok_count,
+            # New scoring metrics
+            "kdp_ready_pct": kdp_ready_pct,
+            "quality_polish_pct": quality_polish_pct,
+            "preflight": preflight,
         }
     finally:
         doc.close()

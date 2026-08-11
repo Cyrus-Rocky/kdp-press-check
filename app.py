@@ -18,6 +18,7 @@ import kdp_rules as rules
 import preview_renderer
 import admin
 import analytics
+import print_cost_calculator
 from problem_solvers_data import CHECK_TO_CATEGORY
 
 UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "uploads")
@@ -51,7 +52,7 @@ SITE_URL = os.environ.get("SITE_URL", "https://kdp-press-check.onrender.com").rs
 SITEMAP_ENDPOINTS = [
     "index", "cover_index", "kindle_index", "preview_index", "error_decoder",
     "keyword_linter", "margin_advisor", "isbn_helper", "description_formatter", "copyright_builder",
-    "metadata_optimizer", "review_timeline", "royalty_calculator",
+    "metadata_optimizer", "review_timeline", "royalty_calculator", "print_cost_index",
     "estimate_pages_index", "genre_checklist", "launch_checklist",
     "templates_page", "problem_solvers",
 ]
@@ -287,6 +288,48 @@ def check_cover():
 @app.route("/royalty-calculator", methods=["GET"])
 def royalty_calculator():
     return render_template("royalty_calculator.html", active_mode="royalty")
+
+
+@app.route("/print-cost-calculator", methods=["GET"])
+def print_cost_index():
+    return render_template("print_cost_calculator.html", active_mode="print-cost")
+
+
+@app.route("/print-cost-calculator", methods=["POST"])
+def print_cost_calculate():
+    """Calculate print costs for different configurations."""
+    try:
+        page_count = int(request.form.get("page_count", 300))
+        trim_size = request.form.get("trim_size", "6x9")
+        is_color = request.form.get("is_color", "false").lower() == "true"
+        list_price = float(request.form.get("list_price", 14.99))
+
+        # Calculate costs
+        bw_cost = print_cost_calculator.calculate_print_cost(page_count, trim_size, is_color=False)
+        color_cost = print_cost_calculator.calculate_print_cost(page_count, trim_size, is_color=True)
+        bw_royalty = print_cost_calculator.royalty_impact(list_price, bw_cost["per_unit_cost"])
+        color_royalty = print_cost_calculator.royalty_impact(list_price, color_cost["per_unit_cost"])
+        comparison = print_cost_calculator.compare_formats(page_count, list_price)
+        suggested = print_cost_calculator.suggest_price(bw_cost["per_unit_cost"], target_profit=3.00)
+
+        return render_template(
+            "print_cost_calculator.html",
+            active_mode="print-cost",
+            page_count=page_count,
+            trim_size=trim_size,
+            is_color=is_color,
+            list_price=list_price,
+            bw_cost=bw_cost,
+            color_cost=color_cost,
+            bw_royalty=bw_royalty,
+            color_royalty=color_royalty,
+            comparison=comparison,
+            suggested=suggested,
+            calculated=True,
+        )
+    except (ValueError, KeyError) as e:
+        flash(f"Invalid input: {str(e)}")
+        return redirect(url_for("print_cost_index"))
 
 
 @app.route("/estimate-pages", methods=["GET"])
