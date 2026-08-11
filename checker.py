@@ -16,6 +16,7 @@ import fitz  # PyMuPDF
 import classify
 import content_quality
 import frontmatter
+import page_breaks
 import kdp_rules as rules
 
 
@@ -660,6 +661,7 @@ def run_all_checks(pdf_path: str) -> dict:
         ]
         full_text = _full_text(doc)
         results += content_quality.run(full_text)
+        results += page_breaks.run(full_text)
         doc_title = (doc.metadata or {}).get("title") or None
         first_page_text = doc[0].get_text() if doc.page_count > 0 else ""
         results += frontmatter.run(full_text, first_page_text, doc_title)

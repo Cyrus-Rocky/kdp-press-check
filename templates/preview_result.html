@@ -282,7 +282,24 @@
               <span class="scan-note-chip" title="Quality suggestion, not a KDP blocker">💡 QUALITY TIP</span>
             </p>
             <p class="scan-issue-desc">{{ r.summary }}</p>
-            {% if r.fix %}<p class="scan-fix-text" style="margin-top:4px;">{{ r.fix }}</p>{% endif %}
+            {% if r.get('checklist') %}
+              <div style="margin-top:1rem; padding:1rem; background:rgba(255,255,255,0.05); border-radius:6px;">
+                <div style="display:grid; gap:0.5rem;">
+                  {% for item in r.checklist %}
+                    <div style="display:flex; align-items:center; gap:0.75rem; font-size:0.9rem;">
+                      <span style="color:{{ '#22c55e' if item.present else '#888' }}; font-weight:bold; width:20px;">
+                        {{ '✓' if item.present else '○' }}
+                      </span>
+                      <div>
+                        <span style="font-weight:600;">{{ item.item }}</span>
+                        <span style="color:var(--color-text-secondary); font-size:0.85rem;"> — {{ item.description }}</span>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
+            {% if r.fix %}<p class="scan-fix-text" style="margin-top:1rem;">{{ r.fix }}</p>{% endif %}
           </div>
         </div>
       {% else %}
@@ -294,6 +311,23 @@
           </div>
           <div class="scan-issue-body">
             <p class="scan-issue-title">{{ r.title }}</p>
+            {% if r.get('checklist') %}
+              <div style="margin-top:0.75rem; padding:1rem; background:rgba(34,197,94,0.05); border-radius:6px;">
+                <div style="display:grid; gap:0.5rem;">
+                  {% for item in r.checklist %}
+                    <div style="display:flex; align-items:center; gap:0.75rem; font-size:0.9rem;">
+                      <span style="color:{{ '#22c55e' if item.present else '#888' }}; font-weight:bold; width:20px;">
+                        {{ '✓' if item.present else '○' }}
+                      </span>
+                      <div>
+                        <span style="font-weight:600;">{{ item.item }}</span>
+                        <span style="color:var(--color-text-secondary); font-size:0.85rem;"> — {{ item.description }}</span>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
           </div>
         </div>
       {% endif %}
