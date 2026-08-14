@@ -219,32 +219,98 @@
 
       <footer class="site-footer">
     <div class="footer-inner">
-      <div class="footer-signup">
-        <div class="footer-signup-text">
-          <p class="footer-eyebrow">KDP requirements change often</p>
-          <p class="footer-display">Check every version before you upload.</p>
+      {# ── Brand Mission & Newsletter ── #}
+      <div class="footer-section footer-hero">
+        <div class="footer-brand">
+          <div class="footer-tagline">
+            <h3 style="margin:0 0 0.5rem 0; font-size:1.3rem; font-weight:700;">Publish like a pro, from day one.</h3>
+            <p style="margin:0; color:var(--color-text-secondary); font-size:0.95rem; line-height:1.5;">
+              KDP Press Check catches real errors before they cost you readers. We're built by publishing pros who understand what KDP actually requires—and what's just noise.
+            </p>
+          </div>
         </div>
         {% if newsletter_enabled %}
-        <div class="footer-signup-form">
-          <p class="footer-signup-label">Get KDP tips and new tools in your inbox</p>
-          <form action="{{ newsletter_action }}" method="post" target="_blank" class="signup-row">
-            <input type="email" name="{{ newsletter_field }}" required placeholder="you@email.com" class="signup-input" aria-label="Email address">
-            <button type="submit" class="signup-btn">Subscribe</button>
+        <div class="footer-newsletter">
+          <p style="margin:0 0 0.75rem 0; font-weight:600; font-size:0.9rem;">Get tips & updates for self-publishers</p>
+          <form action="{{ newsletter_action }}" method="post" target="_blank" class="footer-newsletter-form">
+            <input type="email" name="{{ newsletter_field }}" required placeholder="you@email.com" class="footer-newsletter-input" aria-label="Email address">
+            <button type="submit" class="footer-newsletter-btn">Subscribe</button>
           </form>
-          <p class="footer-signup-note">No spam. Unsubscribe anytime.</p>
+          <p style="margin:0.5rem 0 0 0; font-size:0.8rem; color:var(--color-text-secondary);">No spam. Unsubscribe anytime.</p>
         </div>
         {% endif %}
       </div>
-      <hr class="footer-rule">
-      <nav class="footer-links" aria-label="Footer">
-        <a href="{{ url_for('about') }}">About</a>
-        <a href="{{ url_for('privacy') }}">Privacy</a>
-        {% if contact_email %}<a href="mailto:{{ contact_email }}">Contact</a>{% endif %}
-        <a href="{{ url_for('problem_solvers') }}">Find help</a>
-      </nav>
-      <div class="footer-bar">
-        <span>KDP Press Check is free. Files are analyzed in your session and never stored.</span>
-        <span>Independent tool, not affiliated with Amazon or Kindle Direct Publishing.</span>
+
+      {# ── Main Navigation ── #}
+      <div class="footer-grid">
+        <nav class="footer-column">
+          <p class="footer-column-title">Product</p>
+          <ul style="margin:0; padding:0; list-style:none;">
+            <li><a href="{{ url_for('index') }}">Interior Check</a></li>
+            <li><a href="{{ url_for('cover_index') }}">Cover Check</a></li>
+            <li><a href="{{ url_for('kindle_index') }}">Kindle Check</a></li>
+            <li><a href="{{ url_for('royalty_calculator') }}">Pricing Tools</a></li>
+            {% if pro_enabled %}<li><a href="{{ url_for('pro_landing') }}">Upgrade to Pro</a></li>{% endif %}
+          </ul>
+        </nav>
+
+        <nav class="footer-column">
+          <p class="footer-column-title">Resources</p>
+          <ul style="margin:0; padding:0; list-style:none;">
+            <li><a href="{{ url_for('error_decoder') }}">Error Decoder</a></li>
+            <li><a href="{{ url_for('problem_solvers') }}">Find Help</a></li>
+            <li><a href="{{ url_for('about') }}">About Us</a></li>
+            <li><a href="https://docs.kdpcheck.com" target="_blank" rel="noopener">Documentation</a></li>
+          </ul>
+        </nav>
+
+        <nav class="footer-column">
+          <p class="footer-column-title">Company</p>
+          <ul style="margin:0; padding:0; list-style:none;">
+            <li><a href="{{ url_for('privacy') }}">Privacy Policy</a></li>
+            {% if contact_email %}<li><a href="mailto:{{ contact_email }}">Contact</a></li>{% endif %}
+            <li><a href="https://status.kdpcheck.com" target="_blank" rel="noopener">Status Page</a></li>
+            <li><a href="https://blog.kdpcheck.com" target="_blank" rel="noopener">Blog</a></li>
+          </ul>
+        </nav>
+
+        <div class="footer-column">
+          <p class="footer-column-title">Follow Us</p>
+          <div class="footer-social">
+            <a href="https://x.com/kdpcheck" target="_blank" rel="noopener" aria-label="Twitter/X" title="Follow on Twitter/X" class="footer-social-link">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+            </a>
+            <a href="https://linkedin.com/company/kdpcheck" target="_blank" rel="noopener" aria-label="LinkedIn" title="Follow on LinkedIn" class="footer-social-link">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.475-2.236-1.986-2.236-1.081 0-1.722.721-2.004 1.413-.103.25-.129.599-.129.948v5.444h-3.554s.046-8.827 0-9.745h3.554v1.381c-.009.015-.022.029-.033.042h.033v-.042c.431-.666 1.199-1.616 2.922-1.616 2.135 0 3.731 1.395 3.731 4.397v5.583zM5.337 8.855c-1.144 0-1.915-.762-1.915-1.715 0-.953.77-1.715 1.958-1.715 1.188 0 1.915.762 1.933 1.715 0 .953-.745 1.715-1.976 1.715zm1.946 11.597H3.392V9.707h3.891v10.745zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z"/></svg>
+            </a>
+            <a href="https://facebook.com/kdpcheck" target="_blank" rel="noopener" aria-label="Facebook" title="Follow on Facebook" class="footer-social-link">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            </a>
+            <a href="https://threads.net/@kdpcheck" target="_blank" rel="noopener" aria-label="Threads" title="Follow on Threads" class="footer-social-link">
+              <svg width="18" height="18" viewBox="0 0 192 192" fill="currentColor"><path d="M141.537 88.9883C140.71 88.5919 139.87 88.5744 139.052 88.9494C137.591 89.63 136.584 90.9953 136.584 92.3635C136.584 94.2382 138.218 95.5983 140.061 95.5983C141.537 95.5983 142.846 94.7266 143.379 93.5939C144.659 90.5505 147.557 89.1122 151.129 89.1122C155.771 89.1122 159.471 92.9164 159.471 97.5641C159.471 99.2812 159.034 100.848 158.314 102.122C156.923 104.664 153.904 106.234 150.344 106.234C146.156 106.234 142.576 104.504 140.583 101.624C139.674 100.293 138.326 99.4774 136.851 99.4774C134.565 99.4774 132.699 101.344 132.699 103.631C132.699 104.778 132.968 105.868 133.478 106.824C136.681 112.664 142.914 116.208 150.344 116.208C159.368 116.208 166.348 110.146 166.348 101.816C166.348 97.1846 164.063 93.0541 160.586 90.4324C159.118 89.1122 157.816 87.9595 156.717 87.1267C156.264 86.8056 155.935 86.3621 155.935 85.8437C155.935 84.3119 157.165 83.1348 158.699 83.1348C159.867 83.1348 160.916 83.7412 161.385 84.6827C164.701 90.6993 170.623 94.4635 177.378 94.4635C183.851 94.4635 189.348 90.3186 191.035 84.4849C191.34 83.5948 191.649 82.7236 191.961 81.8704C192.015 81.6891 192.067 81.5085 192.118 81.3279C192.118 81.3279 189.923 81.7236 187.788 82.1151C187.788 82.1151 187.697 82.1316 187.682 82.1334H187.682C187.682 82.1334 187.394 81.6886 186.913 80.9632C185.974 79.5068 183.786 77.8049 180.831 77.8049C179.765 77.8049 178.799 78.0289 177.974 78.4543C175.99 79.4896 174.727 81.3145 174.727 83.5225C174.727 84.7088 175.141 85.8224 175.859 86.6761C176.021 86.8703 176.186 87.0616 176.353 87.2498C177.251 88.2032 178.379 89.0195 179.683 89.6429L180.264 89.943C184.727 92.2957 188.154 95.7203 189.697 99.8859C190.324 101.648 190.7 103.57 190.7 105.549C190.7 113.195 185.846 119.627 178.846 121.984C177.762 122.359 176.618 122.649 175.427 122.849C174.973 122.925 174.516 122.992 174.057 123.051C173.916 123.069 173.775 123.086 173.633 123.102C173.466 123.12 173.299 123.137 173.131 123.152C172.962 123.167 172.793 123.181 172.623 123.193C172.308 123.216 171.992 123.237 171.675 123.255C169.794 123.371 167.868 123.428 165.906 123.428C158.326 123.428 151.098 121.211 145.436 117.302C143.888 116.165 142.393 114.877 140.951 113.441C140.623 113.108 140.299 112.769 139.979 112.426C139.634 112.064 139.293 111.698 138.955 111.328C138.616 110.957 138.281 110.582 137.948 110.203C137.532 109.706 137.12 109.204 136.712 108.698C136.309 108.197 135.91 107.692 135.516 107.184C135.356 106.976 135.196 106.768 135.037 106.559C133.82 104.888 132.712 103.065 131.756 101.098C128.832 94.8864 127.322 87.5435 127.322 79.6944C127.322 63.9245 137.032 50.3696 150.344 50.3696C162.906 50.3696 172.605 59.3937 172.605 70.5316C172.605 74.5827 170.765 78.1135 167.937 80.4392C166.852 81.3901 165.473 82.0274 164.003 82.2401C162.532 82.4527 160.92 82.2401 160.072 81.3381C159.223 80.436 158.893 79.3359 158.893 78.1435C158.893 76.9077 159.223 75.7071 160.072 74.7622C161.274 73.4169 162.993 72.6064 165.005 72.6064C167.017 72.6064 169.03 73.4169 170.232 74.7622C170.884 75.4825 171.447 76.3261 171.893 77.2614C172.339 78.1966 172.665 79.2076 172.849 80.2695C173.245 82.4527 173.426 84.7206 173.426 86.9883C173.426 95.0281 170.303 102.382 164.915 108.013C159.526 113.643 151.816 117.145 143.388 117.145C134.96 117.145 127.251 113.643 121.862 108.013C116.474 102.382 113.35 95.0281 113.35 86.9883C113.35 78.9485 116.474 71.5948 121.862 65.9637C127.251 60.3325 134.96 56.8304 143.388 56.8304C151.816 56.8304 159.526 60.3325 164.915 65.9637C166.606 67.7233 168.087 69.6704 169.325 71.7743C170.231 73.2654 172.048 73.8976 173.835 73.452C175.622 73.0064 177.012 71.5625 177.012 69.8289C177.012 67.0945 175.622 64.5419 173.612 62.4768C170.247 59.1227 165.88 56.6604 161.005 55.3397C155.796 53.9313 150.149 53.6779 144.647 54.6462C144.647 54.6462 144.647 54.6462 144.647 54.6462M79.2957 54.6462C79.2957 54.6462 79.2957 54.6462 79.2957 54.6462C75.0339 55.0974 70.9282 55.9858 67.2024 57.2279C67.2024 57.2279 67.1024 57.2634 67.0521 57.2818C67.0521 57.2818 66.9027 57.3445 66.7523 57.4077C61.0485 59.4916 56.1127 63.1205 52.4689 67.8062C48.8251 72.492 46.4889 78.2295 45.6203 84.3353C44.7516 90.4411 45.5204 96.6869 47.9022 102.358C50.284 108.03 54.1436 112.806 58.9787 116.239C63.8138 119.672 69.4147 121.614 75.1521 121.937C80.8895 122.26 86.6007 121.001 91.7055 118.349C91.7055 118.349 91.8061 118.297 91.9067 118.245C92.0073 118.193 92.1585 118.108 92.3603 117.987C94.3462 116.784 95.9824 115.15 97.1348 113.238C98.2872 111.326 98.9269 109.163 99.0037 106.954C99.0805 104.745 98.5876 102.546 97.5546 100.605C96.5215 98.664 95.0799 97.0426 93.3559 95.8752C91.6319 94.7078 89.6768 93.9451 87.6333 93.6572C85.5898 93.3692 83.5131 93.5615 81.5758 94.2164C81.5758 94.2164 81.4255 94.2682 81.2751 94.3199C79.8098 95.0346 78.5266 96.0905 77.5562 97.3908C76.5858 98.6911 75.9536 100.189 75.721 101.751C75.4884 103.313 75.6582 104.904 76.2208 106.405C76.7834 107.906 77.7214 109.27 78.9423 110.353C80.1632 111.436 81.6328 112.204 83.2165 112.596C84.8001 112.988 86.4571 112.985 88.0385 112.586C88.0385 112.586 88.1593 112.556 88.2801 112.526C90.7408 111.931 93.0126 110.704 94.7831 108.984C96.5536 107.264 97.7695 105.133 98.3165 102.8C98.8635 100.467 98.7142 98.0278 97.8802 95.7869C97.0462 93.546 95.5438 91.5737 93.5696 90.1481C91.5954 88.7225 89.2257 87.8996 86.7756 87.7678C84.3255 87.6361 81.868 88.2061 79.7353 89.4177C78.6519 90.0259 77.6541 90.7583 76.763 91.5998C75.8719 92.4413 75.0926 93.3794 74.4337 94.4019C73.7748 95.4244 73.2416 96.5248 72.8444 97.6865C72.0501 99.9922 71.8893 102.458 72.3755 104.852C72.8616 107.245 73.975 109.471 75.5947 111.281C77.2144 113.091 79.1974 114.422 81.3709 115.154C83.5444 115.886 85.8493 115.996 88.0734 115.474C88.0734 115.474 88.2047 115.441 88.3361 115.408C90.9526 114.801 93.3892 113.496 95.3782 111.627C97.3672 109.758 98.8462 107.391 99.6576 104.762C100.469 102.133 100.582 99.3178 100.024 96.6279C99.466 93.938 98.2537 91.4336 96.4931 89.3549C94.7325 87.2762 92.4828 85.6763 90.0057 84.6756C87.5286 83.6749 84.8773 83.3006 82.2797 83.5879C79.6821 83.8752 77.2127 84.8131 75.1186 86.2752C75.1186 86.2752 75.0192 86.3406 74.9198 86.4064C71.4893 89.3459 69.3092 93.2892 68.8242 97.5827C68.3391 101.8762 69.5644 106.175 72.3214 109.597C75.0784 113.019 79.0979 115.303 83.4596 116.048C87.8214 116.793 92.3405 115.931 96.1023 113.602C99.8641 111.273 102.605 107.644 103.858 103.422C105.111 99.2 104.813 94.6659 103.007 90.5695C101.201 86.4731 98.0511 83.1816 94.2098 81.3181C90.3685 79.4546 85.9666 79.2428 81.9282 80.7236M79.2957 54.6462"/></svg>
+            </a>
+            <a href="https://instagram.com/kdpcheck" target="_blank" rel="noopener" aria-label="Instagram" title="Follow on Instagram" class="footer-social-link">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="2" width="20" height="20" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="currentColor"/><circle cx="18" cy="6" r="1" fill="currentColor"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <hr style="margin:2rem 0; border:none; border-top:1px solid var(--color-border);">
+
+      {# ── Footer Bottom ── #}
+      <div class="footer-bottom">
+        <div style="text-align:center; color:var(--color-text-secondary); font-size:0.85rem; line-height:1.5;">
+          <p style="margin:0 0 0.5rem 0;">
+            <strong>KDP Press Check</strong> · Free tools for self-published authors
+          </p>
+          <p style="margin:0 0 1rem 0;">
+            Files analyzed in your session | Never stored | Independent tool, not affiliated with Amazon KDP
+          </p>
+          <p style="margin:0; font-size:0.8rem;">
+            © {{ now.year }} KDP Press Check. Built by publishing professionals who understand what KDP really cares about.
+          </p>
+        </div>
       </div>
     </div>
       </footer>
