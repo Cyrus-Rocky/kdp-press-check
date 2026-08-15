@@ -3982,8 +3982,8 @@ input, select, textarea {
   z-index: 1000;
   transition: left 300ms ease;
 }
-.app-shell.sidebar-visible .sidebar { left: 0; }
-.app-shell.sidebar-visible .sidebar-backdrop { display: block; }
+.app-shell.is-open .sidebar { left: 0; }
+.app-shell.is-open .sidebar-backdrop { display: block; }
 .sidebar-backdrop {
   position: fixed;
   top: 0;
@@ -4203,7 +4203,7 @@ img, .bv-cover-img, .bv-img-wrapper img {
 
 /* Sidebar in mobile menu works */
 @media (max-width: 767px) {
-  .app-shell.sidebar-visible {
+  .app-shell.is-open {
     position: relative;
   }
 }
