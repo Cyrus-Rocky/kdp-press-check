@@ -132,6 +132,34 @@
   </div>
 </div>
 
+{# ── Interactive Status Navigation ── #}
+<div style="margin-top:2rem; display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:1rem;">
+  {% if fail_count > 0 %}
+  <button type="button" class="status-nav-btn status-nav-btn-fail" data-filter="blockers" title="Navigate to blocking issues">
+    <div class="status-nav-count">{{ fail_count }}</div>
+    <div class="status-nav-label">{{ 'BLOCKING' if fail_count == 1 else 'BLOCKING' }}</div>
+  </button>
+  {% endif %}
+  {% if issue_count > 0 %}
+  <button type="button" class="status-nav-btn status-nav-btn-warn" data-filter="advisory" title="Navigate to quality tips">
+    <div class="status-nav-count">{{ issue_count }}</div>
+    <div class="status-nav-label">{{ 'ISSUE' if issue_count == 1 else 'ISSUES' }}</div>
+  </button>
+  {% endif %}
+  {% if note_count > 0 %}
+  <button type="button" class="status-nav-btn status-nav-btn-pass" data-filter="notes" title="View notes">
+    <div class="status-nav-count">{{ note_count }}</div>
+    <div class="status-nav-label">{{ 'NOTE' if note_count == 1 else 'NOTES' }}</div>
+  </button>
+  {% endif %}
+  {% if ok_count > 0 %}
+  <button type="button" class="status-nav-btn status-nav-btn-pass" data-filter="passed" title="View passed checks">
+    <div class="status-nav-count">{{ ok_count }}</div>
+    <div class="status-nav-label">{{ 'PASSED' if ok_count == 1 else 'PASSED' }}</div>
+  </button>
+  {% endif %}
+</div>
+
 {% if blocking_rows %}
 <div class="result-group">
   <div class="result-group-head">
@@ -181,6 +209,59 @@
 </div>
 
 {% include "_recommended.html" %}
+
+{# ── "Is this intentional?" Modal ── #}
+<div class="intentional-modal" id="intentional-modal">
+  <div class="intentional-content">
+    <h3 class="intentional-title">Is this intentional?</h3>
+    <p class="intentional-description" id="intentional-message"></p>
+    <div class="intentional-buttons">
+      <button class="intentional-btn intentional-btn-yes" id="intentional-yes">Yes, keep it</button>
+      <button class="intentional-btn intentional-btn-no" id="intentional-no">No, fix it</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const modal = document.getElementById('intentional-modal');
+  const yesBtn = document.getElementById('intentional-yes');
+  const noBtn = document.getElementById('intentional-no');
+  const msgEl = document.getElementById('intentional-message');
+  let currentElement = null;
+
+  // Show modal for optional issues
+  document.querySelectorAll('[data-optional="true"]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.preventDefault();
+      currentElement = el;
+      msgEl.textContent = el.dataset.optionalMessage || 'Is this formatting choice intentional?';
+      modal.classList.add('is-open');
+    });
+  });
+
+  yesBtn.addEventListener('click', () => {
+    if (currentElement) {
+      currentElement.classList.add('issue-marked-intentional');
+      const badge = document.createElement('span');
+      badge.className = 'intentional-badge';
+      badge.textContent = '✓ INTENTIONAL';
+      currentElement.appendChild(badge);
+    }
+    modal.classList.remove('is-open');
+  });
+
+  noBtn.addEventListener('click', () => {
+    modal.classList.remove('is-open');
+  });
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.classList.remove('is-open');
+    }
+  });
+})();
+</script>
 
 <p class="disclaimer">This checks the rules we currently model. Always confirm in KDP's own previewer before publishing.</p>
 {% endblock %}
