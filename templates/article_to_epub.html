@@ -8,6 +8,19 @@
   <p class="hero-lead">Share your writing on every platform your readers use. Convert any article to EPUB in seconds, with no sign-ups, no complexity, just results.</p>
 
   <form id="article-form" action="{{ url_for('article_convert') }}" method="post" enctype="multipart/form-data" novalidate class="upload-form-lg">
+    {# URL Input Option #}
+    <div style="margin-bottom: 32px;">
+      <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--pc-strong);">Paste article URL</label>
+      <input type="url" name="article_url" id="article-url" placeholder="https://example.com/article"
+             style="width: 100%; padding: 12px; border: 1.5px solid rgba(240, 240, 243, 0.15); border-radius: 8px; background: rgba(31, 31, 38, 0.3); color: var(--pc-strong); font-size: 1rem;">
+      <p style="font-size: 0.85rem; color: var(--pc-muted); margin-top: 6px;">Paste a URL from Medium, Substack, your blog, or any website</p>
+    </div>
+
+    {# File Upload Option #}
+    <div style="text-align: center; color: var(--pc-muted); margin-bottom: 24px;">
+      <span style="font-weight: 600;">OR</span>
+    </div>
+
     <div class="dropzone-modern" id="article-dropzone">
       <div class="dropzone-icon">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -16,11 +29,11 @@
       </div>
 
       <label for="article-input" class="dropzone-label">
-        <span class="dropzone-title">Paste your article URL or upload HTML</span>
+        <span class="dropzone-title">Upload your file</span>
         <span class="dropzone-subtitle">Drop your file, or <button type="button" class="browse-link" id="browse-article-btn">browse</button></span>
       </label>
 
-      <p class="dropzone-hint">Supports: HTML · TXT · DOCX · or paste article URL</p>
+      <p class="dropzone-hint">Supports: HTML · TXT · DOCX</p>
 
       <input type="file" name="article" id="article-input" accept=".html,.txt,.docx,text/html,text/plain">
 

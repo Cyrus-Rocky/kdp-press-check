@@ -56,40 +56,49 @@
   </form>
 </section>
 
-<div class="tool-grid">
-  <a class="tool-card tool-card-primary" href="{{ url_for('cover_index') }}">
-    <div class="tool-card-icon">📕</div>
-    <span class="tool-card-title">Cover Check</span>
-    <p>Publish with confidence. Validate every dimension KDP requires before you risk rejection.</p>
-    <span class="tool-card-link">Check cover →</span>
-  </a>
-  <a class="tool-card tool-card-primary" href="{{ url_for('kindle_index') }}">
-    <div class="tool-card-icon">📱</div>
-    <span class="tool-card-title">Kindle Check</span>
-    <p>Readers on e-readers deserve perfection. Validate your EPUB structure and formatting instantly.</p>
-    <span class="tool-card-link">Check EPUB →</span>
-  </a>
-  <a class="tool-card tool-card-feature" href="{{ url_for('preview_index') }}">
-    <div class="tool-card-icon">👁️</div>
-    <span class="tool-card-title">Book Preview</span>
-    <p>See exactly how your book looks in print. Catch layout issues before they're published.</p>
-    <span class="tool-card-link">Preview book →</span>
-  </a>
-  <a class="tool-card tool-card-feature" href="{{ url_for('royalty_calculator') }}">
-    <div class="tool-card-icon">💰</div>
-    <span class="tool-card-title">Royalty Calculator</span>
-    <p>Know your numbers before you publish. Calculate profit per copy and breakeven point.</p>
-    <span class="tool-card-link">Calculate royalties →</span>
-  </a>
+<div class="tool-grid" style="grid-template-columns: 1fr 1fr; gap: 20px;">
+  <div style="display: flex; flex-direction: column; gap: 20px;">
+    <a class="tool-card tool-card-primary" href="{{ url_for('cover_index') }}">
+      <div class="tool-card-icon">📕</div>
+      <span class="tool-card-title">Cover Check</span>
+      <p>Validate every dimension KDP requires before you risk rejection.</p>
+      <span class="tool-card-link">Check cover →</span>
+    </a>
+    <a class="tool-card tool-card-feature" href="{{ url_for('preview_index') }}">
+      <div class="tool-card-icon">👁️</div>
+      <span class="tool-card-title">Book Preview</span>
+      <p>See your book layout in print. Catch issues before publishing.</p>
+      <span class="tool-card-link">Preview book →</span>
+    </a>
+  </div>
 
-  {# New: Article to EPUB Converter (Passive Income Product) #}
-  <a class="tool-card tool-card-new" href="/article-to-epub">
-    <div class="tool-card-icon tool-card-icon-new">✨</div>
-    <span class="tool-card-title">Article → EPUB</span>
-    <p>Turn any article into an e-reader file. Share your writing everywhere in seconds.</p>
-    <span class="tool-card-label">NEW</span>
-    <span class="tool-card-link">Convert article →</span>
-  </a>
+  <div style="display: flex; flex-direction: column; gap: 20px;">
+    <a class="tool-card tool-card-primary" href="{{ url_for('kindle_index') }}">
+      <div class="tool-card-icon">📱</div>
+      <span class="tool-card-title">Kindle Check</span>
+      <p>Validate your EPUB structure and formatting for e-readers.</p>
+      <span class="tool-card-link">Check EPUB →</span>
+    </a>
+    <a class="tool-card tool-card-feature" href="{{ url_for('royalty_calculator') }}">
+      <div class="tool-card-icon">💰</div>
+      <span class="tool-card-title">Royalty Calculator</span>
+      <p>Calculate profit per copy and your breakeven point instantly.</p>
+      <span class="tool-card-link">Calculate royalties →</span>
+    </a>
+  </div>
+</div>
+
+{# Article to EPUB Converter - Separate Section #}
+<div style="margin-top: 48px; padding: 32px; background: linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(34, 197, 94, 0.04)); border: 1.5px solid rgba(34, 197, 94, 0.2); border-radius: 12px;">
+  <div style="display: flex; align-items: center; gap: 20px; justify-content: space-between;">
+    <div>
+      <span style="display: inline-block; font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; color: var(--pc-ok); background: rgba(34, 197, 94, 0.15); padding: 4px 10px; border-radius: 4px; margin-bottom: 12px; text-transform: uppercase;">NEW PRODUCT</span>
+      <h3 style="margin: 0 0 8px 0; font-size: 1.25rem; font-weight: 700;">Article to EPUB Converter</h3>
+      <p style="margin: 0; color: var(--pc-muted); max-width: 400px;">Share your writing everywhere. Convert any article to e-reader format in seconds, no sign-ups needed. Freemium: 3 free conversions per month.</p>
+      <a href="/article-to-epub" style="display: inline-block; margin-top: 12px; color: var(--pc-coral); font-weight: 600; text-decoration: none;">Try converter →</a>
+    </div>
+    <div style="font-size: 64px; opacity: 0.7;">✨</div>
+  </div>
 </div>
 
 {% include "_recommended.html" %}

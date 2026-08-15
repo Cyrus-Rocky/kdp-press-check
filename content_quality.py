@@ -207,7 +207,7 @@ def _check_spelling(text: str) -> dict:
     if not unknown:
         return {"title": "Spelling & Typos", "ok": True,
                 "summary": "No spelling issues detected.",
-                "detail": f"Checked {len(sample)} word(s) — all look correct."}
+                "detail": f"Checked {len(sample)} word(s) - all look correct."}
 
     counts = Counter(w for w in sample if w in unknown)
 
@@ -225,7 +225,7 @@ def _check_spelling(text: str) -> dict:
             "title": "Spelling & Typos", "ok": True, "warning_only": True,
             "summary": f"No spelling errors found. ({len(counts)} unknown words appear only once, "
                        f"likely character names or domain terms.)",
-            "detail": "Only flagging words that recur multiple times — those are more likely real typos.",
+            "detail": "Only flagging words that recur multiple times - those are more likely real typos.",
         }
 
     # Format with corrections

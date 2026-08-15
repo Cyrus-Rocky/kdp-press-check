@@ -40,7 +40,7 @@ def classify_disclosure(used_ai: bool, ai_wrote_it: bool) -> dict:
         }
     if not ai_wrote_it:
         return {
-            "verdict": "AI-assisted — no disclosure needed",
+            "verdict": "AI-assisted - no disclosure needed",
             "category": "assisted",
             "explanation": "You wrote the content yourself and only used AI to brainstorm, "
                             "edit, refine, or check it, that's \"AI-assisted\" under KDP's "
@@ -48,7 +48,7 @@ def classify_disclosure(used_ai: bool, ai_wrote_it: bool) -> dict:
                             "even if AI helped substantially with editing.",
         }
     return {
-        "verdict": "AI-generated — disclosure required",
+        "verdict": "AI-generated - disclosure required",
         "category": "generated",
         "explanation": "An AI tool produced the actual text, images, or translation here, "
                         "even if you edited it afterward. KDP classifies this as "
@@ -135,7 +135,7 @@ def scan_manuscript(text: str, max_examples: int = 8) -> dict:
             "severity": severity,
             "label": f"{total_flagged} instance(s) of phrasing detectors commonly flag",
             "detail": ", ".join(f"\"{p}\" x{n}" for p, n in top) +
-                      f" — about {density_per_1000:.1f} per 1,000 words.",
+                      f" - about {density_per_1000:.1f} per 1,000 words.",
         })
 
     # Burstiness: real human writing varies sentence length a lot; very
