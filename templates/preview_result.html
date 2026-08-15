@@ -175,7 +175,7 @@
           </span>
           <div style="margin-top:1rem; display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
             <div style="padding:0.75rem; background:rgba(34,197,94,0.1); border-radius:8px; text-align:center;">
-              <div style="font-size:2rem; font-weight:700; color:#22c55e;">100%</div>
+              <div style="font-size:2rem; font-weight:700; color:#ffffff;">100%</div>
               <div style="font-size:0.9rem; color:var(--color-text-secondary);">KDP Ready</div>
               <div style="font-size:0.8rem; color:var(--color-text-secondary); margin-top:0.25rem;">All blockers passed</div>
             </div>
@@ -409,6 +409,18 @@
 
 </div>{# /.scan-report #}
 
+{# ── "Is this Intentional?" Modal ── #}
+<div class="intentional-modal" id="intentional-modal">
+  <div class="intentional-content">
+    <h3 class="intentional-title">Is this intentional?</h3>
+    <p class="intentional-description" id="intentional-message"></p>
+    <div class="intentional-buttons">
+      <button type="button" class="intentional-btn intentional-btn-yes" id="intentional-yes">Yes, keep it</button>
+      <button type="button" class="intentional-btn intentional-btn-no" id="intentional-no">No, fix it</button>
+    </div>
+  </div>
+</div>
+
 {# ── Data for JS ── #}
 <script>
 (function () {
@@ -601,6 +613,60 @@
   // Preload first 4 pages and render
   preload(0); preload(1); preload(2); preload(3);
   renderSpread();
+
+  // ── "Is this intentional?" Modal System ──
+  var modal = document.getElementById('intentional-modal');
+  var yesBtn = document.getElementById('intentional-yes');
+  var noBtn = document.getElementById('intentional-no');
+  var msgEl = document.getElementById('intentional-message');
+  var currentIssueEl = null;
+
+  // Open modal for optional issues
+  document.querySelectorAll('[data-optional="true"]').forEach(function(el) {
+    var intentBtn = document.createElement('button');
+    intentBtn.type = 'button';
+    intentBtn.className = 'intentional-prompt-btn';
+    intentBtn.textContent = 'Is this intentional?';
+    intentBtn.style.cssText = 'background: rgba(34,197,94,0.1); color: #22c55e; border: 1px solid rgba(34,197,94,0.3); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; margin-left: 8px; transition: all 200ms;';
+
+    intentBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      currentIssueEl = el;
+      var issueTitle = el.querySelector('[data-issue-title]');
+      msgEl.textContent = issueTitle ? 'Is "' + issueTitle.textContent + '" intentional in your book?' : 'Is this formatting intentional?';
+      modal.classList.add('active');
+    });
+
+    el.querySelector('.scan-issue-body')?.appendChild(intentBtn);
+  });
+
+  // Modal button handlers
+  yesBtn.addEventListener('click', function() {
+    if (currentIssueEl) {
+      currentIssueEl.classList.add('issue-marked-intentional');
+      var badge = document.createElement('span');
+      badge.className = 'issue-intentional-badge';
+      badge.textContent = '✓ INTENTIONAL';
+      currentIssueEl.querySelector('.scan-issue-title')?.appendChild(badge);
+
+      // Update score (add 2% for each intentional item)
+      var scoreEl = document.querySelector('[data-quality-score]');
+      if (scoreEl) {
+        var currentScore = parseInt(scoreEl.textContent);
+        scoreEl.textContent = Math.min(100, currentScore + 2) + '%';
+      }
+    }
+    modal.classList.remove('active');
+  });
+
+  noBtn.addEventListener('click', function() {
+    modal.classList.remove('active');
+  });
+
+  // Close modal on backdrop click
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) modal.classList.remove('active');
+  });
 })();
 </script>
 {% endblock %}
