@@ -4946,6 +4946,221 @@ h1, h2, h3 {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   MISSING GRID DEFINITIONS: Add CSS for grids without definitions
+═══════════════════════════════════════════════════════════ */
+
+/* Metadata Optimizer grid layout */
+.meta-grid {
+  display: grid;
+  grid-template-columns: minmax(300px, 1fr) minmax(280px, 380px);
+  gap: 40px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .meta-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+
+/* Essentials/info grid layout */
+.essentials-grid,
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+@media (max-width: 600px) {
+  .essentials-grid,
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Normal content grid */
+.normal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 32px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LAYOUT SYSTEM: Two-column, three-column, and responsive grids
+═══════════════════════════════════════════════════════════ */
+
+/* Two-column responsive layout: inputs left, results right */
+.layout-two-column {
+  display: grid;
+  grid-template-columns: minmax(280px, 400px) minmax(320px, 1fr);
+  gap: 40px;
+  align-items: start;
+}
+
+@media (max-width: 800px) {
+  .layout-two-column {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+
+/* Three-column card grid layout */
+.layout-three-column {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+@media (max-width: 600px) {
+  .layout-three-column {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Side-by-side form layout: form on left, results on right */
+.form-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+
+@media (max-width: 900px) {
+  .form-layout {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+
+/* Card groups: small cards side by side */
+.card-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+@media (max-width: 600px) {
+  .card-group {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Consistent form field styling */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: var(--pc-strong);
+  font-size: 14px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  padding: 12px 14px;
+  border: 1.5px solid var(--pc-rule);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--pc-card);
+  color: var(--pc-ink);
+  transition: border-color 200ms ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--pc-coral);
+  box-shadow: 0 0 0 3px var(--pc-issue-bg);
+}
+
+.form-group input::placeholder {
+  color: var(--pc-faint);
+}
+
+/* Button styling improvements */
+button,
+a.button {
+  min-height: 44px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: normal;
+  word-wrap: break-word;
+  text-decoration: none;
+  transition: all 200ms ease;
+  border: none;
+}
+
+button.primary-btn,
+a.button.primary-btn,
+.btn.btn-primary {
+  background: var(--pc-cta);
+  color: var(--pc-cta-text);
+}
+
+button.primary-btn:hover,
+a.button.primary-btn:hover,
+.btn.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+button.secondary-btn,
+a.button.secondary-btn,
+.btn.btn-secondary {
+  background: var(--pc-card);
+  color: var(--pc-ink);
+  border: 1.5px solid var(--pc-rule);
+}
+
+button.secondary-btn:hover,
+a.button.secondary-btn:hover,
+.btn.btn-secondary:hover {
+  border-color: var(--pc-strong);
+  background: var(--pc-raise);
+}
+
+/* Compact button group for multiple actions */
+.button-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+@media (max-width: 600px) {
+  .button-group {
+    flex-direction: column;
+  }
+
+  .button-group button,
+  .button-group a.button {
+    width: 100%;
+  }
+}
+
+/* Section spacing */
+section {
+  margin-bottom: 60px;
+}
+
+section:last-of-type {
+  margin-bottom: 40px;
+}
+
+/* ═══════════════════════════════════════════════════════════
    Floating Sticky Find Help Button (Bottom Right)
 ═══════════════════════════════════════════════════════════ */
 .floating-help-btn {
