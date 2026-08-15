@@ -190,7 +190,7 @@
       </nav>
 
       <div class="sidebar-foot">
-        <a href="{{ url_for('problem_solvers') }}" class="side-link side-help {{ 'is-active' if active_mode == 'solvers' else '' }}">
+        <a href="{{ url_for('problem_solvers') }}" class="side-link side-help {{ 'is-active' if active_mode == 'solvers' else '' }}" id="find-help-link">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="3.4" stroke="currentColor" stroke-width="1.7"/><path d="M5.5 5.5l4 4M14.5 14.5l4 4M18.5 5.5l-4 4M9.5 14.5l-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
           <span class="sidebar-label">Find help</span>
         </a>

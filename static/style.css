@@ -4231,3 +4231,96 @@ body {
   padding: max(0px, env(safe-area-inset-top)) max(0px, env(safe-area-inset-right))
            max(0px, env(safe-area-inset-bottom)) max(0px, env(safe-area-inset-left));
 }
+
+/* ═══════════════════════════════════════════════════════════
+   LOGO & BRANDING ENHANCEMENTS
+═══════════════════════════════════════════════════════════ */
+
+.mark {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none !important;
+}
+
+.mark::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--pc-coral), var(--pc-coral-soft));
+  transition: width 300ms ease;
+}
+
+.mark:hover::after {
+  width: 100%;
+}
+
+.sidebar-label {
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+
+/* Logo animation on hover */
+.mark-logo {
+  transition: transform 200ms ease;
+}
+
+.mark:hover .mark-logo {
+  transform: scale(1.05);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STICKY FIND HELP FOOTER
+═══════════════════════════════════════════════════════════ */
+
+.sidebar-foot {
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--pc-rule-soft);
+  background: var(--pc-card);
+  z-index: 10;
+}
+
+.side-help {
+  background: linear-gradient(135deg, rgba(255,119,89,0.08), rgba(255,119,89,0.04));
+  border-radius: 6px;
+  padding: 10px 12px;
+  transition: all 200ms ease;
+}
+
+.side-help:hover {
+  background: linear-gradient(135deg, rgba(255,119,89,0.15), rgba(255,119,89,0.1));
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255,119,89,0.15);
+}
+
+.side-help svg {
+  color: var(--pc-coral);
+}
+
+/* Find help responsive */
+@media (max-width: 479px) {
+  .sidebar-foot {
+    padding: 8px 4px;
+  }
+
+  .side-help {
+    padding: 8px 6px;
+  }
+}
+
+@media (min-width: 480px) {
+  .sidebar-foot {
+    padding-top: 16px;
+  }
+
+  .side-help {
+    padding: 10px 12px;
+  }
+}
