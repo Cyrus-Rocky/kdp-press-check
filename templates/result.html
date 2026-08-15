@@ -161,7 +161,7 @@
 </div>
 
 {% if blocking_rows %}
-<div class="result-group">
+<div class="result-group" id="section-blockers">
   <div class="result-group-head">
     <span class="result-group-label">{{ g_label }}</span>
     <span class="result-group-sub">{{ group_sub(blocking_rows) }}</span>
@@ -171,13 +171,18 @@
 {% endif %}
 
 {% if advisory_rows %}
-<div class="result-group">
+<div class="result-group" id="section-advisory">
   <div class="result-group-head">
     <span class="result-group-label">{{ c_label }}</span>
     <span class="result-group-sub">{{ group_sub(advisory_rows) }}</span>
   </div>
   {% for r in advisory_rows %}{{ render_row(r) }}{% endfor %}
 </div>
+{% endif %}
+
+{% if report.results %}
+<div id="section-notes" style="scroll-margin-top: 80px;"></div>
+<div id="section-passed" style="scroll-margin-top: 80px;"></div>
 {% endif %}
 
 {% set ns = namespace(help_count=0) %}
@@ -259,6 +264,26 @@
     if (e.target === modal) {
       modal.classList.remove('is-open');
     }
+  });
+
+  // Status button scroll functionality
+  document.querySelectorAll('.status-nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const filter = btn.dataset.filter;
+      const sectionMap = {
+        'blockers': 'section-blockers',
+        'advisory': 'section-advisory',
+        'notes': 'section-notes',
+        'passed': 'section-passed'
+      };
+      const sectionId = sectionMap[filter];
+      if (sectionId) {
+        const section = document.getElementById(sectionId);
+        if (section) {
+          section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    });
   });
 })();
 </script>

@@ -160,6 +160,19 @@ def index():
     return render_template("index.html", active_mode="interior")
 
 
+@app.route("/article-to-epub", methods=["GET"])
+def article_to_epub():
+    """Article to EPUB converter (coming soon / freemium product)"""
+    return render_template("article_to_epub.html", active_mode="article")
+
+
+@app.route("/article-convert", methods=["POST"])
+def article_convert():
+    """Article to EPUB conversion endpoint (coming soon)"""
+    flash("Article to EPUB converter coming soon! Free tier: 3 conversions/month.")
+    return redirect(url_for("article_to_epub"))
+
+
 @app.route("/check", methods=["POST"])
 def check():
     file = request.files.get("manuscript")
