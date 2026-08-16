@@ -883,7 +883,7 @@ a { color: var(--accent-ink); }
   max-width: 580px;
   margin: 0 0 48px;
 }
-.upload-form-lg { max-width: 720px; }
+.upload-form-lg { max-width: 100%; width: 100%; }
 
 .check-strip {
   display: flex;
@@ -902,7 +902,8 @@ a { color: var(--accent-ink); }
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
-  max-width: 720px;
+  max-width: 100%;
+  width: 100%;
 }
 @media (max-width: 620px) {
   .preview-slots { grid-template-columns: 1fr; }
