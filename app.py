@@ -28,7 +28,7 @@ LEGACY_DOC_EXT = {".doc"}
 # Cap uploads well below the free-tier's 512 MB RAM ceiling. Real KDP interiors
 # and covers are almost always under this; allowing huge files just invites the
 # out-of-memory crashes that take the whole instance down.
-MAX_UPLOAD_MB = int(os.environ.get("MAX_UPLOAD_MB", "40"))
+MAX_UPLOAD_MB = int(os.environ.get("MAX_UPLOAD_MB", "20"))
 MAX_CONTENT_LENGTH = MAX_UPLOAD_MB * 1024 * 1024
 
 app = Flask(__name__)
