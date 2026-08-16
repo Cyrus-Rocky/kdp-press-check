@@ -203,6 +203,10 @@ function cardHtml(entry, isGeneral) {
   if (entry.link) {
     linkHtml = '<a class="decoder-link" href="' + entry.link.href + '">' + entry.link.label + ' →</a>';
   }
+  var feedbackHtml = '';
+  if (isGeneral) {
+    feedbackHtml = '<div style="margin-top:24px; padding-top:20px; border-top:1px solid rgba(240,240,243,0.1);"><p style="font-size:0.9rem; color:var(--pc-muted); margin:0 0 12px 0;">Help us improve: Did this solve your problem?</p><div style="display:flex; gap:8px;"><button class="feedback-btn feedback-yes" data-error="">Yes, thanks!</button><button class="feedback-btn feedback-no" data-error="">No, here\'s my error:</button></div><div class="feedback-input" style="display:none; margin-top:12px;"><textarea placeholder="Paste the exact error message KDP showed you..." style="width:100%; height:80px; padding:8px; border:1.5px solid rgba(240,240,243,0.15); border-radius:6px; background:rgba(31,31,38,0.3); color:var(--pc-strong); font-size:0.9rem; font-family:monospace;" class="feedback-textarea"></textarea><button class="feedback-submit" style="margin-top:8px; padding:8px 12px; background:var(--pc-coral); color:white; border:none; border-radius:4px; cursor:pointer; font-weight:600;">Send feedback</button></div></div>';
+  }
   return '<div class="decoder-card' + (isGeneral ? ' is-general' : '') + '">' +
     '<h3 class="decoder-card-title">' + entry.title + '</h3>' +
     '<p class="decoder-label">What it means</p>' +
@@ -210,6 +214,7 @@ function cardHtml(entry, isGeneral) {
     '<p class="decoder-label">How to fix it</p>' +
     '<div class="decoder-fix">' + entry.fix + '</div>' +
     linkHtml +
+    feedbackHtml +
     '</div>';
 }
 
@@ -231,14 +236,57 @@ function decode() {
   out.innerHTML = scored.slice(0, 3).map(function(x, i) { return cardHtml(x.e, false); }).join("");
 }
 
-document.getElementById("decode-btn").addEventListener("click", decode);
+function attachFeedbackListeners() {
+  document.querySelectorAll(".feedback-yes").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      fetch("/api/error-feedback", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({error: document.getElementById("decoder-input").value, helpful: true})
+      }).then(function() {
+        btn.textContent = "Thanks! →";
+        btn.disabled = true;
+      });
+    });
+  });
+
+  document.querySelectorAll(".feedback-no").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      this.parentElement.nextElementSibling.style.display = "block";
+      this.disabled = true;
+    });
+  });
+
+  document.querySelectorAll(".feedback-submit").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      var textarea = this.parentElement.querySelector(".feedback-textarea");
+      fetch("/api/error-feedback", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({error: textarea.value, helpful: false})
+      }).then(function() {
+        textarea.value = "Thanks! We'll analyze this and add a solution soon.";
+        btn.disabled = true;
+      });
+    });
+  });
+}
+
+document.getElementById("decode-btn").addEventListener("click", function() {
+  decode();
+  setTimeout(attachFeedbackListeners, 100);
+});
 document.getElementById("decoder-input").addEventListener("keydown", function(e) {
-  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") decode();
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+    decode();
+    setTimeout(attachFeedbackListeners, 100);
+  }
 });
 document.querySelectorAll(".decoder-example").forEach(function(btn) {
   btn.addEventListener("click", function() {
     document.getElementById("decoder-input").value = this.getAttribute("data-fill");
     decode();
+    setTimeout(attachFeedbackListeners, 100);
   });
 });
 </script>

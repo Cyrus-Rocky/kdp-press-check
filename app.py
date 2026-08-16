@@ -19,6 +19,7 @@ import preview_renderer
 import admin
 import analytics
 import print_cost_calculator
+import error_feedback
 from problem_solvers_data import CHECK_TO_CATEGORY
 
 UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "uploads")
@@ -965,6 +966,28 @@ def admin_cancel():
     else:
         flash(f"Cancellation failed: {msg}", "error")
     return redirect(url_for("admin_dashboard"))
+
+
+@app.route("/api/error-feedback", methods=["POST"])
+def api_error_feedback():
+    """Collect error feedback from users."""
+    try:
+        data = request.get_json() or {}
+        error_text = data.get("error", "").strip()
+        helpful = data.get("helpful", None)
+
+        if not error_text or len(error_text) < 10:
+            return {"success": False, "message": "Error too short"}, 400
+
+        # Hash the user's IP for privacy (don't store raw IP)
+        import hashlib
+        ip_hash = hashlib.md5(request.remote_addr.encode()).hexdigest()[:8]
+
+        success = error_feedback.collect_error(error_text, helpful, ip_hash)
+        return {"success": success}, 200 if success else 400
+    except Exception as e:
+        logger.error(f"Error collecting feedback: {e}")
+        return {"success": False}, 500
 
 
 @app.errorhandler(RequestEntityTooLarge)
