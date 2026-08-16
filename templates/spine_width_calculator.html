@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% block title %}Spine Width Calculator - Exact measurements for your KDP cover{% endblock %}
+{% block meta_description %}Calculate the exact spine width your book needs based on page count and paper type. KDP's spine width formula depends on paper thickness - get it wrong and your cover gets rejected.{% endblock %}
+{% block content %}
+
+<section class="hero-single">
+  <div class="eyebrow">Spine width calculator</div>
+  <h1 class="hero-display">Your spine width, calculated exactly.</h1>
+  <p class="hero-lead">The spine width of your cover depends on how many pages you have and your paper type. Get this wrong and KDP rejects your cover. Enter your details below and we'll show you the exact measurement.</p>
+
+  <div class="layout-two-column" style="gap: 40px;">
+    {# Left column: Inputs #}
+    <div>
+      <div class="form-group">
+        <label for="spine-pages">How many pages?</label>
+        <input type="number" id="spine-pages" min="24" max="828" value="200" style="width: 100%; padding: 12px; border: 1.5px solid rgba(240, 240, 243, 0.15); border-radius: 8px; background: rgba(31, 31, 38, 0.3); color: var(--pc-strong); font-size: 1rem;">
+        <p style="font-size: 0.85rem; color: var(--pc-muted); margin-top: 6px;">KDP allows 24–828 pages for paperbacks</p>
+      </div>
+
+      <div class="form-group" style="margin-top: 24px;">
+        <label for="spine-paper">Paper type?</label>
+        <select id="spine-paper" style="width: 100%; padding: 12px; border: 1.5px solid rgba(240, 240, 243, 0.15); border-radius: 8px; background: rgba(31, 31, 38, 0.3); color: var(--pc-strong); font-size: 1rem;">
+          <option value="white">White paper (standard, 60# text)</option>
+          <option value="cream">Cream paper (heavier, 60# text)</option>
+          <option value="color">Premium color paper (60# text)</option>
+        </select>
+        <p style="font-size: 0.85rem; color: var(--pc-muted); margin-top: 6px;">Cream paper is heavier, so spine width increases</p>
+      </div>
+    </div>
+
+    {# Right column: Results #}
+    <div>
+      <div style="background: rgba(34, 197, 94, 0.08); border: 1.5px solid rgba(34, 197, 94, 0.2); border-radius: 12px; padding: 32px;">
+        <div style="font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; color: var(--pc-ok); text-transform: uppercase; margin-bottom: 16px;">Your spine width</div>
+
+        <div style="margin-bottom: 24px;">
+          <div style="font-size: 2.5rem; font-weight: 700; color: var(--pc-strong); margin-bottom: 4px;" id="spine-result-in">0.45"</div>
+          <div style="font-size: 0.9rem; color: var(--pc-muted);">at <span id="spine-result-pages">200</span> pages</div>
+        </div>
+
+        <div style="background: rgba(240, 240, 243, 0.05); border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+          <div style="font-size: 0.85rem; color: var(--pc-muted); margin-bottom: 8px;">Also in millimeters:</div>
+          <div style="font-size: 1.25rem; font-weight: 600; color: var(--pc-strong);" id="spine-result-mm">11.4 mm</div>
+        </div>
+
+        <div id="spine-warning" style="background: rgba(249, 115, 22, 0.1); border: 1.5px solid rgba(249, 115, 22, 0.2); border-radius: 8px; padding: 12px; display: none;">
+          <p style="font-size: 0.9rem; color: var(--pc-strong); margin: 0;">⚠️ Don't print text on the spine</p>
+          <p style="font-size: 0.85rem; color: var(--pc-muted); margin: 4px 0 0 0;">With fewer than 130 pages, the spine is too thin for readable text. Keep it blank or use background art only.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# Comparison Table #}
+<section style="margin-top: 64px;">
+  <div style="margin-bottom: 32px;">
+    <h2 style="margin: 0 0 8px 0; font-size: 1.5rem; font-weight: 700;">Spine width at different page counts</h2>
+    <p style="margin: 0; color: var(--pc-muted);">See how spine width grows as your book gets longer. Notice how cream paper's spine is always thicker?</p>
+  </div>
+
+  <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; font-size: 0.95rem;">
+      <thead>
+        <tr style="border-bottom: 2px solid rgba(240, 240, 243, 0.1);">
+          <th style="text-align: left; padding: 12px; color: var(--pc-muted); font-weight: 600;">Page Count</th>
+          <th style="text-align: center; padding: 12px; color: var(--pc-muted); font-weight: 600;">White Paper</th>
+          <th style="text-align: center; padding: 12px; color: var(--pc-muted); font-weight: 600;">Cream Paper</th>
+          <th style="text-align: center; padding: 12px; color: var(--pc-muted); font-weight: 600;">Color Paper</th>
+        </tr>
+      </thead>
+      <tbody id="spine-comparison-table">
+        <!-- Populated by JavaScript -->
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{# Why It Matters #}
+<section style="margin-top: 64px; background: rgba(240, 240, 243, 0.03); border: 1.5px solid rgba(240, 240, 243, 0.1); border-radius: 12px; padding: 40px;">
+  <h2 style="margin: 0 0 24px 0; font-size: 1.5rem; font-weight: 700;">Why spine width matters</h2>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
+    <div>
+      <h3 style="margin: 0 0 12px 0; font-size: 1.1rem; font-weight: 700;">The real problem</h3>
+      <p style="margin: 0; color: var(--pc-muted); line-height: 1.6;">You design your cover with a spine width that looks right on your screen. But if you change your paper type from white to cream (because cream looks better), the spine width mathematically changes. Your cover no longer fits KDP's exact dimensions. They reject it.</p>
+    </div>
+
+    <div>
+      <h3 style="margin: 0 0 12px 0; font-size: 1.1rem; font-weight: 700;">The fix</h3>
+      <p style="margin: 0; color: var(--pc-muted); line-height: 1.6;">Calculate your spine width BEFORE you design the cover. Then, if you decide to change paper type, recalculate. Your designer can adjust the spine proportionally. This tool does the math so you don't lose weeks to rejection cycles.</p>
+    </div>
+  </div>
+</section>
+
+<script>
+const SPINE_PER_PAGE = {
+  white: 0.002252,
+  cream: 0.0025,
+  color: 0.002252
+};
+
+const PAPER_LABELS = {
+  white: "White Paper",
+  cream: "Cream Paper",
+  color: "Premium Color Paper"
+};
+
+function update() {
+  const pages = parseInt(document.getElementById("spine-pages").value, 10) || 200;
+  const paper = document.getElementById("spine-paper").value;
+
+  const spineInches = (pages * SPINE_PER_PAGE[paper]).toFixed(4);
+  const spineMm = (parseFloat(spineInches) * 25.4).toFixed(1);
+
+  document.getElementById("spine-result-in").textContent = spineInches + '"';
+  document.getElementById("spine-result-pages").textContent = pages.toLocaleString();
+  document.getElementById("spine-result-mm").textContent = spineMm + " mm";
+
+  // Show warning for small page counts
+  if (pages < 130) {
+    document.getElementById("spine-warning").style.display = "block";
+  } else {
+    document.getElementById("spine-warning").style.display = "none";
+  }
+
+  // Update comparison table
+  updateComparisonTable();
+}
+
+function updateComparisonTable() {
+  const table = document.getElementById("spine-comparison-table");
+  table.innerHTML = "";
+
+  const pageCounts = [50, 100, 150, 200, 250, 300, 400, 500, 700];
+
+  pageCounts.forEach(pc => {
+    const row = document.createElement("tr");
+    row.style.borderBottom = "1px solid rgba(240, 240, 243, 0.1)";
+
+    const whiteSpine = (pc * SPINE_PER_PAGE.white).toFixed(4);
+    const creamSpine = (pc * SPINE_PER_PAGE.cream).toFixed(4);
+    const colorSpine = (pc * SPINE_PER_PAGE.color).toFixed(4);
+
+    row.innerHTML = `
+      <td style="padding: 12px; font-weight: 600;">${pc} pages</td>
+      <td style="text-align: center; padding: 12px;">${whiteSpine}"</td>
+      <td style="text-align: center; padding: 12px; color: var(--pc-coral); font-weight: 600;">${creamSpine}"</td>
+      <td style="text-align: center; padding: 12px;">${colorSpine}"</td>
+    `;
+    table.appendChild(row);
+  });
+}
+
+// Event listeners
+document.getElementById("spine-pages").addEventListener("input", update);
+document.getElementById("spine-paper").addEventListener("change", update);
+
+// Initial render
+update();
+</script>
+
+{% endblock %}
