@@ -9,25 +9,26 @@
   <form id="upload-form" action="{{ url_for('check') }}" method="post"
         enctype="multipart/form-data" novalidate data-accept=".pdf,.docx,.txt,.rtf,.odt" class="upload-form-lg">
 
-    {# Modern Premium Upload Box #}
-    <div class="dropzone-modern" id="dropzone">
-      <div class="dropzone-icon">
+    {# Modern Horizontal Upload Box #}
+    <div class="dropzone-modern" id="dropzone" style="display: flex; align-items: center; gap: 32px; padding: 32px; cursor: pointer; min-height: 120px; height: auto;">
+      <div class="dropzone-icon" style="flex-shrink: 0;">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M12 2v20M7 13l5 5 5-5M7 8h10"/>
         </svg>
       </div>
 
-      <label for="file-input" class="dropzone-label">
-        <span class="dropzone-title">Upload your manuscript</span>
-        <span class="dropzone-subtitle">Drag and drop your file, or <button type="button" class="browse-link" id="browse-btn">browse</button></span>
-      </label>
-
-      <p class="dropzone-hint">Supports: PDF · DOCX · TXT · RTF · ODT (up to 20 MB)</p>
+      <div style="flex: 1;">
+        <label for="file-input" class="dropzone-label" style="cursor: pointer;">
+          <span class="dropzone-title">Upload your manuscript</span>
+          <span class="dropzone-subtitle">Drag and drop your file, or <button type="button" class="browse-link" id="browse-btn">browse</button></span>
+        </label>
+        <p class="dropzone-hint">Supports: PDF · DOCX · TXT · RTF · ODT (up to 20 MB)</p>
+      </div>
 
       <input type="file" name="manuscript" id="file-input"
-             accept="application/pdf,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx,.txt,.rtf,application/vnd.oasis.opendocument.text,.odt">
+             accept="application/pdf,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx,.txt,.rtf,application/vnd.oasis.opendocument.text,.odt" style="display: none;">
 
-      <div class="filename-display" id="file-display">
+      <div class="filename-display" id="file-display" style="flex-shrink: 0;">
         <div class="filename-info">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
@@ -61,10 +62,10 @@
 
       {# Quote at top #}
       <div style="text-align: center; margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid rgba(240, 240, 243, 0.1);">
-        <p style="margin: 0; font-size: 1.25rem; font-weight: 600; color: var(--pc-strong); line-height: 1.6; font-style: italic;" id="loading-quote">
+        <p style="margin: 0; font-size: 1.25rem; font-weight: 600; color: #fff; line-height: 1.6; font-style: italic;" id="loading-quote">
           "The manuscript is the message. Get it right, and the world listens."
         </p>
-        <p style="margin: 12px 0 0 0; font-size: 0.9rem; color: var(--pc-muted);">— <span id="loading-quote-author">David McCullough, Historian</span></p>
+        <p style="margin: 12px 0 0 0; font-size: 0.9rem; color: rgba(240, 240, 243, 0.6);">— <span id="loading-quote-author">David McCullough, Historian</span></p>
       </div>
 
       {# Loading animation and status #}
@@ -177,6 +178,11 @@ function getRandomQuote() {
   return QUOTES[Math.floor(Math.random() * QUOTES.length)];
 }
 
+// Make entire dropzone clickable
+document.getElementById("dropzone").addEventListener("click", function() {
+  document.getElementById("file-input").click();
+});
+
 // Handle form submission
 document.getElementById("upload-form").addEventListener("submit", function(e) {
   const fileInput = document.getElementById("file-input");
@@ -193,6 +199,16 @@ document.getElementById("upload-form").addEventListener("submit", function(e) {
   const quote = getRandomQuote();
   document.getElementById("loading-quote").textContent = '"' + quote.text + '"';
   document.getElementById("loading-quote-author").textContent = quote.author;
+
+  // Rotate quotes every 10 seconds while loading
+  const quoteInterval = setInterval(() => {
+    const newQuote = getRandomQuote();
+    document.getElementById("loading-quote").textContent = '"' + newQuote.text + '"';
+    document.getElementById("loading-quote-author").textContent = newQuote.author;
+  }, 10000);
+
+  // Store interval ID on modal so we can clear it later
+  modal.quoteInterval = quoteInterval;
 
   // Disable submit button
   const submitBtn = document.getElementById("submit-btn");
@@ -212,6 +228,7 @@ window.addEventListener("load", function() {
   // Only hide if we're on the index page (not on results page)
   if (window.location.pathname === "/" || window.location.pathname === "/index") {
     modal.style.display = "none";
+    if (modal.quoteInterval) clearInterval(modal.quoteInterval);
     document.getElementById("submit-btn").disabled = false;
     document.getElementById("submit-btn").style.opacity = "1";
     document.getElementById("submit-btn").style.cursor = "pointer";

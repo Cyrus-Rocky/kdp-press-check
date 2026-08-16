@@ -114,5 +114,13 @@
   pageCount.addEventListener("input", recompute);
   paperType.addEventListener("change", recompute);
   recompute();
+
+  // Make entire dropzone clickable
+  document.getElementById("dropzone").addEventListener("click", function(e) {
+    if (e.target.tagName !== "BUTTON") {
+      document.getElementById("file-input").click();
+    }
+  });
+  document.getElementById("dropzone").style.cursor = "pointer";
 </script>
 {% endblock %}
