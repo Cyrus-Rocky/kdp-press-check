@@ -1,0 +1,293 @@
+{% extends "base.html" %}
+{% block title %}Cover DPI Calculator - Check if your cover resolution meets KDP requirements{% endblock %}
+{% block meta_description %}Check your book cover's DPI (dots per inch). KDP requires 300 DPI minimum for print quality. Upload your cover or enter dimensions to instantly see if it will be rejected.{% endblock %}
+{% block content %}
+
+<section class="hero-single">
+  <div class="eyebrow">Cover DPI calculator</div>
+  <h1 class="hero-display">Is your cover resolution high enough?</h1>
+  <p class="hero-lead">KDP requires your cover to be at least 300 DPI (dots per inch) at print size. Too low and your cover looks pixelated or gets rejected. Enter your cover dimensions or upload the file to check instantly.</p>
+
+  <div class="layout-two-column" style="gap: 40px;">
+    {# Left column: Input options #}
+    <div>
+      <div style="margin-bottom: 32px;">
+        <div style="font-size: 0.85rem; font-weight: 700; letter-spacing: 1px; color: var(--pc-muted); text-transform: uppercase; margin-bottom: 16px;">Option 1: Enter dimensions</div>
+
+        <div class="form-group">
+          <label for="dpi-width">Cover width (pixels)</label>
+          <input type="number" id="dpi-width" placeholder="e.g. 1800" style="width: 100%; padding: 12px; border: 1.5px solid rgba(240, 240, 243, 0.15); border-radius: 8px; background: rgba(31, 31, 38, 0.3); color: var(--pc-strong); font-size: 1rem;">
+        </div>
+
+        <div class="form-group" style="margin-top: 16px;">
+          <label for="dpi-height">Cover height (pixels)</label>
+          <input type="number" id="dpi-height" placeholder="e.g. 2700" style="width: 100%; padding: 12px; border: 1.5px solid rgba(240, 240, 243, 0.15); border-radius: 8px; background: rgba(31, 31, 38, 0.3); color: var(--pc-strong); font-size: 1rem;">
+        </div>
+
+        <div class="form-group" style="margin-top: 16px;">
+          <label for="dpi-size">Cover size at print (inches)</label>
+          <select id="dpi-size" style="width: 100%; padding: 12px; border: 1.5px solid rgba(240, 240, 243, 0.15); border-radius: 8px; background: rgba(31, 31, 38, 0.3); color: var(--pc-strong); font-size: 1rem;">
+            <option value="">-- Select trim size --</option>
+            <option value="5.5">5.5" × 8.5" (standard paperback)</option>
+            <option value="6">6" × 9" (most common)</option>
+            <option value="5">5" × 8"</option>
+            <option value="7">7" × 10"</option>
+            <option value="8.5">8.5" × 11" (large format)</option>
+            <option value="custom">Custom width</option>
+          </select>
+          <p style="font-size: 0.85rem; color: var(--pc-muted); margin-top: 6px;">For full-wrap cover, use width only (back + spine + front combined)</p>
+        </div>
+
+        <div id="custom-width-input" style="display: none; margin-top: 16px;">
+          <label for="dpi-custom">Custom width (inches)</label>
+          <input type="number" id="dpi-custom" placeholder="e.g. 6.5" step="0.1" style="width: 100%; padding: 12px; border: 1.5px solid rgba(240, 240, 243, 0.15); border-radius: 8px; background: rgba(31, 31, 38, 0.3); color: var(--pc-strong); font-size: 1rem;">
+        </div>
+      </div>
+
+      <div style="text-align: center; color: var(--pc-muted); margin: 32px 0; font-weight: 600;">OR</div>
+
+      <div>
+        <div style="font-size: 0.85rem; font-weight: 700; letter-spacing: 1px; color: var(--pc-muted); text-transform: uppercase; margin-bottom: 16px;">Option 2: Upload cover file</div>
+
+        <div style="border: 2px dashed rgba(240, 240, 243, 0.2); border-radius: 8px; padding: 32px; text-align: center; cursor: pointer;" id="dpi-dropzone">
+          <div style="font-size: 2rem; margin-bottom: 12px;">📤</div>
+          <p style="margin: 0; color: var(--pc-strong); font-weight: 600;">Drop your cover here</p>
+          <p style="margin: 6px 0 0 0; font-size: 0.9rem; color: var(--pc-muted);">or click to browse</p>
+          <input type="file" id="dpi-file" accept="image/jpeg,image/png,image/jpg" style="display: none;">
+        </div>
+        <p style="font-size: 0.85rem; color: var(--pc-muted); margin-top: 12px;">Supports JPG, PNG (up to 10 MB)</p>
+      </div>
+    </div>
+
+    {# Right column: Results #}
+    <div>
+      <div id="dpi-results" style="background: rgba(34, 197, 94, 0.08); border: 1.5px solid rgba(34, 197, 94, 0.2); border-radius: 12px; padding: 32px;">
+        <div style="font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; color: var(--pc-muted); text-transform: uppercase; margin-bottom: 24px;">DPI Analysis</div>
+
+        <div style="text-align: center; padding: 24px 0; border-bottom: 1px solid rgba(240, 240, 243, 0.1); margin-bottom: 24px;">
+          <div style="font-size: 0.9rem; color: var(--pc-muted); margin-bottom: 8px;">Calculated DPI</div>
+          <div style="font-size: 2.5rem; font-weight: 700; color: var(--pc-strong);" id="dpi-value">—</div>
+        </div>
+
+        <div id="dpi-status" style="background: rgba(34, 197, 94, 0.15); border: 1.5px solid rgba(34, 197, 94, 0.3); border-radius: 8px; padding: 16px; margin-bottom: 20px; display: none;">
+          <p style="margin: 0; font-size: 0.95rem; color: var(--pc-strong);">✅ Resolution is good!</p>
+          <p style="margin: 6px 0 0 0; font-size: 0.85rem; color: var(--pc-muted);">Your cover meets KDP's 300 DPI minimum.</p>
+        </div>
+
+        <div id="dpi-warning" style="background: rgba(249, 115, 22, 0.15); border: 1.5px solid rgba(249, 115, 22, 0.3); border-radius: 8px; padding: 16px; margin-bottom: 20px; display: none;">
+          <p style="margin: 0; font-size: 0.95rem; color: var(--pc-strong);">⚠️ Resolution too low!</p>
+          <p style="margin: 6px 0 0 0; font-size: 0.85rem; color: var(--pc-muted);">Your cover is below 300 DPI. KDP may reject it or it will look pixelated.</p>
+        </div>
+
+        <div id="dpi-empty" style="text-align: center; padding: 40px 0; color: var(--pc-muted);">
+          <p style="margin: 0; font-size: 0.95rem;">Enter dimensions or upload a file to calculate DPI</p>
+        </div>
+
+        <div id="dpi-details" style="display: none;">
+          <div style="background: rgba(240, 240, 243, 0.05); border-radius: 8px; padding: 16px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.9rem;">
+              <div>
+                <div style="color: var(--pc-muted); font-size: 0.85rem;">Width</div>
+                <div style="color: var(--pc-strong); font-weight: 600;" id="dpi-detail-width">—</div>
+              </div>
+              <div>
+                <div style="color: var(--pc-muted); font-size: 0.85rem;">Height</div>
+                <div style="color: var(--pc-strong); font-weight: 600;" id="dpi-detail-height">—</div>
+              </div>
+              <div>
+                <div style="color: var(--pc-muted); font-size: 0.85rem;">Print size</div>
+                <div style="color: var(--pc-strong); font-weight: 600;" id="dpi-detail-print">—</div>
+              </div>
+              <div>
+                <div style="color: var(--pc-muted); font-size: 0.85rem;">Status</div>
+                <div style="color: var(--pc-strong); font-weight: 600;" id="dpi-detail-status">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# How to fix #}
+<section style="margin-top: 64px; background: rgba(249, 115, 22, 0.05); border: 1.5px solid rgba(249, 115, 22, 0.15); border-radius: 12px; padding: 40px; display: none;" id="dpi-fix-section">
+  <h2 style="margin: 0 0 24px 0; font-size: 1.5rem; font-weight: 700;">How to fix low DPI</h2>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
+    <div>
+      <h3 style="margin: 0 0 12px 0; font-size: 1.1rem; font-weight: 700;">Option 1: Resize the image</h3>
+      <p style="margin: 0; color: var(--pc-muted); line-height: 1.6;">If you have the original high-res file, export or resize it to a larger pixel dimension. For a 6×9" cover at 300 DPI, you need 1800×2700 pixels minimum.</p>
+    </div>
+
+    <div>
+      <h3 style="margin: 0 0 12px 0; font-size: 1.1rem; font-weight: 700;">Option 2: Use a smaller print size</h3>
+      <p style="margin: 0; color: var(--pc-muted); line-height: 1.6;">If your current pixels can't reach 300 DPI, consider a smaller trim size. A 5×8" cover needs only 1500×2400 pixels for 300 DPI.</p>
+    </div>
+  </div>
+</section>
+
+{# Why DPI matters #}
+<section style="margin-top: 64px;">
+  <h2 style="margin: 0 0 24px 0; font-size: 1.5rem; font-weight: 700;">Why 300 DPI matters</h2>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
+    <div style="background: rgba(34, 197, 94, 0.08); border: 1.5px solid rgba(34, 197, 94, 0.2); border-radius: 12px; padding: 24px;">
+      <h3 style="margin: 0 0 12px 0; font-size: 1.1rem; font-weight: 700;">At 300 DPI</h3>
+      <p style="margin: 0; color: var(--pc-muted); line-height: 1.6;">Your cover looks crisp and professional when printed. Text is sharp, images are clear, colors are vibrant. Readers see a quality product.</p>
+    </div>
+
+    <div style="background: rgba(249, 115, 22, 0.08); border: 1.5px solid rgba(249, 115, 22, 0.2); border-radius: 12px; padding: 24px;">
+      <h3 style="margin: 0 0 12px 0; font-size: 1.1rem; font-weight: 700;">Below 300 DPI</h3>
+      <p style="margin: 0; color: var(--pc-muted); line-height: 1.6;">Your cover looks pixelated or blurry. Text appears fuzzy. Images have visible blocks or artifacts. Readers think it's amateurish. KDP may reject it.</p>
+    </div>
+  </div>
+</section>
+
+{# Quick reference #}
+<section style="margin-top: 64px; background: rgba(240, 240, 243, 0.03); border: 1.5px solid rgba(240, 240, 243, 0.1); border-radius: 12px; padding: 40px;">
+  <h2 style="margin: 0 0 24px 0; font-size: 1.5rem; font-weight: 700;">Minimum pixels at 300 DPI (quick reference)</h2>
+
+  <table style="width: 100%; border-collapse: collapse; font-size: 0.95rem;">
+    <thead>
+      <tr style="border-bottom: 2px solid rgba(240, 240, 243, 0.1);">
+        <th style="text-align: left; padding: 12px; color: var(--pc-muted); font-weight: 600;">Trim Size</th>
+        <th style="text-align: center; padding: 12px; color: var(--pc-muted); font-weight: 600;">Minimum pixels</th>
+        <th style="text-align: center; padding: 12px; color: var(--pc-muted); font-weight: 600;">Recommended</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom: 1px solid rgba(240, 240, 243, 0.05);">
+        <td style="padding: 12px;">5" × 8"</td>
+        <td style="text-align: center; padding: 12px;">1500 × 2400 px</td>
+        <td style="text-align: center; padding: 12px;">1800 × 2880 px</td>
+      </tr>
+      <tr style="border-bottom: 1px solid rgba(240, 240, 243, 0.05);">
+        <td style="padding: 12px;">5.5" × 8.5"</td>
+        <td style="text-align: center; padding: 12px;">1650 × 2550 px</td>
+        <td style="text-align: center; padding: 12px;">1980 × 3060 px</td>
+      </tr>
+      <tr style="border-bottom: 1px solid rgba(240, 240, 243, 0.05);">
+        <td style="padding: 12px;">6" × 9"</td>
+        <td style="text-align: center; padding: 12px;">1800 × 2700 px</td>
+        <td style="text-align: center; padding: 12px;">2160 × 3240 px</td>
+      </tr>
+      <tr style="border-bottom: 1px solid rgba(240, 240, 243, 0.05);">
+        <td style="padding: 12px;">7" × 10"</td>
+        <td style="text-align: center; padding: 12px;">2100 × 3000 px</td>
+        <td style="text-align: center; padding: 12px;">2520 × 3600 px</td>
+      </tr>
+      <tr>
+        <td style="padding: 12px;">8.5" × 11"</td>
+        <td style="text-align: center; padding: 12px;">2550 × 3300 px</td>
+        <td style="text-align: center; padding: 12px;">3060 × 3960 px</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<script>
+const TRIM_SIZES = {
+  "5.5": 5.5,
+  "6": 6,
+  "5": 5,
+  "7": 7,
+  "8.5": 8.5,
+};
+
+function calculateDPI() {
+  const width = parseInt(document.getElementById("dpi-width").value, 10);
+  const height = parseInt(document.getElementById("dpi-height").value, 10);
+  const sizeValue = document.getElementById("dpi-size").value;
+  const customWidth = parseFloat(document.getElementById("dpi-custom").value);
+
+  if (!width || !height || !sizeValue) {
+    document.getElementById("dpi-results").innerHTML = '<div style="font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; color: var(--pc-muted); text-transform: uppercase; margin-bottom: 24px;">DPI Analysis</div><div id="dpi-empty" style="text-align: center; padding: 40px 0; color: var(--pc-muted);"><p style="margin: 0; font-size: 0.95rem;">Enter dimensions or upload a file to calculate DPI</p></div>';
+    document.getElementById("dpi-fix-section").style.display = "none";
+    return;
+  }
+
+  let printWidth = TRIM_SIZES[sizeValue];
+  if (sizeValue === "custom") {
+    printWidth = customWidth;
+  }
+  if (!printWidth) {
+    return;
+  }
+
+  const dpi = Math.round(width / printWidth);
+  const isPassing = dpi >= 300;
+
+  const statusHtml = isPassing
+    ? '<div id="dpi-status" style="background: rgba(34, 197, 94, 0.15); border: 1.5px solid rgba(34, 197, 94, 0.3); border-radius: 8px; padding: 16px; margin-bottom: 20px;"><p style="margin: 0; font-size: 0.95rem; color: var(--pc-strong);">✅ Resolution is good!</p><p style="margin: 6px 0 0 0; font-size: 0.85rem; color: var(--pc-muted);">Your cover meets KDP\'s 300 DPI minimum.</p></div>'
+    : '<div id="dpi-warning" style="background: rgba(249, 115, 22, 0.15); border: 1.5px solid rgba(249, 115, 22, 0.3); border-radius: 8px; padding: 16px; margin-bottom: 20px;"><p style="margin: 0; font-size: 0.95rem; color: var(--pc-strong);">⚠️ Resolution too low!</p><p style="margin: 6px 0 0 0; font-size: 0.85rem; color: var(--pc-muted);">Your cover is below 300 DPI. KDP may reject it or it will look pixelated.</p></div>';
+
+  const detailsHtml = '<div id="dpi-details"><div style="background: rgba(240, 240, 243, 0.05); border-radius: 8px; padding: 16px;"><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.9rem;"><div><div style="color: var(--pc-muted); font-size: 0.85rem;">Width</div><div style="color: var(--pc-strong); font-weight: 600;">' + width + ' px</div></div><div><div style="color: var(--pc-muted); font-size: 0.85rem;">Height</div><div style="color: var(--pc-strong); font-weight: 600;">' + height + ' px</div></div><div><div style="color: var(--pc-muted); font-size: 0.85rem;">Print size</div><div style="color: var(--pc-strong); font-weight: 600;">' + printWidth + '"</div></div><div><div style="color: var(--pc-muted); font-size: 0.85rem;">Status</div><div style="color: ' + (isPassing ? 'var(--pc-ok)' : 'var(--pc-fail)') + '; font-weight: 600;">' + (isPassing ? 'GOOD' : 'TOO LOW') + '</div></div></div></div></div>';
+
+  document.getElementById("dpi-results").innerHTML =
+    '<div style="font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; color: var(--pc-muted); text-transform: uppercase; margin-bottom: 24px;">DPI Analysis</div>' +
+    '<div style="text-align: center; padding: 24px 0; border-bottom: 1px solid rgba(240, 240, 243, 0.1); margin-bottom: 24px;"><div style="font-size: 0.9rem; color: var(--pc-muted); margin-bottom: 8px;">Calculated DPI</div><div style="font-size: 2.5rem; font-weight: 700; color: ' + (isPassing ? 'var(--pc-ok)' : 'var(--pc-fail)') + ';">' + dpi + ' DPI</div></div>' +
+    statusHtml +
+    detailsHtml;
+
+  document.getElementById("dpi-fix-section").style.display = isPassing ? "none" : "block";
+}
+
+document.getElementById("dpi-width").addEventListener("input", calculateDPI);
+document.getElementById("dpi-height").addEventListener("input", calculateDPI);
+document.getElementById("dpi-size").addEventListener("change", function() {
+  if (this.value === "custom") {
+    document.getElementById("custom-width-input").style.display = "block";
+  } else {
+    document.getElementById("custom-width-input").style.display = "none";
+  }
+  calculateDPI();
+});
+document.getElementById("dpi-custom").addEventListener("input", calculateDPI);
+
+// File upload
+document.getElementById("dpi-dropzone").addEventListener("click", () => {
+  document.getElementById("dpi-file").click();
+});
+
+document.getElementById("dpi-file").addEventListener("change", function() {
+  const file = this.files[0];
+  if (!file) return;
+
+  const img = new Image();
+  img.onload = function() {
+    document.getElementById("dpi-width").value = img.width;
+    document.getElementById("dpi-height").value = img.height;
+    document.getElementById("dpi-size").value = "6"; // default to 6x9
+    calculateDPI();
+  };
+  img.src = URL.createObjectURL(file);
+});
+
+document.getElementById("dpi-dropzone").addEventListener("dragover", (e) => {
+  e.preventDefault();
+  e.currentTarget.style.opacity = "0.7";
+});
+
+document.getElementById("dpi-dropzone").addEventListener("dragleave", (e) => {
+  e.currentTarget.style.opacity = "1";
+});
+
+document.getElementById("dpi-dropzone").addEventListener("drop", (e) => {
+  e.preventDefault();
+  e.currentTarget.style.opacity = "1";
+  const file = e.dataTransfer.files[0];
+  if (!file) return;
+
+  const img = new Image();
+  img.onload = function() {
+    document.getElementById("dpi-width").value = img.width;
+    document.getElementById("dpi-height").value = img.height;
+    document.getElementById("dpi-size").value = "6";
+    calculateDPI();
+  };
+  img.src = URL.createObjectURL(file);
+});
+</script>
+
+{% endblock %}
