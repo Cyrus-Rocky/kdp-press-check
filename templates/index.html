@@ -54,6 +54,59 @@
     <p id="form-status" role="status" aria-live="polite"
        style="position:absolute; left:-9999px;"></p>
   </form>
+
+  {# LOADING MODAL #}
+  <div id="loading-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+    <div style="background: rgba(31, 31, 38, 0.95); border: 1.5px solid rgba(240, 240, 243, 0.15); border-radius: 16px; padding: 48px; max-width: 700px; width: 90%; backdrop-filter: blur(10px);">
+
+      {# Quote at top #}
+      <div style="text-align: center; margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid rgba(240, 240, 243, 0.1);">
+        <p style="margin: 0; font-size: 1.25rem; font-weight: 600; color: var(--pc-strong); line-height: 1.6; font-style: italic;" id="loading-quote">
+          "The manuscript is the message. Get it right, and the world listens."
+        </p>
+        <p style="margin: 12px 0 0 0; font-size: 0.9rem; color: var(--pc-muted);">— <span id="loading-quote-author">David McCullough, Historian</span></p>
+      </div>
+
+      {# Loading animation and status #}
+      <div style="text-align: center;">
+        {# Animated loading spinner #}
+        <div style="margin-bottom: 32px;">
+          <svg width="64" height="64" viewBox="0 0 64 64" style="margin: 0 auto; display: block;">
+            <circle cx="32" cy="32" r="28" fill="none" stroke="rgba(240, 240, 243, 0.1)" stroke-width="3"/>
+            <circle cx="32" cy="32" r="28" fill="none" stroke="var(--pc-coral)" stroke-width="3" stroke-dasharray="44 100" stroke-linecap="round" style="animation: spin 2s linear infinite; transform-origin: 32px 32px;">
+              <style>
+                @keyframes spin {
+                  0% { transform: rotate(0deg); }
+                  100% { transform: rotate(360deg); }
+                }
+              </style>
+            </circle>
+          </svg>
+        </div>
+
+        <h3 style="margin: 0 0 12px 0; font-size: 1.25rem; font-weight: 700; color: var(--pc-strong);">Analyzing your manuscript</h3>
+        <p style="margin: 0 0 24px 0; font-size: 0.95rem; color: var(--pc-muted); line-height: 1.6;">
+          We're checking your book against KDP's exact requirements. This usually takes 30-60 seconds depending on file size.
+        </p>
+
+        {# Progress indicators #}
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 32px;">
+          <div style="padding: 12px; background: rgba(34, 197, 94, 0.1); border-radius: 8px;">
+            <div style="font-size: 1.5rem; margin-bottom: 4px;">📄</div>
+            <div style="font-size: 0.85rem; color: var(--pc-muted);">Reading file</div>
+          </div>
+          <div style="padding: 12px; background: rgba(34, 197, 94, 0.1); border-radius: 8px;">
+            <div style="font-size: 1.5rem; margin-bottom: 4px;">🔍</div>
+            <div style="font-size: 0.85rem; color: var(--pc-muted);">Running checks</div>
+          </div>
+          <div style="padding: 12px; background: rgba(34, 197, 94, 0.1); border-radius: 8px;">
+            <div style="font-size: 1.5rem; margin-bottom: 4px;">✨</div>
+            <div style="font-size: 0.85rem; color: var(--pc-muted);">Building report</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
 
 <div class="tool-grid" style="grid-template-columns: 1fr 1fr; gap: 20px;">
@@ -89,4 +142,80 @@
 </div>
 
 {% include "_recommended.html" %}
+
+<script>
+// Motivational quotes for loading screen
+const QUOTES = [
+  {
+    text: "The manuscript is the message. Get it right, and the world listens.",
+    author: "David McCullough, Historian"
+  },
+  {
+    text: "A rejected manuscript is not a rejection of you. It's a redirection to something better.",
+    author: "Stephen King, Author"
+  },
+  {
+    text: "Your book deserves to be perfect. We're making sure it is.",
+    author: "KDP Press Check"
+  },
+  {
+    text: "Every page you perfect is a reader you earn.",
+    author: "Unknown"
+  },
+  {
+    text: "Publishing isn't about luck. It's about preparation meeting opportunity.",
+    author: "Malcolm Gladwell"
+  },
+  {
+    text: "The only difference between a published author and an unpublished one is action.",
+    author: "You, Right Now"
+  }
+];
+
+// Get random quote
+function getRandomQuote() {
+  return QUOTES[Math.floor(Math.random() * QUOTES.length)];
+}
+
+// Handle form submission
+document.getElementById("upload-form").addEventListener("submit", function(e) {
+  const fileInput = document.getElementById("file-input");
+  if (!fileInput.files || fileInput.files.length === 0) {
+    e.preventDefault();
+    return;
+  }
+
+  // Show loading modal
+  const modal = document.getElementById("loading-modal");
+  modal.style.display = "flex";
+
+  // Set random quote
+  const quote = getRandomQuote();
+  document.getElementById("loading-quote").textContent = '"' + quote.text + '"';
+  document.getElementById("loading-quote-author").textContent = quote.author;
+
+  // Disable submit button
+  const submitBtn = document.getElementById("submit-btn");
+  submitBtn.disabled = true;
+  submitBtn.style.opacity = "0.5";
+  submitBtn.style.cursor = "not-allowed";
+
+  // Scroll to modal
+  setTimeout(() => {
+    modal.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, 100);
+});
+
+// Hide modal when page loads (after redirect from server)
+window.addEventListener("load", function() {
+  const modal = document.getElementById("loading-modal");
+  // Only hide if we're on the index page (not on results page)
+  if (window.location.pathname === "/" || window.location.pathname === "/index") {
+    modal.style.display = "none";
+    document.getElementById("submit-btn").disabled = false;
+    document.getElementById("submit-btn").style.opacity = "1";
+    document.getElementById("submit-btn").style.cursor = "pointer";
+  }
+});
+</script>
 {% endblock %}
