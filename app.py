@@ -16,6 +16,10 @@ import pro_access
 import recommended_tools
 import kdp_rules as rules
 import preview_renderer
+import admin
+import analytics
+import print_cost_calculator
+import error_feedback
 from problem_solvers_data import CHECK_TO_CATEGORY
 
 UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "uploads")
@@ -24,7 +28,7 @@ LEGACY_DOC_EXT = {".doc"}
 # Cap uploads well below the free-tier's 512 MB RAM ceiling. Real KDP interiors
 # and covers are almost always under this; allowing huge files just invites the
 # out-of-memory crashes that take the whole instance down.
-MAX_UPLOAD_MB = int(os.environ.get("MAX_UPLOAD_MB", "40"))
+MAX_UPLOAD_MB = int(os.environ.get("MAX_UPLOAD_MB", "20"))
 MAX_CONTENT_LENGTH = MAX_UPLOAD_MB * 1024 * 1024
 
 app = Flask(__name__)
@@ -48,7 +52,8 @@ SITE_URL = os.environ.get("SITE_URL", "https://kdp-press-check.onrender.com").rs
 # Every GET page, for the sitemap.
 SITEMAP_ENDPOINTS = [
     "index", "cover_index", "kindle_index", "preview_index", "error_decoder",
-    "keyword_linter", "margin_advisor", "royalty_calculator",
+    "keyword_linter", "margin_advisor", "spine_width_calculator", "cover_dpi_calculator", "isbn_helper", "description_formatter", "copyright_builder",
+    "metadata_optimizer", "review_timeline", "royalty_calculator", "print_cost_index",
     "estimate_pages_index", "genre_checklist", "launch_checklist",
     "templates_page", "problem_solvers",
 ]
@@ -185,8 +190,13 @@ def check():
             report = run_all_checks(path)
         else:
             report = run_all_checks_text_format(path, ext)
-    except Exception:
+
+        # Track analytics
+        analytics.track_check("interior_check")
+        analytics.track_upload(ext)
+    except Exception as e:
         logger.exception("Failed to analyze upload %s (%s)", safe_name, file.filename)
+        analytics.log_error(str(e), feature="interior_check")
         flash(
             "We couldn't read that file. It may be corrupted, password-protected, "
             "or not a valid file of its type, try re-exporting it and upload again."
@@ -254,8 +264,13 @@ def check_cover():
             _doc.close()
         except Exception:
             pass
-    except Exception:
+
+        # Track analytics
+        analytics.track_check("cover_check")
+        analytics.track_upload(".pdf")
+    except Exception as e:
         logger.exception("Failed to analyze cover upload %s (%s)", safe_name, file.filename)
+        analytics.log_error(str(e), feature="cover_check")
         flash(
             "We couldn't read that file. It may be corrupted, password-protected, "
             "or not a valid PDF, try re-exporting it and upload again."
@@ -274,6 +289,48 @@ def check_cover():
 @app.route("/royalty-calculator", methods=["GET"])
 def royalty_calculator():
     return render_template("royalty_calculator.html", active_mode="royalty")
+
+
+@app.route("/print-cost-calculator", methods=["GET"])
+def print_cost_index():
+    return render_template("print_cost_calculator.html", active_mode="print-cost")
+
+
+@app.route("/print-cost-calculator", methods=["POST"])
+def print_cost_calculate():
+    """Calculate print costs for different configurations."""
+    try:
+        page_count = int(request.form.get("page_count", 300))
+        trim_size = request.form.get("trim_size", "6x9")
+        is_color = request.form.get("is_color", "false").lower() == "true"
+        list_price = float(request.form.get("list_price", 14.99))
+
+        # Calculate costs
+        bw_cost = print_cost_calculator.calculate_print_cost(page_count, trim_size, is_color=False)
+        color_cost = print_cost_calculator.calculate_print_cost(page_count, trim_size, is_color=True)
+        bw_royalty = print_cost_calculator.royalty_impact(list_price, bw_cost["per_unit_cost"])
+        color_royalty = print_cost_calculator.royalty_impact(list_price, color_cost["per_unit_cost"])
+        comparison = print_cost_calculator.compare_formats(page_count, list_price)
+        suggested = print_cost_calculator.suggest_price(bw_cost["per_unit_cost"], target_profit=3.00)
+
+        return render_template(
+            "print_cost_calculator.html",
+            active_mode="print-cost",
+            page_count=page_count,
+            trim_size=trim_size,
+            is_color=is_color,
+            list_price=list_price,
+            bw_cost=bw_cost,
+            color_cost=color_cost,
+            bw_royalty=bw_royalty,
+            color_royalty=color_royalty,
+            comparison=comparison,
+            suggested=suggested,
+            calculated=True,
+        )
+    except (ValueError, KeyError) as e:
+        flash(f"Invalid input: {str(e)}")
+        return redirect(url_for("print_cost_index"))
 
 
 @app.route("/estimate-pages", methods=["GET"])
@@ -370,6 +427,41 @@ def keyword_linter():
 @app.route("/margin-advisor", methods=["GET"])
 def margin_advisor():
     return render_template("margin_advisor.html", active_mode="margins")
+
+
+@app.route("/spine-width-calculator", methods=["GET"])
+def spine_width_calculator():
+    return render_template("spine_width_calculator.html", active_mode="spine")
+
+
+@app.route("/cover-dpi-calculator", methods=["GET"])
+def cover_dpi_calculator():
+    return render_template("cover_dpi_calculator.html", active_mode="dpi")
+
+
+@app.route("/isbn-helper", methods=["GET"])
+def isbn_helper():
+    return render_template("isbn_helper.html", active_mode="isbn")
+
+
+@app.route("/description-formatter", methods=["GET"])
+def description_formatter():
+    return render_template("description_formatter.html", active_mode="description")
+
+
+@app.route("/copyright-builder", methods=["GET"])
+def copyright_builder():
+    return render_template("copyright_page_builder.html", active_mode="copyright")
+
+
+@app.route("/metadata-optimizer", methods=["GET"])
+def metadata_optimizer():
+    return render_template("metadata_optimizer.html", active_mode="metadata")
+
+
+@app.route("/review-timeline", methods=["GET"])
+def review_timeline():
+    return render_template("review_timeline.html", active_mode="timeline")
 
 
 @app.route("/launch-checklist", methods=["GET"])
@@ -543,6 +635,7 @@ def ai_disclosure_quiz():
     used_ai = request.form.get("used_ai") == "yes"
     ai_wrote_it = request.form.get("ai_wrote_it") == "yes"
     quiz_result = ai_disclosure.classify_disclosure(used_ai, ai_wrote_it)
+    analytics.track_pro_check("ai_disclosure_quiz")
     return render_template("pro_ai_disclosure.html", active_mode="pro", quiz_result=quiz_result,
                             used_ai=request.form.get("used_ai"), ai_wrote_it=request.form.get("ai_wrote_it"))
 
@@ -565,6 +658,7 @@ def ai_disclosure_scan():
         flash("We couldn't read that file. It may be corrupted, try re-saving and uploading again.")
         return redirect(url_for("ai_disclosure_advisor"))
     scan_result = ai_disclosure.scan_manuscript(text)
+    analytics.track_pro_check("ai_disclosure_scan")
     return render_template("pro_ai_disclosure.html", active_mode="pro",
                             scan_result=scan_result, scan_filename=file.filename)
 
@@ -787,6 +881,110 @@ def problem_solvers():
     cat = request.args.get("cat", "all")
     return render_template("problem_solvers.html", active_mode="solvers",
                            solvers=SOLVERS, categories=CATEGORIES, active_cat=cat)
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# ADMIN DASHBOARD ROUTES
+# ──────────────────────────────────────────────────────────────────────────────
+
+@app.route("/admin", methods=["GET"])
+@admin.admin_required
+def admin_dashboard():
+    """Main admin dashboard showing analytics, subscribers, and system health."""
+    subs = admin.fetch_stripe_subscribers()
+    stats = analytics.get_stats()
+    top = analytics.get_top_features(n=5)
+    max_checks = max(top.values()) if top else 1
+    max_pro = max(stats['pro_checks_by_feature'].values()) if stats['pro_checks_by_feature'] else 1
+    max_uploads = max(stats['uploads_by_format'].values()) if stats['uploads_by_format'] else 1
+
+    active_count = sum(1 for s in subs if s['status'] == 'active')
+    trial_count = sum(1 for s in subs if s['status'] == 'trialing')
+
+    return render_template("admin_dashboard.html",
+                           subscribers=subs,
+                           subscriber_count=len(subs),
+                           active_sub_count=active_count,
+                           trial_count=trial_count,
+                           mrr=admin.calculate_mrr(subs),
+                           stats=stats,
+                           top_features=top,
+                           max_checks=max_checks,
+                           max_pro=max_pro,
+                           max_uploads=max_uploads)
+
+
+@app.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+    """Admin login page."""
+    if request.method == "POST":
+        password = request.form.get("password", "")
+        success, msg = admin.verify_admin_password(password)
+        if success:
+            admin.mark_admin_authenticated(session)
+            flash("Welcome, admin!")
+            return redirect(url_for("admin_dashboard"))
+        else:
+            flash(f"Login failed: {msg}", "error")
+
+    return render_template("admin_login.html")
+
+
+@app.route("/admin/logout", methods=["GET", "POST"])
+def admin_logout():
+    """Log out of admin panel."""
+    session.pop("admin_authenticated", None)
+    session.pop("admin_auth_time", None)
+    flash("Logged out of admin panel.")
+    return redirect(url_for("index"))
+
+
+@app.route("/admin/refund", methods=["POST"])
+@admin.admin_required
+def admin_refund():
+    """Issue a refund for a subscription."""
+    sub_id = request.form.get("subscription_id", "")
+    success, msg = admin.refund_subscription(sub_id, reason="refund")
+    if success:
+        flash(f"Refund issued: {msg}")
+    else:
+        flash(f"Refund failed: {msg}", "error")
+    return redirect(url_for("admin_dashboard"))
+
+
+@app.route("/admin/cancel", methods=["POST"])
+@admin.admin_required
+def admin_cancel():
+    """Cancel a subscription."""
+    sub_id = request.form.get("subscription_id", "")
+    success, msg = admin.cancel_subscription(sub_id)
+    if success:
+        flash(f"Subscription cancelled: {msg}")
+    else:
+        flash(f"Cancellation failed: {msg}", "error")
+    return redirect(url_for("admin_dashboard"))
+
+
+@app.route("/api/error-feedback", methods=["POST"])
+def api_error_feedback():
+    """Collect error feedback from users."""
+    try:
+        data = request.get_json() or {}
+        error_text = data.get("error", "").strip()
+        helpful = data.get("helpful", None)
+
+        if not error_text or len(error_text) < 10:
+            return {"success": False, "message": "Error too short"}, 400
+
+        # Hash the user's IP for privacy (don't store raw IP)
+        import hashlib
+        ip_hash = hashlib.md5(request.remote_addr.encode()).hexdigest()[:8]
+
+        success = error_feedback.collect_error(error_text, helpful, ip_hash)
+        return {"success": success}, 200 if success else 400
+    except Exception as e:
+        logger.error(f"Error collecting feedback: {e}")
+        return {"success": False}, 500
 
 
 @app.errorhandler(RequestEntityTooLarge)

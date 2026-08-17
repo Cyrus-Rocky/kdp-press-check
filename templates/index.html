@@ -2,65 +2,237 @@
 {% block content %}
 
 <section class="hero-single">
-  <div class="eyebrow">Interior check · Paperback</div>
-  <h1 class="hero-display">Catch it before KDP&nbsp;does.</h1>
-  <p class="hero-lead">Upload your paperback interior and get the full report KDP won't give you: margins, fonts, bleed, image resolution, and everything else it checks at submission, before you risk a rejected upload.</p>
+  <div class="eyebrow">KDP Press Check · Get Published Without Fear</div>
+  <h1 class="hero-display">Never face a rejected upload&nbsp;again.</h1>
+  <p class="hero-lead">Every rejected KDP submission costs you a month. Every resubmission kills your confidence. Check your book against KDP's exact requirements BEFORE you upload—so you publish with certainty, not anxiety.</p>
 
   <form id="upload-form" action="{{ url_for('check') }}" method="post"
         enctype="multipart/form-data" novalidate data-accept=".pdf,.docx,.txt,.rtf,.odt" class="upload-form-lg">
-    <div class="dropzone" id="dropzone">
-      <span class="bracket-r" aria-hidden="true"></span>
-      <span class="scanline" aria-hidden="true"></span>
 
-      <label for="file-input" class="instructions">Drop your interior file here, or
-        <button type="button" class="browse" id="browse-btn">click to browse</button>
-      </label>
-      <p class="filehint">PDF · DOCX · TXT · RTF · ODT</p>
+    {# Modern Horizontal Upload Box #}
+    <div class="dropzone-modern" id="dropzone" style="display: flex; align-items: center; gap: 32px; padding: 32px; cursor: pointer; min-height: 120px; height: auto;">
+      <div class="dropzone-icon" style="flex-shrink: 0;">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 2v20M7 13l5 5 5-5M7 8h10"/>
+        </svg>
+      </div>
+
+      <div style="flex: 1;">
+        <label for="file-input" class="dropzone-label" style="cursor: pointer;">
+          <span class="dropzone-title">Upload your manuscript</span>
+          <span class="dropzone-subtitle">Drag and drop your file, or <button type="button" class="browse-link" id="browse-btn">browse</button></span>
+        </label>
+        <p class="dropzone-hint">Supports: PDF · DOCX · TXT · RTF · ODT (up to 20 MB)</p>
+      </div>
 
       <input type="file" name="manuscript" id="file-input"
-             accept="application/pdf,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx,.txt,.rtf,application/vnd.oasis.opendocument.text,.odt">
+             accept="application/pdf,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx,.txt,.rtf,application/vnd.oasis.opendocument.text,.odt" style="display: none;">
 
-      <div class="filename-display" id="file-display">
-        <span id="file-name"></span>
-        <button type="button" class="remove" id="file-remove">Remove</button>
+      <div class="filename-display" id="file-display" style="flex-shrink: 0;">
+        <div class="filename-info">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
+            <polyline points="13 2 13 9 20 9"/>
+          </svg>
+          <span id="file-name"></span>
+        </div>
+        <button type="button" class="remove-file" id="file-remove" title="Remove file">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
       </div>
     </div>
 
     <div class="actions-inline">
-      <button type="submit" class="primary" id="submit-btn" disabled>
-        <span class="label">Run press check →</span>
-        <span class="spinner"><span class="spinner-dash" aria-hidden="true"></span> Checking manuscript&hellip;</span>
+      <button type="submit" class="primary-btn" id="submit-btn" disabled>
+        <span class="label">Check my manuscript →</span>
+        <span class="spinner"><span class="spinner-dash" aria-hidden="true"></span> Analyzing…</span>
       </button>
-      <span class="footnote-inline">Nothing is stored. Your file is deleted the moment the check is done.</span>
+      <span class="footnote-inline">🔒 Private & instant. Deleted after check completes.</span>
     </div>
 
     <p id="form-status" role="status" aria-live="polite"
        style="position:absolute; left:-9999px;"></p>
   </form>
+
+  {# LOADING MODAL #}
+  <div id="loading-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+    <div style="background: rgba(31, 31, 38, 0.95); border: 1.5px solid rgba(240, 240, 243, 0.15); border-radius: 16px; padding: 48px; max-width: 700px; width: 90%; backdrop-filter: blur(10px);">
+
+      {# Quote at top #}
+      <div style="text-align: center; margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid rgba(240, 240, 243, 0.1);">
+        <p style="margin: 0; font-size: 1.25rem; font-weight: 600; color: #fff; line-height: 1.6; font-style: italic;" id="loading-quote">
+          "The manuscript is the message. Get it right, and the world listens."
+        </p>
+        <p style="margin: 12px 0 0 0; font-size: 0.9rem; color: rgba(240, 240, 243, 0.6);">— <span id="loading-quote-author">David McCullough, Historian</span></p>
+      </div>
+
+      {# Loading animation and status #}
+      <div style="text-align: center;">
+        {# Animated loading spinner #}
+        <div style="margin-bottom: 32px;">
+          <svg width="64" height="64" viewBox="0 0 64 64" style="margin: 0 auto; display: block;">
+            <circle cx="32" cy="32" r="28" fill="none" stroke="rgba(240, 240, 243, 0.1)" stroke-width="3"/>
+            <circle cx="32" cy="32" r="28" fill="none" stroke="var(--pc-coral)" stroke-width="3" stroke-dasharray="44 100" stroke-linecap="round" style="animation: spin 2s linear infinite; transform-origin: 32px 32px;">
+              <style>
+                @keyframes spin {
+                  0% { transform: rotate(0deg); }
+                  100% { transform: rotate(360deg); }
+                }
+              </style>
+            </circle>
+          </svg>
+        </div>
+
+        <h3 style="margin: 0 0 12px 0; font-size: 1.25rem; font-weight: 700; color: var(--pc-strong);">Analyzing your manuscript</h3>
+        <p style="margin: 0 0 24px 0; font-size: 0.95rem; color: var(--pc-muted); line-height: 1.6;">
+          We're checking your book against KDP's exact requirements. This usually takes 30-60 seconds depending on file size.
+        </p>
+
+        {# Progress indicators #}
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 32px;">
+          <div style="padding: 12px; background: rgba(34, 197, 94, 0.1); border-radius: 8px;">
+            <div style="font-size: 1.5rem; margin-bottom: 4px;">📄</div>
+            <div style="font-size: 0.85rem; color: var(--pc-muted);">Reading file</div>
+          </div>
+          <div style="padding: 12px; background: rgba(34, 197, 94, 0.1); border-radius: 8px;">
+            <div style="font-size: 1.5rem; margin-bottom: 4px;">🔍</div>
+            <div style="font-size: 0.85rem; color: var(--pc-muted);">Running checks</div>
+          </div>
+          <div style="padding: 12px; background: rgba(34, 197, 94, 0.1); border-radius: 8px;">
+            <div style="font-size: 1.5rem; margin-bottom: 4px;">✨</div>
+            <div style="font-size: 0.85rem; color: var(--pc-muted);">Building report</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
 
-<div class="tool-grid">
-  <a class="tool-card" href="{{ url_for('cover_index') }}">
-    <span class="tool-card-title">Cover check</span>
-    <p>Validate your full-wrap cover: spine width, bleed, barcode zone.</p>
-    <span class="tool-card-link">Open →</span>
-  </a>
-  <a class="tool-card" href="{{ url_for('kindle_index') }}">
-    <span class="tool-card-title">Kindle check</span>
-    <p>Validate your EPUB: nav, cover image, fonts, delivery-fee weight.</p>
-    <span class="tool-card-link">Open →</span>
-  </a>
-  <a class="tool-card" href="{{ url_for('preview_index') }}">
-    <span class="tool-card-title">Book preview</span>
-    <p>See your book as a printed spread, with margin guides overlaid.</p>
-    <span class="tool-card-link">Open →</span>
-  </a>
-  <a class="tool-card" href="{{ url_for('royalty_calculator') }}">
-    <span class="tool-card-title">Royalty calculator</span>
-    <p>Know your printing cost, royalty per copy and breakeven point.</p>
-    <span class="tool-card-link">Open →</span>
-  </a>
+<div class="tool-grid" style="grid-template-columns: 1fr 1fr; gap: 20px;">
+  <div style="display: flex; flex-direction: column; gap: 20px;">
+    <a class="tool-card tool-card-primary" href="{{ url_for('cover_index') }}">
+      <div class="tool-card-icon">📕</div>
+      <span class="tool-card-title">Cover Check</span>
+      <p>Validate every dimension KDP requires before you risk rejection.</p>
+      <span class="tool-card-link">Check cover →</span>
+    </a>
+    <a class="tool-card tool-card-feature" href="{{ url_for('preview_index') }}">
+      <div class="tool-card-icon">👁️</div>
+      <span class="tool-card-title">Book Preview</span>
+      <p>See your book layout in print. Catch issues before publishing.</p>
+      <span class="tool-card-link">Preview book →</span>
+    </a>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 20px;">
+    <a class="tool-card tool-card-primary" href="{{ url_for('kindle_index') }}">
+      <div class="tool-card-icon">📱</div>
+      <span class="tool-card-title">Kindle Check</span>
+      <p>Validate your EPUB structure and formatting for e-readers.</p>
+      <span class="tool-card-link">Check EPUB →</span>
+    </a>
+    <a class="tool-card tool-card-feature" href="{{ url_for('royalty_calculator') }}">
+      <div class="tool-card-icon">💰</div>
+      <span class="tool-card-title">Royalty Calculator</span>
+      <p>Calculate profit per copy and your breakeven point instantly.</p>
+      <span class="tool-card-link">Calculate royalties →</span>
+    </a>
+  </div>
 </div>
 
 {% include "_recommended.html" %}
+
+<script>
+// Motivational quotes for loading screen
+const QUOTES = [
+  {
+    text: "The manuscript is the message. Get it right, and the world listens.",
+    author: "David McCullough, Historian"
+  },
+  {
+    text: "A rejected manuscript is not a rejection of you. It's a redirection to something better.",
+    author: "Stephen King, Author"
+  },
+  {
+    text: "Your book deserves to be perfect. We're making sure it is.",
+    author: "KDP Press Check"
+  },
+  {
+    text: "Every page you perfect is a reader you earn.",
+    author: "Unknown"
+  },
+  {
+    text: "Publishing isn't about luck. It's about preparation meeting opportunity.",
+    author: "Malcolm Gladwell"
+  },
+  {
+    text: "The only difference between a published author and an unpublished one is action.",
+    author: "You, Right Now"
+  }
+];
+
+// Get random quote
+function getRandomQuote() {
+  return QUOTES[Math.floor(Math.random() * QUOTES.length)];
+}
+
+// Make entire dropzone clickable
+document.getElementById("dropzone").addEventListener("click", function() {
+  document.getElementById("file-input").click();
+});
+
+// Handle form submission
+document.getElementById("upload-form").addEventListener("submit", function(e) {
+  const fileInput = document.getElementById("file-input");
+  if (!fileInput.files || fileInput.files.length === 0) {
+    e.preventDefault();
+    return;
+  }
+
+  // Show loading modal
+  const modal = document.getElementById("loading-modal");
+  modal.style.display = "flex";
+
+  // Set random quote
+  const quote = getRandomQuote();
+  document.getElementById("loading-quote").textContent = '"' + quote.text + '"';
+  document.getElementById("loading-quote-author").textContent = quote.author;
+
+  // Rotate quotes every 10 seconds while loading
+  const quoteInterval = setInterval(() => {
+    const newQuote = getRandomQuote();
+    document.getElementById("loading-quote").textContent = '"' + newQuote.text + '"';
+    document.getElementById("loading-quote-author").textContent = newQuote.author;
+  }, 10000);
+
+  // Store interval ID on modal so we can clear it later
+  modal.quoteInterval = quoteInterval;
+
+  // Disable submit button
+  const submitBtn = document.getElementById("submit-btn");
+  submitBtn.disabled = true;
+  submitBtn.style.opacity = "0.5";
+  submitBtn.style.cursor = "not-allowed";
+
+  // Scroll to modal
+  setTimeout(() => {
+    modal.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, 100);
+});
+
+// Hide modal when page loads (after redirect from server)
+window.addEventListener("load", function() {
+  const modal = document.getElementById("loading-modal");
+  // Only hide if we're on the index page (not on results page)
+  if (window.location.pathname === "/" || window.location.pathname === "/index") {
+    modal.style.display = "none";
+    if (modal.quoteInterval) clearInterval(modal.quoteInterval);
+    document.getElementById("submit-btn").disabled = false;
+    document.getElementById("submit-btn").style.opacity = "1";
+    document.getElementById("submit-btn").style.cursor = "pointer";
+  }
+});
+</script>
 {% endblock %}

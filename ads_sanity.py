@@ -70,7 +70,7 @@ def evaluate(spend: float, sales: float, clicks: int, impressions: int, days_run
         elif acos > ACOS_BAD:
             findings.append({
                 "severity": "issue",
-                "label": f"ACOS is {acos:.0f}% — spending more than you're earning back",
+                "label": f"ACOS is {acos:.0f}% - spending more than you're earning back",
                 "detail": "At this rate you're losing money on every sale this campaign "
                           "produces. Check for broad-match keywords with no negative keywords "
                           "set, that's the single most common cause of budget bleeding into "
@@ -79,7 +79,7 @@ def evaluate(spend: float, sales: float, clicks: int, impressions: int, days_run
         elif acos > ACOS_WATCH:
             findings.append({
                 "severity": "note",
-                "label": f"ACOS is {acos:.0f}% — worth tightening, not yet an emergency",
+                "label": f"ACOS is {acos:.0f}% - worth tightening, not yet an emergency",
                 "detail": "You're spending close to what you earn back. Review your search term "
                           "report for clicks that aren't converting and add them as negative "
                           "keywords before increasing budget further.",
@@ -87,14 +87,14 @@ def evaluate(spend: float, sales: float, clicks: int, impressions: int, days_run
         elif acos > ACOS_HEALTHY:
             findings.append({
                 "severity": "ok",
-                "label": f"ACOS is {acos:.0f}% — acceptable, keep monitoring",
+                "label": f"ACOS is {acos:.0f}% - acceptable, keep monitoring",
                 "detail": "Reasonable for a campaign still finding its footing. Recheck after "
                           "another week of data.",
             })
         else:
             findings.append({
                 "severity": "ok",
-                "label": f"ACOS is {acos:.0f}% — healthy",
+                "label": f"ACOS is {acos:.0f}% - healthy",
                 "detail": "This campaign is earning back more than it costs. Consider a modest "
                           "budget increase to see if it scales.",
             })

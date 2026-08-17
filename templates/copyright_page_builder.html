@@ -1,0 +1,430 @@
+{% extends "base.html" %}
+{% block title %}Copyright Page Template Builder · KDP Press Check{% endblock %}
+{% block meta_description %}Generate a professional copyright page for your book. Choose fiction/non-fiction, get required copyright elements, ISBN support, and ready-to-copy text.{% endblock %}
+{% block content %}
+
+<section class="hero-single">
+  <div class="eyebrow">Copyright Page Builder</div>
+  <h1 class="hero-display">Generate a professional copyright page.</h1>
+  <p class="hero-lead">Missing copyright pages cause KDP rejections in some categories. This tool generates the required legal text based on your book type, automatically includes your ISBN, and gives you copy-paste-ready content.</p>
+
+  <div class="copyright-grid layout-two-column">
+    <div class="copyright-form">
+      <div class="est-card">
+        <h3>Your Book Details</h3>
+
+        <div class="field">
+          <label for="cp-author">Author Name (as it appears on cover)</label>
+          <input type="text" id="cp-author" placeholder="Jane Smith" value="">
+        </div>
+
+        <div class="field">
+          <label for="cp-year">Publication Year</label>
+          <input type="number" id="cp-year" min="2000" max="2100" value="2026">
+        </div>
+
+        <div class="field">
+          <label for="cp-isbn">ISBN-13 (optional)</label>
+          <input type="text" id="cp-isbn" placeholder="978-0-123456-78-9">
+          <small class="hint">Leave blank if using KDP's free ISBN. Format: 13 digits with or without hyphens.</small>
+        </div>
+
+        <div class="field">
+          <label>Book Type</label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" id="cp-type-fiction" name="cp-type" value="fiction" checked>
+              <span>Fiction</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" id="cp-type-nonfiction" name="cp-type" value="nonfiction">
+              <span>Non-fiction</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Geographic Location</label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" id="cp-locale-us" name="cp-locale" value="us" checked>
+              <span>United States</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" id="cp-locale-intl" name="cp-locale" value="intl">
+              <span>International / Other</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="field" id="cp-series-field" style="display:none;">
+          <label for="cp-series">Series Name (optional)</label>
+          <input type="text" id="cp-series" placeholder="My Book Series">
+        </div>
+
+        <div class="field" id="cp-booknumber-field" style="display:none;">
+          <label for="cp-booknumber">Book Number in Series (optional)</label>
+          <input type="number" id="cp-booknumber" min="1" value="1">
+        </div>
+
+        <div class="field" id="cp-disclaimer-field">
+          <label for="cp-disclaimer">Non-Fiction: Liability Disclaimer?</label>
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="cp-add-disclaimer">
+              <span>Add liability disclaimer (recommended for advice books)</span>
+            </label>
+          </div>
+        </div>
+
+        <button type="button" id="cp-generate" class="btn btn-primary">Generate Copyright Page</button>
+      </div>
+    </div>
+
+    <div class="copyright-output">
+      <div class="est-card">
+        <h3>Your Copyright Page</h3>
+        <div id="cp-output" class="copyright-output-text">
+          <p style="color: var(--color-text-secondary); text-align: center;">Your copyright page will appear here...</p>
+        </div>
+        <button type="button" id="cp-copy" class="btn btn-secondary" style="display:none;">Copy to Clipboard</button>
+      </div>
+
+      <div class="est-card">
+        <h3>Required Elements</h3>
+        <div id="cp-checklist" class="checklist">
+          <div class="check-item">
+            <input type="checkbox" id="ch-copyright" disabled>
+            <label for="ch-copyright">Copyright symbol & author name</label>
+          </div>
+          <div class="check-item">
+            <input type="checkbox" id="ch-year" disabled>
+            <label for="ch-year">Publication year</label>
+          </div>
+          <div class="check-item">
+            <input type="checkbox" id="ch-isbn" disabled>
+            <label for="ch-isbn">ISBN (if provided)</label>
+          </div>
+          <div class="check-item">
+            <input type="checkbox" id="ch-disclaimer" disabled>
+            <label for="ch-disclaimer">Disclaimer of copyright (what readers can/can't do)</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="guide-section">
+  <h2>Copyright Page Essentials</h2>
+  <div class="essentials-grid">
+    <div class="essential-card">
+      <h3>Fiction Books</h3>
+      <p><strong>Must include:</strong></p>
+      <ul>
+        <li>Copyright © [Year] [Author Name]</li>
+        <li>ISBN (if applicable)</li>
+        <li>Disclaimer: This is a work of fiction. Any resemblance to real persons is coincidental.</li>
+      </ul>
+      <p><strong>Optional:</strong></p>
+      <ul>
+        <li>Publisher name</li>
+        <li>Edition info</li>
+        <li>Series name & book number</li>
+      </ul>
+    </div>
+    <div class="essential-card">
+      <h3>Non-Fiction Books</h3>
+      <p><strong>Must include:</strong></p>
+      <ul>
+        <li>Copyright © [Year] [Author Name]</li>
+        <li>ISBN (if applicable)</li>
+        <li>Disclaimer of liability (recommended)</li>
+      </ul>
+      <p><strong>Optional:</strong></p>
+      <ul>
+        <li>Publisher name</li>
+        <li>Edition info</li>
+        <li>Credential/expertise statement</li>
+      </ul>
+    </div>
+    <div class="essential-card">
+      <h3>Copyright vs. Trademark</h3>
+      <p><strong>Copyright © </strong> (what you use) protects the written work.</p>
+      <p><strong>Trademark ™</strong> (not needed here) protects brand names/logos.</p>
+      <p>Only use © on the copyright page. Your book title doesn't need ™.</p>
+    </div>
+  </div>
+</section>
+
+<script>
+const authorInput = document.getElementById('cp-author');
+const yearInput = document.getElementById('cp-year');
+const isbnInput = document.getElementById('cp-isbn');
+const typeRadios = document.querySelectorAll('input[name="cp-type"]');
+const localeRadios = document.querySelectorAll('input[name="cp-locale"]');
+const seriesInput = document.getElementById('cp-series');
+const bookNumberInput = document.getElementById('cp-booknumber');
+const disclaimerCheckbox = document.getElementById('cp-add-disclaimer');
+const generateBtn = document.getElementById('cp-generate');
+const copyBtn = document.getElementById('cp-copy');
+const outputDiv = document.getElementById('cp-output');
+
+// Show/hide series fields based on book type
+function updateSeriesVisibility() {
+  const isFiction = document.getElementById('cp-type-fiction').checked;
+  document.getElementById('cp-series-field').style.display = isFiction ? 'block' : 'none';
+  document.getElementById('cp-booknumber-field').style.display = isFiction ? 'block' : 'none';
+}
+
+// Show/hide disclaimer based on type
+function updateDisclaimerVisibility() {
+  const isNonfiction = document.getElementById('cp-type-nonfiction').checked;
+  document.getElementById('cp-disclaimer-field').style.display = isNonfiction ? 'block' : 'none';
+}
+
+typeRadios.forEach(radio => {
+  radio.addEventListener('change', () => {
+    updateSeriesVisibility();
+    updateDisclaimerVisibility();
+  });
+});
+
+function generateCopyrightPage() {
+  const author = authorInput.value.trim() || '[Author Name]';
+  const year = yearInput.value || new Date().getFullYear();
+  const isbn = isbnInput.value.trim();
+  const isFiction = document.getElementById('cp-type-fiction').checked;
+  const isIntl = document.getElementById('cp-locale-intl').checked;
+  const series = seriesInput.value.trim();
+  const bookNumber = bookNumberInput.value;
+  const addDisclaimer = disclaimerCheckbox.checked && !isFiction;
+
+  let html = '';
+
+  // Copyright line
+  html += `<p><strong>© ${year} ${author}</strong></p>\n`;
+
+  // ISBN
+  if (isbn) {
+    const cleanISBN = isbn.replace(/[^0-9]/g, '');
+    html += `<p>ISBN: ${cleanISBN}</p>\n`;
+  }
+
+  // Series info (fiction only)
+  if (isFiction && series) {
+    html += `<p>${series} Book ${bookNumber}</p>\n`;
+  }
+
+  // All rights reserved
+  html += `<p>All rights reserved. No part of this book may be reproduced or transmitted in any form or by any means, electronic or mechanical, including photocopying, recording, or by any information storage and retrieval system, without permission in writing from the publisher.</p>\n`;
+
+  // Disclaimer (fiction)
+  if (isFiction) {
+    html += `<p>This is a work of fiction. Any resemblance to actual persons, living or dead, or actual events is purely coincidental.</p>\n`;
+  }
+
+  // Disclaimer (non-fiction)
+  if (addDisclaimer && !isFiction) {
+    html += `<p><strong>Disclaimer:</strong> This book is provided for educational and informational purposes only. The author does not warrant the performance, effectiveness, or applicability of any methods or material contained in this book. The author will not be liable for any direct, indirect, incidental, special, consequential, or punitive damages arising out of the use of this book or any information contained herein.</p>\n`;
+  }
+
+  // Display output
+  outputDiv.innerHTML = html.replace(/\n/g, '<br>');
+
+  // Update checklist
+  document.getElementById('ch-copyright').checked = true;
+  document.getElementById('ch-year').checked = true;
+  document.getElementById('ch-isbn').checked = !!isbn;
+  document.getElementById('ch-disclaimer').checked = isFiction || addDisclaimer;
+
+  // Show copy button
+  copyBtn.style.display = 'inline-block';
+}
+
+generateBtn.addEventListener('click', generateCopyrightPage);
+
+copyBtn.addEventListener('click', () => {
+  const text = outputDiv.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const originalText = copyBtn.textContent;
+    copyBtn.textContent = '✓ Copied!';
+    setTimeout(() => {
+      copyBtn.textContent = originalText;
+    }, 2000);
+  });
+});
+
+// Generate on page load
+generateCopyrightPage();
+updateSeriesVisibility();
+updateDisclaimerVisibility();
+</script>
+
+<style>
+.copyright-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+@media (max-width: 1024px) {
+  .copyright-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.copyright-form, .copyright-output {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.field {
+  margin-bottom: 1.5rem;
+}
+
+.field label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: var(--color-text-primary);
+}
+
+.field input[type="text"],
+.field input[type="number"] {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 1rem;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+}
+
+.radio-group, .checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.radio-label, .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  font-weight: normal;
+}
+
+.radio-label input, .checkbox-label input {
+  width: auto;
+  cursor: pointer;
+}
+
+.hint {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 1rem;
+}
+
+.btn-primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #2563eb;
+}
+
+.btn-secondary {
+  background: var(--color-bg-alt);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+}
+
+.btn-secondary:hover {
+  background: var(--color-bg-secondary);
+}
+
+.copyright-output-text {
+  background: var(--color-bg-secondary);
+  padding: 1.5rem;
+  border-radius: 6px;
+  line-height: 1.8;
+  min-height: 300px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.check-item input[type="checkbox"] {
+  width: auto;
+  cursor: not-allowed;
+}
+
+.check-item label {
+  margin: 0;
+  font-weight: normal;
+  cursor: default;
+  color: var(--color-text-secondary);
+}
+
+.essentials-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.essential-card {
+  padding: 1.5rem;
+  background: var(--color-bg-alt);
+  border-radius: 8px;
+  border-left: 4px solid #3b82f6;
+}
+
+.essential-card h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+}
+
+.essential-card p {
+  margin: 0.5rem 0;
+  font-size: 0.95rem;
+}
+
+.essential-card ul {
+  margin: 0.5rem 0 1rem 1.5rem;
+  padding: 0;
+  font-size: 0.95rem;
+}
+
+.essential-card li {
+  margin-bottom: 0.5rem;
+}
+</style>
+
+{% endblock %}

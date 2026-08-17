@@ -1,0 +1,427 @@
+{% extends "base.html" %}
+{% block title %}Metadata Completeness Optimizer · KDP Press Check{% endblock %}
+{% block meta_description %}Validate all KDP metadata: title, subtitle, description, keywords, category, BISAC code, and series info. Real-time checking and completion percentage.{% endblock %}
+{% block content %}
+
+<section class="hero-single">
+  <div class="eyebrow">Metadata Optimizer</div>
+  <h1 class="hero-display">Complete your book's metadata.</h1>
+  <p class="hero-lead">Incomplete metadata = invisible book on Amazon. This tool validates every field KDP requires, flags mismatches, and shows your completion percentage so you know you're ready.</p>
+
+  <div class="meta-grid">
+    <div class="meta-form">
+      <div class="est-card">
+        <h3>Book Metadata</h3>
+
+        <div class="field">
+          <label for="meta-title">Title *</label>
+          <input type="text" id="meta-title" placeholder="The Title of Your Book" maxlength="200">
+          <small class="hint">1-200 characters. Keep it clear and searchable.</small>
+          <div class="field-status" id="meta-title-status"></div>
+        </div>
+
+        <div class="field">
+          <label for="meta-subtitle">Subtitle (optional)</label>
+          <input type="text" id="meta-subtitle" placeholder="A Subtitle or Tagline" maxlength="200">
+          <small class="hint">0-200 characters. Recommended for discoverability.</small>
+          <div class="field-status" id="meta-subtitle-status"></div>
+        </div>
+
+        <div class="field">
+          <label for="meta-description">Description *</label>
+          <textarea id="meta-description" placeholder="Your book description..." maxlength="4000" style="height: 120px;"></textarea>
+          <small class="hint">0-4000 characters. Amazon limit.</small>
+          <div class="field-status" id="meta-description-status"></div>
+        </div>
+
+        <div class="field">
+          <label for="meta-category">Primary Category *</label>
+          <input type="text" id="meta-category" placeholder="e.g., Fiction > Fantasy > Epic">
+          <small class="hint">Must select at least one category from KDP's list.</small>
+          <div class="field-status" id="meta-category-status"></div>
+        </div>
+
+        <div class="field">
+          <label for="meta-bisac">BISAC Code (optional)</label>
+          <input type="text" id="meta-bisac" placeholder="e.g., FIC009020">
+          <small class="hint">Optional but recommended for bookstores.</small>
+          <div class="field-status" id="meta-bisac-status"></div>
+        </div>
+
+        <div class="field">
+          <label for="meta-keywords">Keywords (up to 7, required)</label>
+          <textarea id="meta-keywords" placeholder="Enter keywords separated by commas or line breaks" style="height: 100px;"></textarea>
+          <small class="hint">7 keywords max. 20-100 chars each. No commas, quotes, or exact title duplicates.</small>
+          <div class="field-status" id="meta-keywords-status"></div>
+        </div>
+
+        <div class="field">
+          <label for="meta-agerange">Age Range (YA/Children's)</label>
+          <select id="meta-agerange">
+            <option value="">Not applicable</option>
+            <option value="0-2">0-2 years</option>
+            <option value="3-5">3-5 years</option>
+            <option value="6-8">6-8 years</option>
+            <option value="9-12">9-12 years</option>
+            <option value="13-17">13-17 years</option>
+          </select>
+          <div class="field-status" id="meta-agerange-status"></div>
+        </div>
+
+        <div class="field">
+          <label for="meta-series">Series Name (optional)</label>
+          <input type="text" id="meta-series" placeholder="My Series">
+          <div class="field-status" id="meta-series-status"></div>
+        </div>
+
+        <div class="field">
+          <label for="meta-seriesnumber">Book Number in Series</label>
+          <input type="number" id="meta-seriesnumber" min="1" value="1">
+        </div>
+      </div>
+    </div>
+
+    <div class="meta-output">
+      <div class="est-card">
+        <h3>Completion Status</h3>
+        <div class="completion-gauge">
+          <div class="gauge-circle">
+            <svg viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="45" class="gauge-background"/>
+              <circle cx="50" cy="50" r="45" class="gauge-progress" id="meta-gauge-progress"/>
+            </svg>
+            <div class="gauge-text">
+              <span id="meta-completion-pct">0</span>%
+            </div>
+          </div>
+        </div>
+        <p class="completion-label">Metadata Complete</p>
+      </div>
+
+      <div class="est-card">
+        <h3>Validation Report</h3>
+        <div id="meta-report" class="validation-report">
+          <div class="report-section">
+            <div class="report-item required">
+              <span class="item-label">Title</span>
+              <span class="item-status">⚠️ Missing</span>
+            </div>
+            <div class="report-item required">
+              <span class="item-label">Description</span>
+              <span class="item-status">⚠️ Missing</span>
+            </div>
+            <div class="report-item required">
+              <span class="item-label">Category</span>
+              <span class="item-status">⚠️ Missing</span>
+            </div>
+            <div class="report-item">
+              <span class="item-label">Keywords (7 max)</span>
+              <span class="item-status">0 / 7</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="guide-section">
+  <h2>Metadata Best Practices</h2>
+  <div class="tips-grid">
+    <div class="tip-card">
+      <h3>Title Matters</h3>
+      <p>Clear, searchable titles rank better. Include the genre or hook. Avoid ALL CAPS and excessive punctuation.</p>
+    </div>
+    <div class="tip-card">
+      <h3>Keywords Strategy</h3>
+      <p>Use all 7 slots. Target 2-3 word phrases: "fantasy adventure" not just "fantasy." Check category bestsellers to see what's working.</p>
+    </div>
+    <div class="tip-card">
+      <h3>Category Choice</h3>
+      <p>Pick your top-ranked category, not the most competitive. Top 100 in a smaller category beats top 10,000 in a huge one.</p>
+    </div>
+    <div class="tip-card">
+      <h3>Subtitle Power</h3>
+      <p>Subtitles clarify what your book is about: "The Heir" → "The Heir: A Fantasy Epic." Helps with search and clarity.</p>
+    </div>
+    <div class="tip-card">
+      <h3>Description Hook</h3>
+      <p>First sentence appears before "Read more." Make it irresistible. Set reader expectations about genre, tone, and pacing.</p>
+    </div>
+    <div class="tip-card">
+      <h3>Series Consistency</h3>
+      <p>Use identical series names across all books. Format: "Series Name" (not "The Series Name Book 1"). Book #1, #2, etc.</p>
+    </div>
+  </div>
+</section>
+
+<script>
+const inputs = {
+  title: document.getElementById('meta-title'),
+  subtitle: document.getElementById('meta-subtitle'),
+  description: document.getElementById('meta-description'),
+  category: document.getElementById('meta-category'),
+  bisac: document.getElementById('meta-bisac'),
+  keywords: document.getElementById('meta-keywords'),
+  agerange: document.getElementById('meta-agerange'),
+  series: document.getElementById('meta-series'),
+  seriesnumber: document.getElementById('meta-seriesnumber')
+};
+
+function updateCompletion() {
+  let score = 0;
+  const checks = [];
+
+  // Title (required)
+  if (inputs.title.value.trim().length > 0) {
+    score += 20;
+    checks.push({field: 'Title', status: '✅ Complete', required: true});
+  } else {
+    checks.push({field: 'Title', status: '⚠️ Missing', required: true});
+  }
+
+  // Description (required)
+  if (inputs.description.value.trim().length > 0) {
+    score += 20;
+    checks.push({field: 'Description', status: '✅ Complete', required: true});
+  } else {
+    checks.push({field: 'Description', status: '⚠️ Missing', required: true});
+  }
+
+  // Category (required)
+  if (inputs.category.value.trim().length > 0) {
+    score += 20;
+    checks.push({field: 'Category', status: '✅ Complete', required: true});
+  } else {
+    checks.push({field: 'Category', status: '⚠️ Missing', required: true});
+  }
+
+  // Keywords (required)
+  const keywordList = inputs.keywords.value.split(/[,\n]/).filter(k => k.trim().length > 0);
+  const keywordCount = Math.min(keywordList.length, 7);
+  score += (keywordCount / 7) * 20;
+  checks.push({field: 'Keywords', status: `${keywordCount} / 7`, required: false});
+
+  // Subtitle (optional)
+  if (inputs.subtitle.value.trim().length > 0) {
+    score += 5;
+    checks.push({field: 'Subtitle', status: '✅ Added', required: false});
+  } else {
+    checks.push({field: 'Subtitle', status: '➖ Not added', required: false});
+  }
+
+  // Age range (conditional)
+  if (inputs.agerange.value) {
+    score += 5;
+    checks.push({field: 'Age Range', status: '✅ Set', required: false});
+  } else {
+    checks.push({field: 'Age Range', status: '➖ Not applicable', required: false});
+  }
+
+  // Series (optional)
+  if (inputs.series.value.trim().length > 0) {
+    score += 5;
+    checks.push({field: 'Series', status: '✅ Complete', required: false});
+  } else {
+    checks.push({field: 'Series', status: '➖ Single book', required: false});
+  }
+
+  // BISAC (optional)
+  if (inputs.bisac.value.trim().length > 0) {
+    score += 5;
+    checks.push({field: 'BISAC Code', status: '✅ Added', required: false});
+  } else {
+    checks.push({field: 'BISAC Code', status: '➖ Not added', required: false});
+  }
+
+  // Update gauge
+  document.getElementById('meta-completion-pct').textContent = Math.round(score);
+  const circumference = 2 * Math.PI * 45;
+  const offset = circumference - (score / 100) * circumference;
+  document.getElementById('meta-gauge-progress').style.strokeDashoffset = offset;
+
+  // Update report
+  let reportHTML = '<div class="report-section">';
+  checks.forEach(check => {
+    const cls = check.required ? 'required' : '';
+    reportHTML += `<div class="report-item ${cls}"><span class="item-label">${check.field}</span><span class="item-status">${check.status}</span></div>`;
+  });
+  reportHTML += '</div>';
+  document.getElementById('meta-report').innerHTML = reportHTML;
+}
+
+// Attach event listeners
+Object.values(inputs).forEach(input => {
+  input.addEventListener('input', updateCompletion);
+  input.addEventListener('change', updateCompletion);
+});
+
+// Initial update
+updateCompletion();
+</script>
+
+<style>
+.meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+@media (max-width: 1024px) {
+  .meta-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.field {
+  margin-bottom: 1.5rem;
+}
+
+.field label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.field input, .field textarea, .field select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+.hint {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.field-status {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  min-height: 1.2em;
+}
+
+.completion-gauge {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 2rem 0;
+}
+
+.gauge-circle {
+  position: relative;
+  width: 200px;
+  height: 200px;
+}
+
+.gauge-circle svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.gauge-background {
+  fill: none;
+  stroke: var(--color-bg-secondary);
+  stroke-width: 8;
+}
+
+.gauge-progress {
+  fill: none;
+  stroke: #3b82f6;
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-dasharray: 282.7;
+  stroke-dashoffset: 282.7;
+  transition: stroke-dashoffset 0.3s ease;
+}
+
+.gauge-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.gauge-text span {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #3b82f6;
+}
+
+.completion-label {
+  text-align: center;
+  color: var(--color-text-secondary);
+  margin: 1rem 0 0 0;
+}
+
+.validation-report {
+  min-height: 200px;
+}
+
+.report-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.report-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: var(--color-bg-secondary);
+  border-radius: 4px;
+  border-left: 3px solid var(--color-border);
+  align-items: center;
+}
+
+.report-item.required {
+  border-left-color: #3b82f6;
+}
+
+.item-label {
+  font-weight: 500;
+}
+
+.item-status {
+  text-align: right;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.tip-card {
+  padding: 1.5rem;
+  background: var(--color-bg-alt);
+  border-radius: 8px;
+  border-left: 4px solid #3b82f6;
+}
+
+.tip-card h3 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.tip-card p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+}
+</style>
+
+{% endblock %}

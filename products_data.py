@@ -37,7 +37,7 @@ PRODUCTS = [
         "buy_url": "",
     },
     {
-        "name": "First Book on KDP — Publishing Guide",
+        "name": "First Book on KDP - Publishing Guide",
         "price": "$12",
         "blurb": "A plain-English ebook that walks a first-time author from finished manuscript to live listing, avoiding the rejections this site checks for.",
         "includes": [

@@ -47,4 +47,14 @@
 
   <p class="footnote-inline" style="display:block; margin-top:40px;">Don't have an EPUB yet? Kindle Create, Vellum, and Calibre can all export one from your manuscript.</p>
 </section>
+
+<script>
+// Make entire dropzone clickable
+document.getElementById("dropzone").addEventListener("click", function(e) {
+  if (e.target.tagName !== "BUTTON") {
+    document.getElementById("file-input").click();
+  }
+});
+document.getElementById("dropzone").style.cursor = "pointer";
+</script>
 {% endblock %}

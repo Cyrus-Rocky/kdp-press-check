@@ -1,0 +1,400 @@
+{% extends "base.html" %}
+{% block title %}KDP Review Timeline & What to Expect · KDP Press Check{% endblock %}
+{% block meta_description %}Understand Amazon KDP's review timeline. How long does review take? What happens if rejected? How to appeal? What's normal and what's not.{% endblock %}
+{% block content %}
+
+<section class="hero-single">
+  <div class="eyebrow">Review Timeline Guide</div>
+  <h1 class="hero-display">Calm your nerves during KDP review.</h1>
+  <p class="hero-lead">The KDP review process feels slow and mysterious. Here's exactly what's happening, how long it takes, what can go wrong, and what to do if it does.</p>
+</section>
+
+<section class="guide-section">
+  <h2>The KDP Review Timeline</h2>
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-marker">1</div>
+      <div class="timeline-content">
+        <h3>You Submit Your Book</h3>
+        <p><strong>Duration:</strong> Immediate</p>
+        <p>You hit "Save and Publish." Instantly, your book enters the KDP review queue. No delay here.</p>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-marker">2</div>
+      <div class="timeline-content">
+        <h3>Automated Scanning (5-30 min)</h3>
+        <p><strong>Duration:</strong> 5-30 minutes</p>
+        <p>KDP's automated systems scan your file for obvious issues: corruption, missing fonts, blocked tags, copyright mismatches. If it fails here, you get an error immediately.</p>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-marker">3</div>
+      <div class="timeline-content">
+        <h3>In Queue for Manual Review (1-24 hours)</h3>
+        <p><strong>Duration:</strong> Usually 12-48 hours (but can be up to 5 business days)</p>
+        <p>Your book joins the human review queue. During business hours (US time), this is often faster. Weekends and holidays slow things down.</p>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-marker">4</div>
+      <div class="timeline-content">
+        <h3>Human Review (Varies)</h3>
+        <p><strong>Duration:</strong> Minutes to hours</p>
+        <p>A KDP reviewer checks your interior and/or cover against KDP's publishing guidelines. They verify margins, fonts, image quality, copyright page, metadata, etc.</p>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-marker">5</div>
+      <div class="timeline-content">
+        <h3>Approval or Rejection</h3>
+        <p><strong>Duration:</strong> Immediate</p>
+        <p>KDP emails you with approval or rejection. Approval usually takes 24-72 hours total. Rejection includes a reason.</p>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-marker">6</div>
+      <div class="timeline-content">
+        <h3>Post-Approval (48-72 hours)</h3>
+        <p><strong>Duration:</strong> 24-72 hours</p>
+        <p><strong>Important:</strong> Approval ≠ visible on Amazon. Your book is approved but not yet searchable. This is normal and expected.</p>
+        <p>The book will show up in search results within 24-72 hours after approval. Author/publisher pages update separately.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="guide-section">
+  <h2>What's Normal (Don't Panic)</h2>
+  <div class="normal-grid">
+    <div class="normal-card">
+      <h3>✅ Status: "In review"</h3>
+      <p>This is expected and takes up to 72 hours. Check back in 24 hrs.</p>
+    </div>
+    <div class="normal-card">
+      <h3>✅ Book not showing in search yet</h3>
+      <p>After approval, give it 24-72 hours. This is normal. Your book isn't invisible—it's indexing.</p>
+    </div>
+    <div class="normal-card">
+      <h3>✅ Author page not updated yet</h3>
+      <p>Author pages refresh separately from book availability. Can take extra 24 hours.</p>
+    </div>
+    <div class="normal-card">
+      <h3>✅ Book in series not auto-linked</h3>
+      <p>Series linking happens after books are live and indexed (~48-72 hrs).</p>
+    </div>
+    <div class="normal-card">
+      <h3>✅ Slow review on weekends</h3>
+      <p>KDP reviews slower on Saturdays, Sundays, and US holidays. Expected.</p>
+    </div>
+    <div class="normal-card">
+      <h3>✅ No email = still reviewing</h3>
+      <p>Silence is not rejection. You'll get an email (approval or rejection) within 72 hours.</p>
+    </div>
+  </div>
+</section>
+
+<section class="guide-section">
+  <h2>If Your Book Gets Rejected</h2>
+  <div class="rejection-guide">
+    <div class="rejection-card">
+      <h3>Step 1: Read the Error Message</h3>
+      <p>KDP's error messages are vague, but they point to a real issue. Common reasons:</p>
+      <ul>
+        <li><strong>Margin error</strong> - Interior margins don't match KDP's rules for your page count</li>
+        <li><strong>Image quality</strong> - DPI too low (must be 300 DPI minimum)</li>
+        <li><strong>Page size mismatch</strong> - Your PDF doesn't match the trim size you selected</li>
+        <li><strong>Copyright/metadata</strong> - Missing copyright info or metadata doesn't match file</li>
+        <li><strong>Formatting issue</strong> - Corrupted fonts, unsupported characters, or broken links</li>
+      </ul>
+    </div>
+
+    <div class="rejection-card">
+      <h3>Step 2: Use the Error Decoder</h3>
+      <p>If KDP's message is cryptic, paste it into our <a href="{{ url_for('error_decoder') }}">Error Decoder</a> for a plain-English translation and fix suggestions.</p>
+    </div>
+
+    <div class="rejection-card">
+      <h3>Step 3: Fix It</h3>
+      <p>Go back to your interior/cover file, fix the issue, and reupload. Don't ask for a manual review yet—fix it first. Testing with our checklist tools helps:</p>
+      <ul>
+        <li><a href="{{ url_for('index') }}">Interior Check</a> - Verify margins, fonts, page count</li>
+        <li><a href="{{ url_for('cover_index') }}">Cover Check</a> - Verify dimensions, bleed, barcode</li>
+      </ul>
+    </div>
+
+    <div class="rejection-card">
+      <h3>Step 4: Resubmit</h3>
+      <p>Upload the fixed file and resubmit for review. Same 24-72 hour timeline applies. Most books are approved on the second attempt.</p>
+    </div>
+
+    <div class="rejection-card">
+      <h3>When to Ask for Manual Review</h3>
+      <p>You can request a manual review if:</p>
+      <ul>
+        <li>You've resubmitted 2+ times and still get rejected</li>
+        <li>The error message doesn't match what you see in your file</li>
+        <li>You believe KDP made a mistake</li>
+      </ul>
+      <p><strong>How:</strong> In your KDP Dashboard, find the book → "Paperback Details" or "Ebook Details" → Look for "Contact us about this issue" link.</p>
+    </div>
+  </div>
+</section>
+
+<section class="guide-section">
+  <h2>Common Myths & Truths</h2>
+  <div class="myths-grid">
+    <div class="myth-card">
+      <h3>🚫 Myth: "My book is banned"</h3>
+      <p><strong>Truth:</strong> Rejection ≠ ban. You can resubmit unlimited times. Only books with genuine KDP violations get removed after approval.</p>
+    </div>
+    <div class="myth-card">
+      <h3>🚫 Myth: "I should wait longer"</h3>
+      <p><strong>Truth:</strong> No—if it's been 5+ business days and no email, contact KDP. It's a queue system, not a timer.</p>
+    </div>
+    <div class="myth-card">
+      <h3>🚫 Myth: "Rejections hurt your account"</h3>
+      <p><strong>Truth:</strong> Rejections don't damage your account. Submit again. KDP reviewers don't hold grudges.</p>
+    </div>
+    <div class="myth-card">
+      <h3>✅ Truth: "Resubmitting is fast"</h3>
+      <p>Once you resubmit a fixed file, it goes back to the front of the queue. Usually approved within 24 hours.</p>
+    </div>
+    <div class="myth-card">
+      <h3>✅ Truth: "Search indexing takes time"</h3>
+      <p>After approval, your book isn't searchable for 12-72 hours. This is normal. Don't panic.</p>
+    </div>
+    <div class="myth-card">
+      <h3>✅ Truth: "Pricing changes don't require reapproval"</h3>
+      <p>Change your price, royalty option, or keywords anytime. No new review needed after approval.</p>
+    </div>
+  </div>
+</section>
+
+<section class="guide-section">
+  <h2>Checklist: Before You Submit</h2>
+  <div class="preflight-checklist">
+    <div class="checklist-group">
+      <h3>Interior (if applicable)</h3>
+      <ul>
+        <li>☐ Margins match KDP's requirements for your page count (<a href="{{ url_for('margin_advisor') }}">Margin Advisor</a>)</li>
+        <li>☐ All images are 300 DPI minimum</li>
+        <li>☐ Page count matches PDF (no blank pages)</li>
+        <li>☐ Fonts are embedded (not system fonts)</li>
+        <li>☐ Copyright page present with ISBN (if you have one)</li>
+      </ul>
+    </div>
+    <div class="checklist-group">
+      <h3>Cover (if applicable)</h3>
+      <ul>
+        <li>☐ Cover dimensions match trim size</li>
+        <li>☐ Bleed/safe zones correct (<a href="{{ url_for('cover_index') }}">Cover Check</a>)</li>
+        <li>☐ Barcode present (for print) or area reserved</li>
+        <li>☐ Image quality is 300 DPI minimum</li>
+      </ul>
+    </div>
+    <div class="checklist-group">
+      <h3>Metadata</h3>
+      <ul>
+        <li>☐ Title matches cover and copyright page</li>
+        <li>☐ Description is compelling and 100+ chars</li>
+        <li>☐ Keywords filled (7 slots)</li>
+        <li>☐ Category selected</li>
+        <li>☐ Series info consistent across books (if applicable)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin: 2rem 0;
+  position: relative;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 30px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, #3b82f6, #93c5fd);
+}
+
+.timeline-item {
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  gap: 2rem;
+  position: relative;
+}
+
+.timeline-marker {
+  width: 60px;
+  height: 60px;
+  background: #3b82f6;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.5rem;
+  border: 3px solid var(--color-bg-primary);
+  position: relative;
+  z-index: 1;
+}
+
+.timeline-content {
+  padding: 1.5rem;
+  background: var(--color-bg-alt);
+  border-radius: 8px;
+  border-left: 4px solid #3b82f6;
+}
+
+.timeline-content h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+}
+
+.timeline-content p {
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+.timeline-content ul {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.timeline-content li {
+  margin-bottom: 0.5rem;
+}
+
+.normal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.normal-card {
+  padding: 1.5rem;
+  background: rgba(34, 197, 94, 0.1);
+  border-left: 4px solid #22c55e;
+  border-radius: 6px;
+}
+
+.normal-card h3 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  color: #22c55e;
+}
+
+.normal-card p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.rejection-guide {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.rejection-card {
+  padding: 1.5rem;
+  background: var(--color-bg-alt);
+  border-radius: 8px;
+  border-left: 4px solid #f59e0b;
+}
+
+.rejection-card h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+}
+
+.rejection-card p {
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+.rejection-card a {
+  color: #3b82f6;
+  text-decoration: underline;
+}
+
+.myths-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.myth-card {
+  padding: 1.5rem;
+  background: var(--color-bg-alt);
+  border-radius: 8px;
+}
+
+.myth-card h3 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.myth-card p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+}
+
+.preflight-checklist {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+.checklist-group {
+  padding: 1.5rem;
+  background: var(--color-bg-alt);
+  border-radius: 8px;
+}
+
+.checklist-group h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+}
+
+.checklist-group ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.checklist-group li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.95rem;
+}
+
+.checklist-group li:last-child {
+  border-bottom: none;
+}
+
+.checklist-group a {
+  color: #3b82f6;
+  text-decoration: underline;
+}
+</style>
+
+{% endblock %}

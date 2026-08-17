@@ -6,12 +6,32 @@
 <div class="bv-header">
   <div>
     <h1 class="bv-title">Book Preview</h1>
-    <p class="bv-subtitle">
-      <span class="bv-mono">{{ interior_filename }}</span>
-      &nbsp;·&nbsp; {{ interior_meta.page_count }} page{{ 's' if interior_meta.page_count != 1 else '' }}
-      &nbsp;·&nbsp; {{ interior_meta.width_in }}" × {{ interior_meta.height_in }}"
-      {% if cover_meta %}&nbsp;·&nbsp; cover included{% endif %}
-    </p>
+    <div style="display:flex; gap:1.5rem; flex-wrap:wrap; font-size:0.9rem; color:var(--pc-muted); margin-top:0.5rem;">
+      <div>
+        <span style="font-weight:600; color:var(--pc-ink);">{{ interior_filename }}</span>
+      </div>
+      <div style="display:flex; gap:0.75rem; align-items:center;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="opacity:0.5;">
+          <path d="M4 19h16M7 3h10a1 1 0 011 1v12a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+        <span>{{ interior_meta.page_count }} page{{ 's' if interior_meta.page_count != 1 else '' }}</span>
+      </div>
+      <div style="display:flex; gap:0.75rem; align-items:center;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="opacity:0.5;">
+          <rect x="3" y="4" width="18" height="16" rx="1" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M9 9h6M9 14h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span>{{ interior_meta.width_in }}" × {{ interior_meta.height_in }}"</span>
+      </div>
+      {% if cover_meta %}
+      <div style="display:flex; gap:0.75rem; align-items:center; padding:0.25rem 0.75rem; background:rgba(34,197,94,0.15); border-radius:4px; color:var(--pc-ok); font-weight:500;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+          <path d="M5 12l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Cover included</span>
+      </div>
+      {% endif %}
+    </div>
   </div>
   <div class="bv-header-actions">
     <button type="button" class="bv-btn bv-btn-guide" id="btn-guides" aria-pressed="true">
@@ -20,6 +40,14 @@
         <path d="M3 9h18M3 15h18M9 3v18M15 3v18" stroke="currentColor" stroke-width="1" opacity="0.5"/>
       </svg>
       Guides: On
+    </button>
+    {%- set quick_mode = request.args.get('quick', 'false') == 'true' -%}
+    <button type="button" class="bv-btn" id="btn-quick-toggle" title="Show only KDP blockers, hide quality suggestions">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+        <path d="M12 19a7 7 0 100-14 7 7 0 000 14z" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M12 9v4l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      {{ 'Full details' if quick_mode else 'KDP blockers only' }}
     </button>
     <a href="{{ url_for('preview_index') }}" class="bv-btn">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -137,20 +165,80 @@
     {% set has_margin_issues = margin_report and margin_report.violations | length > 0 %}
     {% if not has_compliance_fails and not has_margin_issues %}
       <div class="scan-verdict scan-verdict-pass">
-        <span class="scan-verdict-emoji">👍</span>
+        <span class="scan-verdict-emoji">✓</span>
         <div>
-          <strong>Looking good!</strong>
-          <span>No blocking issues found. Always confirm in KDP's own previewer before submitting.</span>
+          <strong>PASS - Ready for KDP</strong>
+          <span>
+            This book will be accepted by KDP. The quality suggestions below are optional improvements,
+            not required fixes. Always do a final check in KDP's own previewer before submitting.
+            <span title="A PASS means we found no hard blocking errors. Quality notes (like formatting consistency) are helpful but not required for KDP publication." style="cursor:help; text-decoration:underline dotted; color:inherit;">ℹ</span>
+          </span>
+          <div style="margin-top:1rem; display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+            <div style="padding:0.75rem; background:rgba(34,197,94,0.1); border-radius:8px; text-align:center;">
+              <div style="font-size:2rem; font-weight:700; color:#ffffff;">100%</div>
+              <div style="font-size:0.9rem; color:var(--color-text-secondary);">KDP Ready</div>
+              <div style="font-size:0.8rem; color:var(--color-text-secondary); margin-top:0.25rem;">All blockers passed</div>
+            </div>
+            <div style="padding:0.75rem; background:rgba(99,102,241,0.1); border-radius:8px; text-align:center;">
+              <div style="font-size:2rem; font-weight:700; color:#6366f1;">{{ check_report.quality_polish_pct | default(100) }}%</div>
+              <div style="font-size:0.9rem; color:var(--color-text-secondary);">Quality Polish</div>
+              <div style="font-size:0.8rem; color:var(--color-text-secondary); margin-top:0.25rem;">Suggestions adopted</div>
+            </div>
+          </div>
         </div>
       </div>
     {% else %}
-      <div class="scan-verdict scan-verdict-fail">
+      <div class="scan-verdict" style="background:rgba(255,176,59,0.12); border-left-color:#ffb03b;">
         <span class="scan-verdict-emoji">⚠️</span>
         <div>
-          <strong>Issues found</strong>
-          <span>Fix the items below before uploading to KDP.</span>
+          <strong>{{ check_report.issue_count }} Blocking issue(s) found</strong>
+          <span>
+            The red ✗ items below will prevent KDP from accepting your book. The yellow ⚠ items are quality suggestions.
+            Fix all red items, then re-upload.
+            <span title="Red items = hard KDP blockers (trim size, fonts, DPI, margins, bleed). Yellow items = quality tips (not blockers, won't stop publication)." style="cursor:help; text-decoration:underline dotted; color:inherit;">ℹ</span>
+          </span>
+          <div style="margin-top:1rem; display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+            <div style="padding:0.75rem; background:rgba(239,68,68,0.1); border-radius:8px; text-align:center;">
+              <div style="font-size:2rem; font-weight:700; color:#ef4444;">{{ check_report.kdp_ready_pct | default(0) }}%</div>
+              <div style="font-size:0.9rem; color:var(--color-text-secondary);">KDP Ready</div>
+              <div style="font-size:0.8rem; color:var(--color-text-secondary); margin-top:0.25rem;">{{ check_report.issue_count }} blocker(s) remaining</div>
+            </div>
+            <div style="padding:0.75rem; background:rgba(99,102,241,0.1); border-radius:8px; text-align:center;">
+              <div style="font-size:2rem; font-weight:700; color:#6366f1;">{{ check_report.quality_polish_pct | default(0) }}%</div>
+              <div style="font-size:0.9rem; color:var(--color-text-secondary);">Quality Polish</div>
+              <div style="font-size:0.8rem; color:var(--color-text-secondary); margin-top:0.25rem;">{{ check_report.advisory_issue_count }} quality tips</div>
+            </div>
+          </div>
         </div>
       </div>
+    {% endif %}
+
+    {# ── Interactive Status Navigation ── #}
+    {% if check_report or margin_report %}
+    {%- set blocking_count = check_report.results | selectattr('ok', 'equalto', False) | rejectattr('warning_only', 'defined') | list | length if check_report else 0 -%}
+    {%- set advisory_count = check_report.results | selectattr('warning_only', 'defined') | selectattr('ok', 'equalto', False) | list | length if check_report else 0 -%}
+    {%- set passed_count = check_report.results | selectattr('ok', 'equalto', True) | list | length if check_report else 0 -%}
+    {%- set margin_violations = margin_report.violations | length if margin_report else 0 -%}
+    <div style="margin-top:2rem; display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:1rem;">
+      {% if blocking_count > 0 or margin_violations > 0 %}
+      <button type="button" class="status-nav-btn status-nav-btn-fail" data-filter="blockers" title="Navigate to blocking issues">
+        <div class="status-nav-count">{{ blocking_count + margin_violations }}</div>
+        <div class="status-nav-label">{{ 'BLOCKING' if blocking_count + margin_violations == 1 else 'BLOCKING' }}</div>
+      </button>
+      {% endif %}
+      {% if advisory_count > 0 %}
+      <button type="button" class="status-nav-btn status-nav-btn-warn" data-filter="advisory" title="Navigate to quality tips">
+        <div class="status-nav-count">{{ advisory_count }}</div>
+        <div class="status-nav-label">{{ 'QUALITY TIP' if advisory_count == 1 else 'QUALITY TIPS' }}</div>
+      </button>
+      {% endif %}
+      {% if passed_count > 0 %}
+      <button type="button" class="status-nav-btn status-nav-btn-pass" data-filter="passed" title="View passed checks">
+        <div class="status-nav-count">{{ passed_count }}</div>
+        <div class="status-nav-label">{{ 'PASSED' }}</div>
+      </button>
+      {% endif %}
+    </div>
     {% endif %}
   </div>
 
@@ -216,7 +304,7 @@
 
   {# ── KDP Compliance results ── #}
   {% if check_report %}
-  <div class="scan-section">
+  <div class="scan-section" id="compliance-section">
     <h3 class="scan-section-title">KDP Compliance Check</h3>
     {% set blocking = check_report.results | rejectattr('warning_only', 'defined') | list %}
     {% for r in check_report.results %}
@@ -253,7 +341,7 @@
           </div>
         </div>
       {% elif r.warning_only and not r.ok %}
-        <div class="scan-issue scan-issue-warn">
+        <div class="scan-issue scan-issue-warn" data-advisory="true">
           <div class="scan-issue-icon">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <path d="M12 9v4M12 16.5v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -261,13 +349,33 @@
             </svg>
           </div>
           <div class="scan-issue-body">
-            <p class="scan-issue-title">{{ r.title }} <span class="scan-note-chip">NOTE</span></p>
+            <p class="scan-issue-title">
+              {{ r.title }}
+              <span class="scan-note-chip" title="Quality suggestion, not a KDP blocker">💡 QUALITY TIP</span>
+            </p>
             <p class="scan-issue-desc">{{ r.summary }}</p>
-            {% if r.fix %}<p class="scan-fix-text" style="margin-top:4px;">{{ r.fix }}</p>{% endif %}
+            {% if r.get('checklist') %}
+              <div style="margin-top:1rem; padding:1rem; background:rgba(255,255,255,0.05); border-radius:6px;">
+                <div style="display:grid; gap:0.5rem;">
+                  {% for item in r.checklist %}
+                    <div style="display:flex; align-items:center; gap:0.75rem; font-size:0.9rem;">
+                      <span style="color:{{ '#22c55e' if item.present else '#888' }}; font-weight:bold; width:20px;">
+                        {{ '✓' if item.present else '○' }}
+                      </span>
+                      <div>
+                        <span style="font-weight:600;">{{ item.item }}</span>
+                        <span style="color:var(--color-text-secondary); font-size:0.85rem;"> - {{ item.description }}</span>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
+            {% if r.fix %}<p class="scan-fix-text" style="margin-top:1rem;">{{ r.fix }}</p>{% endif %}
           </div>
         </div>
       {% else %}
-        <div class="scan-issue scan-issue-pass">
+        <div class="scan-issue scan-issue-pass" data-advisory="true">
           <div class="scan-issue-icon">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <path d="M5 12l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -275,6 +383,23 @@
           </div>
           <div class="scan-issue-body">
             <p class="scan-issue-title">{{ r.title }}</p>
+            {% if r.get('checklist') %}
+              <div style="margin-top:0.75rem; padding:1rem; background:rgba(34,197,94,0.05); border-radius:6px;">
+                <div style="display:grid; gap:0.5rem;">
+                  {% for item in r.checklist %}
+                    <div style="display:flex; align-items:center; gap:0.75rem; font-size:0.9rem;">
+                      <span style="color:{{ '#22c55e' if item.present else '#888' }}; font-weight:bold; width:20px;">
+                        {{ '✓' if item.present else '○' }}
+                      </span>
+                      <div>
+                        <span style="font-weight:600;">{{ item.item }}</span>
+                        <span style="color:var(--color-text-secondary); font-size:0.85rem;"> - {{ item.description }}</span>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
           </div>
         </div>
       {% endif %}
@@ -283,6 +408,18 @@
   {% endif %}
 
 </div>{# /.scan-report #}
+
+{# ── "Is this Intentional?" Modal ── #}
+<div class="intentional-modal" id="intentional-modal">
+  <div class="intentional-content">
+    <h3 class="intentional-title">Is this intentional?</h3>
+    <p class="intentional-description" id="intentional-message"></p>
+    <div class="intentional-buttons">
+      <button type="button" class="intentional-btn intentional-btn-yes" id="intentional-yes">Yes, keep it</button>
+      <button type="button" class="intentional-btn intentional-btn-no" id="intentional-no">No, fix it</button>
+    </div>
+  </div>
+</div>
 
 {# ── Data for JS ── #}
 <script>
@@ -395,6 +532,32 @@
     document.getElementById("guide-legend").style.display = showGuides ? "" : "none";
   });
 
+  // Quick-check toggle (show only KDP blockers)
+  var quickCheckActive = {{ 'true' if request.args.get('quick') == 'true' else 'false' | lower }};
+  var btnQuick = document.getElementById("btn-quick-toggle");
+  if (btnQuick) {
+    function updateQuickView(isQuick) {
+      var advisoryIssues = document.querySelectorAll("[data-advisory=true]");
+      advisoryIssues.forEach(function (el) {
+        el.style.display = isQuick ? "none" : "";
+      });
+      btnQuick.innerHTML = btnQuick.innerHTML.replace(
+        /(KDP blockers only|Full details)/,
+        isQuick ? "Full details" : "KDP blockers only"
+      );
+    }
+    btnQuick.addEventListener("click", function () {
+      quickCheckActive = !quickCheckActive;
+      updateQuickView(quickCheckActive);
+      var newUrl = window.location.pathname + "?" + new URLSearchParams(window.location.search)
+        .set("quick", quickCheckActive ? "true" : "false").toString();
+      window.history.replaceState({}, "", newUrl);
+    });
+    if (quickCheckActive) {
+      updateQuickView(true);
+    }
+  }
+
   // Nav buttons
   document.getElementById("btn-first").addEventListener("click", function(){ goTo(0); });
   document.getElementById("btn-prev").addEventListener("click",  function(){ if(spread>0){spread--;renderSpread();} });
@@ -422,9 +585,88 @@
     });
   });
 
+  // Status navigation buttons (filter and scroll to sections)
+  document.querySelectorAll(".status-nav-btn").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var filter = this.dataset.filter;
+      var section = document.getElementById("compliance-section");
+      if(!section) return;
+
+      // Smooth scroll to section
+      section.scrollIntoView({behavior:"smooth", block:"start"});
+
+      // Flash animation feedback
+      btn.style.animation = "none";
+      setTimeout(function(){ btn.style.animation = ""; }, 10);
+      btn.style.animation = "pulse 0.6s ease-out";
+    });
+  });
+
+  // Add pulse animation for button feedback
+  if(!document.getElementById("status-btn-animation")) {
+    var style = document.createElement("style");
+    style.id = "status-btn-animation";
+    style.textContent = "@keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); } 100% { transform: scale(1); opacity: 1; } }";
+    document.head.appendChild(style);
+  }
+
   // Preload first 4 pages and render
   preload(0); preload(1); preload(2); preload(3);
   renderSpread();
+
+  // ── "Is this intentional?" Modal System ──
+  var modal = document.getElementById('intentional-modal');
+  var yesBtn = document.getElementById('intentional-yes');
+  var noBtn = document.getElementById('intentional-no');
+  var msgEl = document.getElementById('intentional-message');
+  var currentIssueEl = null;
+
+  // Open modal for optional issues
+  document.querySelectorAll('[data-optional="true"]').forEach(function(el) {
+    var intentBtn = document.createElement('button');
+    intentBtn.type = 'button';
+    intentBtn.className = 'intentional-prompt-btn';
+    intentBtn.textContent = 'Is this intentional?';
+    intentBtn.style.cssText = 'background: rgba(34,197,94,0.1); color: #22c55e; border: 1px solid rgba(34,197,94,0.3); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; margin-left: 8px; transition: all 200ms;';
+
+    intentBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      currentIssueEl = el;
+      var issueTitle = el.querySelector('[data-issue-title]');
+      msgEl.textContent = issueTitle ? 'Is "' + issueTitle.textContent + '" intentional in your book?' : 'Is this formatting intentional?';
+      modal.classList.add('active');
+    });
+
+    el.querySelector('.scan-issue-body')?.appendChild(intentBtn);
+  });
+
+  // Modal button handlers
+  yesBtn.addEventListener('click', function() {
+    if (currentIssueEl) {
+      currentIssueEl.classList.add('issue-marked-intentional');
+      var badge = document.createElement('span');
+      badge.className = 'issue-intentional-badge';
+      badge.textContent = '✓ INTENTIONAL';
+      currentIssueEl.querySelector('.scan-issue-title')?.appendChild(badge);
+
+      // Update score (add 2% for each intentional item)
+      var scoreEl = document.querySelector('[data-quality-score]');
+      if (scoreEl) {
+        var currentScore = parseInt(scoreEl.textContent);
+        scoreEl.textContent = Math.min(100, currentScore + 2) + '%';
+      }
+    }
+    modal.classList.remove('active');
+  });
+
+  noBtn.addEventListener('click', function() {
+    modal.classList.remove('active');
+  });
+
+  // Close modal on backdrop click
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) modal.classList.remove('active');
+  });
 })();
 </script>
 {% endblock %}
