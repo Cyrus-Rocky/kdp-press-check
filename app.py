@@ -52,7 +52,7 @@ SITE_URL = os.environ.get("SITE_URL", "https://kdp-press-check.onrender.com").rs
 # Every GET page, for the sitemap.
 SITEMAP_ENDPOINTS = [
     "index", "cover_index", "kindle_index", "preview_index", "error_decoder",
-    "keyword_linter", "margin_advisor", "spine_width_calculator", "cover_dpi_calculator", "isbn_helper", "description_formatter", "copyright_builder",
+    "keyword_linter", "margin_advisor", "spine_width_calculator", "cover_dpi_calculator", "metadata_keyword_validator", "isbn_helper", "description_formatter", "copyright_builder",
     "metadata_optimizer", "review_timeline", "royalty_calculator", "print_cost_index",
     "estimate_pages_index", "genre_checklist", "launch_checklist",
     "templates_page", "problem_solvers",
@@ -437,6 +437,11 @@ def spine_width_calculator():
 @app.route("/cover-dpi-calculator", methods=["GET"])
 def cover_dpi_calculator():
     return render_template("cover_dpi_calculator.html", active_mode="dpi")
+
+
+@app.route("/metadata-keyword-validator", methods=["GET"])
+def metadata_keyword_validator():
+    return render_template("metadata_keyword_validator.html", active_mode="metadata-keywords")
 
 
 @app.route("/isbn-helper", methods=["GET"])

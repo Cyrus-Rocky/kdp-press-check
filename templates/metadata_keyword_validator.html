@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+{% block title %}Metadata Keyword Validator - Catch keyword-stuffing rejections{% endblock %}
+{% block meta_description %}Check if your book title and subtitle are keyword-stuffed. KDP rejects subtitles that read like search bars instead of descriptions. Validate your metadata instantly.{% endblock %}
+{% block content %}
+
+<section class="hero-single">
+  <div class="eyebrow">Metadata validator</div>
+  <h1 class="hero-display">Is your subtitle a search bar or a description?</h1>
+  <p class="hero-lead">KDP rejects subtitles stuffed with keywords like "Low Carb, High Protein, Air Fryer, Diabetic Friendly, Quick Meals." Your subtitle should describe what your book is about, not list every keyword you could rank for. Check yours instantly.</p>
+
+  <div class="layout-two-column" style="gap: 40px;">
+    {# Left column: Input #}
+    <div>
+      <div class="form-group">
+        <label for="meta-title">Book Title</label>
+        <input type="text" id="meta-title" placeholder="e.g. The Art of Self-Publishing" style="width: 100%; padding: 12px; border: 1.5px solid rgba(240, 240, 243, 0.15); border-radius: 8px; background: rgba(31, 31, 38, 0.3); color: var(--pc-strong); font-size: 1rem;">
+        <p style="font-size: 0.85rem; color: var(--pc-muted); margin-top: 6px;">Your main book title (usually short)</p>
+      </div>
+
+      <div class="form-group" style="margin-top: 24px;">
+        <label for="meta-subtitle">Book Subtitle</label>
+        <input type="text" id="meta-subtitle" placeholder="e.g. A Complete Guide to Self-Publishing Success" style="width: 100%; padding: 12px; border: 1.5px solid rgba(240, 240, 243, 0.15); border-radius: 8px; background: rgba(31, 31, 38, 0.3); color: var(--pc-strong); font-size: 1rem;">
+        <p style="font-size: 0.85rem; color: var(--pc-muted); margin-top: 6px;">Your subtitle (describes what the book is about)</p>
+      </div>
+
+      <button type="button" id="meta-check-btn" style="margin-top: 24px; width: 100%; padding: 12px 20px; background: var(--pc-coral); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem;">Analyze Metadata →</button>
+    </div>
+
+    {# Right column: Results #}
+    <div>
+      <div id="meta-results" style="background: rgba(34, 197, 94, 0.08); border: 1.5px solid rgba(34, 197, 94, 0.2); border-radius: 12px; padding: 32px; min-height: 300px; display: flex; align-items: center; justify-content: center;">
+        <div style="text-align: center; color: var(--pc-muted);">
+          <p style="margin: 0; font-size: 0.95rem;">Enter your title and subtitle to analyze</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# Why It Matters #}
+<section style="margin-top: 64px; background: rgba(249, 115, 22, 0.05); border: 1.5px solid rgba(249, 115, 22, 0.15); border-radius: 12px; padding: 40px;">
+  <h2 style="margin: 0 0 24px 0; font-size: 1.5rem; font-weight: 700;">Why KDP rejects keyword-stuffed subtitles</h2>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
+    <div>
+      <h3 style="margin: 0 0 12px 0; font-size: 1.1rem; font-weight: 700;">❌ Rejected Example</h3>
+      <p style="margin: 0; color: var(--pc-muted); line-height: 1.6; font-family: monospace; background: rgba(0,0,0,0.2); padding: 16px; border-radius: 8px; font-size: 0.9rem;">
+        "Weight Loss Cookbook: Easy Healthy Recipes, Meal Plan, Low Carb, High Protein, Air Fryer, Diabetic Friendly, Quick Meals for Busy Families, 2026 Edition"
+      </p>
+      <p style="margin: 12px 0 0 0; color: var(--pc-muted);">KDP sees this as: "You're trying to rank for every keyword imaginable instead of describing your actual book."</p>
+    </div>
+
+    <div>
+      <h3 style="margin: 0 0 12px 0; font-size: 1.1rem; font-weight: 700;">✅ Accepted Example</h3>
+      <p style="margin: 0; color: var(--pc-strong); line-height: 1.6; font-family: monospace; background: rgba(34, 197, 94, 0.15); padding: 16px; border-radius: 8px; font-size: 0.9rem;">
+        "Weight Loss Cookbook: Quick, Healthy Recipes for Busy Families"
+      </p>
+      <p style="margin: 12px 0 0 0; color: var(--pc-muted);">KDP sees this as: "A clear description of what the book contains."</p>
+    </div>
+  </div>
+</section>
+
+{# Tips #}
+<section style="margin-top: 64px;">
+  <h2 style="margin: 0 0 24px 0; font-size: 1.5rem; font-weight: 700;">How to write a good subtitle</h2>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
+    <div style="background: rgba(240, 240, 243, 0.03); border: 1.5px solid rgba(240, 240, 243, 0.1); border-radius: 12px; padding: 24px;">
+      <h3 style="margin: 0 0 12px 0; font-size: 1rem; font-weight: 700;">✍️ Describe, don't list</h3>
+      <p style="margin: 0; color: var(--pc-muted); font-size: 0.9rem; line-height: 1.6;">Your subtitle should tell readers what the book is about in plain English, not read like a search query.</p>
+    </div>
+
+    <div style="background: rgba(240, 240, 243, 0.03); border: 1.5px solid rgba(240, 240, 243, 0.1); border-radius: 12px; padding: 24px;">
+      <h3 style="margin: 0 0 12px 0; font-size: 1rem; font-weight: 700;">🎯 Keep it short</h3>
+      <p style="margin: 0; color: var(--pc-muted); font-size: 0.9rem; line-height: 1.6;">60-80 characters is ideal. Longer than that, you're probably adding fluff or keywords.</p>
+    </div>
+
+    <div style="background: rgba(240, 240, 243, 0.03); border: 1.5px solid rgba(240, 240, 243, 0.1); border-radius: 12px; padding: 24px;">
+      <h3 style="margin: 0 0 12px 0; font-size: 1rem; font-weight: 700;">💰 The payout</h3>
+      <p style="margin: 0; color: var(--pc-muted); font-size: 0.9rem; line-height: 1.6;">A good subtitle gets APPROVED on first upload. A bad one gets REJECTED and costs you a month.</p>
+    </div>
+  </div>
+</section>
+
+<script>
+function analyzeMetadata() {
+  const title = document.getElementById("meta-title").value.trim();
+  const subtitle = document.getElementById("meta-subtitle").value.trim();
+
+  if (!title || !subtitle) {
+    document.getElementById("meta-results").innerHTML = '<div style="text-align: center; color: var(--pc-muted);"><p style="margin: 0; font-size: 0.95rem;">Enter both title and subtitle to analyze</p></div>';
+    return;
+  }
+
+  // Keyword stuffing indicators
+  let issues = [];
+  let score = 100; // Start with perfect score
+
+  // Check subtitle length
+  if (subtitle.length > 100) {
+    issues.push({ type: "warning", msg: "Subtitle is too long (100+ chars). Consider shortening to 60-80 chars." });
+    score -= 15;
+  }
+
+  // Count commas (often indicates list of keywords)
+  const commaCount = (subtitle.match(/,/g) || []).length;
+  if (commaCount >= 3) {
+    issues.push({ type: "error", msg: "Too many commas (" + commaCount + "). Reads like a keyword list, not a description." });
+    score -= 25;
+  } else if (commaCount >= 2) {
+    issues.push({ type: "warning", msg: "Multiple commas suggest keyword listing. Consider rephrasing as a description." });
+    score -= 15;
+  }
+
+  // Common keyword list patterns
+  const keywordPatterns = [
+    /\b(quick|easy|simple|fast|best|top|ultimate|complete|full|essential|beginner|advanced|step-by-step|how to)\b/gi,
+    /\b(for|with|by|in|on|at)\b.*?\b(beginner|expert|dummies|you|everyone|anyone)\b/i
+  ];
+
+  let keywordCount = 0;
+  keywordPatterns.forEach(pattern => {
+    const matches = subtitle.match(pattern);
+    if (matches) keywordCount += matches.length;
+  });
+
+  if (keywordCount >= 4) {
+    issues.push({ type: "error", msg: "Too many marketing keywords. Focus on describing what the book actually teaches." });
+    score -= 20;
+  } else if (keywordCount >= 2) {
+    issues.push({ type: "warning", msg: "Contains marketing language. Make sure it's readable, not keyword-heavy." });
+    score -= 10;
+  }
+
+  // Check for common spam phrases
+  const spamPhrases = ["including", "contains", "covers", "learn", "discover", "master", "unlock", "secrets"];
+  const subtitleLower = subtitle.toLowerCase();
+  const spamCount = spamPhrases.filter(p => subtitleLower.includes(p)).length;
+
+  if (spamCount >= 3) {
+    issues.push({ type: "warning", msg: "Contains common spam phrases. Readers want clarity, not marketing hype." });
+    score -= 10;
+  }
+
+  // Scoring
+  score = Math.max(10, score);
+
+  // Build results
+  let statusColor = score >= 70 ? "var(--pc-ok)" : (score >= 50 ? "var(--pc-fail)" : "var(--pc-fail)");
+  let statusLabel = score >= 70 ? "✅ Good" : (score >= 50 ? "⚠️ Needs work" : "❌ High risk");
+
+  let resultsHTML = `
+    <div style="text-align: center;">
+      <div style="margin-bottom: 24px;">
+        <div style="font-size: 2rem; font-weight: 700; color: ${statusColor}; margin-bottom: 8px;">${score}%</div>
+        <div style="font-size: 1.1rem; font-weight: 600; color: ${statusColor};">${statusLabel}</div>
+        <div style="font-size: 0.9rem; color: var(--pc-muted); margin-top: 4px;">KDP metadata quality</div>
+      </div>
+
+      <div style="text-align: left; margin-top: 24px;">
+        <div style="font-size: 0.9rem; font-weight: 600; margin-bottom: 12px; color: var(--pc-strong);">Subtitle stats:</div>
+        <div style="background: rgba(240, 240, 243, 0.05); border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+          <p style="margin: 6px 0; font-size: 0.85rem;"><span style="color: var(--pc-muted);">Length:</span> ${subtitle.length} characters (ideal: 60-80)</p>
+          <p style="margin: 6px 0; font-size: 0.85rem;"><span style="color: var(--pc-muted);">Commas:</span> ${commaCount} (ideal: 0-1)</p>
+          <p style="margin: 6px 0; font-size: 0.85rem;"><span style="color: var(--pc-muted);">Marketing keywords:</span> ${keywordCount} detected</p>
+        </div>
+      </div>
+  `;
+
+  if (issues.length > 0) {
+    resultsHTML += '<div style="font-size: 0.9rem; font-weight: 600; margin-bottom: 12px; color: var(--pc-strong);">Issues:</div>';
+    issues.forEach(issue => {
+      const bgColor = issue.type === "error" ? "rgba(239, 68, 68, 0.15)" : "rgba(249, 115, 22, 0.15)";
+      const borderColor = issue.type === "error" ? "rgba(239, 68, 68, 0.3)" : "rgba(249, 115, 22, 0.3)";
+      const icon = issue.type === "error" ? "🚫" : "⚠️";
+      resultsHTML += `<div style="background: ${bgColor}; border: 1.5px solid ${borderColor}; border-radius: 8px; padding: 12px; margin-bottom: 8px; font-size: 0.85rem;">${icon} ${issue.msg}</div>`;
+    });
+  } else {
+    resultsHTML += '<div style="background: rgba(34, 197, 94, 0.15); border: 1.5px solid rgba(34, 197, 94, 0.3); border-radius: 8px; padding: 12px; font-size: 0.85rem;">✅ Your subtitle looks good! This should pass KDP approval.</div>';
+  }
+
+  resultsHTML += '</div>';
+  document.getElementById("meta-results").innerHTML = resultsHTML;
+}
+
+document.getElementById("meta-check-btn").addEventListener("click", analyzeMetadata);
+
+// Real-time analysis as user types
+document.getElementById("meta-title").addEventListener("input", analyzeMetadata);
+document.getElementById("meta-subtitle").addEventListener("input", analyzeMetadata);
+</script>
+
+{% endblock %}
