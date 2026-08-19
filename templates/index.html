@@ -57,7 +57,7 @@
   </form>
 
   {# LOADING MODAL #}
-  <div id="loading-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+  <div id="loading-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
     <div style="background: rgba(31, 31, 38, 0.95); border: 1.5px solid rgba(240, 240, 243, 0.15); border-radius: 16px; padding: 48px; max-width: 700px; width: 90%; backdrop-filter: blur(10px);">
 
       {# Quote at top #}
@@ -222,17 +222,21 @@ document.getElementById("upload-form").addEventListener("submit", function(e) {
   }, 100);
 });
 
-// Hide modal when page loads (after redirect from server)
-window.addEventListener("load", function() {
+// Hide modal on page load and DOMContentLoaded
+function hideLoadingModal() {
   const modal = document.getElementById("loading-modal");
-  // Only hide if we're on the index page (not on results page)
-  if (window.location.pathname === "/" || window.location.pathname === "/index") {
-    modal.style.display = "none";
-    if (modal.quoteInterval) clearInterval(modal.quoteInterval);
-    document.getElementById("submit-btn").disabled = false;
-    document.getElementById("submit-btn").style.opacity = "1";
-    document.getElementById("submit-btn").style.cursor = "pointer";
+  modal.style.display = "none";
+  if (modal.quoteInterval) clearInterval(modal.quoteInterval);
+  const submitBtn = document.getElementById("submit-btn");
+  if (submitBtn) {
+    submitBtn.disabled = false;
+    submitBtn.style.opacity = "1";
+    submitBtn.style.cursor = "pointer";
   }
-});
+}
+
+document.addEventListener("DOMContentLoaded", hideLoadingModal);
+window.addEventListener("load", hideLoadingModal);
+window.addEventListener("pageshow", hideLoadingModal);
 </script>
 {% endblock %}
