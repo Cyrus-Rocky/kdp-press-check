@@ -1,0 +1,153 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Author Feedback{% endblock %}
+{% block header %}Author Feedback Management{% endblock %}
+
+{% block content %}
+<div class="card">
+  <h2>Feedback Filters</h2>
+  <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+    <button class="filter-btn active" onclick="filterFeedback('all')">All</button>
+    <button class="filter-btn" onclick="filterFeedback('bug')">🐛 Bugs</button>
+    <button class="filter-btn" onclick="filterFeedback('feature_request')">✨ Features</button>
+    <button class="filter-btn" onclick="filterFeedback('unclear')">❓ Unclear</button>
+    <button class="filter-btn" onclick="filterFeedback('accurate')">✅ Accurate</button>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Feedback List</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Tool</th>
+        <th>Type</th>
+        <th>Message</th>
+        <th>Author</th>
+        <th>Date</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="feedback-tbody">
+      <tr><td colspan="7" style="text-align: center; color: rgba(240, 240, 243, 0.5);">Loading feedback...</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .filter-btn {
+    padding: 8px 16px;
+    border: 1px solid rgba(240, 240, 243, 0.2);
+    background: transparent;
+    color: rgba(240, 240, 243, 0.8);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover {
+    background: rgba(240, 240, 243, 0.1);
+  }
+  .filter-btn.active {
+    background: #f97316;
+    color: #fff;
+    border-color: #f97316;
+  }
+</style>
+
+<script>
+let allFeedback = [];
+let currentFilter = 'all';
+
+document.addEventListener('DOMContentLoaded', loadFeedback);
+
+async function loadFeedback() {
+  try {
+    const response = await fetch('/admin/api/feedback');
+    allFeedback = await response.json();
+    renderFeedback();
+  } catch (err) {
+    document.getElementById('feedback-tbody').innerHTML = `<tr><td colspan="7" style="text-align: center; color: #ef4444;">Error loading feedback: ${err.message}</td></tr>`;
+  }
+}
+
+function renderFeedback() {
+  const filtered = currentFilter === 'all'
+    ? allFeedback
+    : allFeedback.filter(f => f.feedback_type === currentFilter);
+
+  const tbody = document.getElementById('feedback-tbody');
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: rgba(240, 240, 243, 0.5);">No feedback yet</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(feedback => `
+    <tr>
+      <td><strong>${feedback.tool_name}</strong></td>
+      <td>
+        ${{
+          'bug': '🐛 Bug',
+          'feature_request': '✨ Feature',
+          'unclear': '❓ Unclear',
+          'accurate': '✅ Accurate'
+        }[feedback.feedback_type] || feedback.feedback_type}
+      </td>
+      <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis;">${feedback.message || '(no message)'}</td>
+      <td style="font-size: 12px;">${feedback.author_email || 'Anonymous'}</td>
+      <td style="font-size: 12px;">${new Date(feedback.created_at).toLocaleDateString()}</td>
+      <td>
+        <select onchange="updateFeedbackStatus(${feedback.id}, this.value)" style="padding: 6px; border-radius: 4px; background: rgba(31, 31, 38, 0.5); color: #f0f0f3; border: 1px solid rgba(240, 240, 243, 0.2);">
+          <option value="open" ${feedback.status === 'open' ? 'selected' : ''}>Open</option>
+          <option value="reviewed" ${feedback.status === 'reviewed' ? 'selected' : ''}>Reviewed</option>
+          <option value="addressed" ${feedback.status === 'addressed' ? 'selected' : ''}>Addressed</option>
+        </select>
+      </td>
+      <td>
+        <button class="btn btn-danger" onclick="deleteFeedback(${feedback.id})" style="font-size: 12px;">Delete</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function filterFeedback(type) {
+  currentFilter = type;
+
+  // Update button states
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  event.target.classList.add('active');
+
+  renderFeedback();
+}
+
+async function updateFeedbackStatus(feedbackId, status) {
+  try {
+    await fetch(`/admin/api/feedback/${feedbackId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
+    });
+    loadFeedback();
+  } catch (err) {
+    alert(`Error updating feedback: ${err.message}`);
+  }
+}
+
+async function deleteFeedback(feedbackId) {
+  if (confirm('Delete this feedback?')) {
+    try {
+      await fetch(`/admin/api/feedback/${feedbackId}`, {
+        method: 'DELETE'
+      });
+      loadFeedback();
+    } catch (err) {
+      alert(`Error deleting feedback: ${err.message}`);
+    }
+  }
+}
+</script>
+{% endblock %}

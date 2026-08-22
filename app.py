@@ -5,6 +5,8 @@ import uuid
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file, abort, Response, session
 from werkzeug.exceptions import RequestEntityTooLarge
 
+from models import db
+from admin_routes import admin_bp
 from checker import run_all_checks
 from cover_checker import run_all_cover_checks
 from docx_checker import run_all_checks_docx
@@ -39,6 +41,13 @@ app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
 app.config["PERMANENT_SESSION_LIFETIME"] = 30 * 24 * 60 * 60  # 30 days
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+
+# Database configuration
+DATABASE_PATH = os.path.join(os.path.dirname(__file__), "kdp_check.db")
+app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DATABASE_PATH}"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+db.init_app(app)
+
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 logging.basicConfig(level=logging.INFO)
@@ -1017,6 +1026,14 @@ def handle_server_error(exc):
     logger.exception("Unhandled server error")
     flash("Something went wrong on our end. Please try again.")
     return redirect(url_for("index")), 500
+
+
+# Register admin blueprint
+app.register_blueprint(admin_bp)
+
+# Initialize database tables
+with app.app_context():
+    db.create_all()
 
 
 if __name__ == "__main__":
